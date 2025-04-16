@@ -42,11 +42,12 @@ jobs:
 
       - name: Android Assemble
         uses: gradle/gradle-build-action@v3
+        with:
+          arguments: --no-daemon --stacktrace --build-cache --parallel --configure-on-demand assembleMainlineRelease
         env:
           CMAKE_C_COMPILER_LAUNCHER: "ccache"
           CMAKE_CXX_COMPILER_LAUNCHER: "ccache"
           CCACHE_COMPILERCHECK: "string:${{ env.NDK_VERSION }}"
-        run: ./gradlew --no-daemon --stacktrace --build-cache --parallel --configure-on-demand assembleMainlineRelease
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
@@ -58,4 +59,3 @@ jobs:
             app/build/outputs/mapping/mainlineRelease/mapping.txt
           if-no-files-found: error
           retention-days: 7
-          
