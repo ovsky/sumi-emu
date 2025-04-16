@@ -2,7 +2,7 @@
 name: Build and Deploy Android
 
 on:
-  push: 
+  push:
     branches: [ master ]
 
 jobs:
@@ -32,12 +32,12 @@ jobs:
       - name: Install Java 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin' # Temurin should come pre-installed on GitHub-hosted runners
+          distribution: 'temurin'
           java-version: '17'
 
       - name: Install Ninja Build
         run: |
-          sudo apt-get install -y ninja-build
+          sudo apt-get update && sudo apt-get install -y ninja-build
           ln -s /usr/bin/ninja .
 
       - name: Android Assemble
@@ -45,5 +45,17 @@ jobs:
         env:
           CMAKE_C_COMPILER_LAUNCHER: "ccache"
           CMAKE_CXX_COMPILER_LAUNCHER: "ccache"
-          CCACHE_COMPILERCHECK: "string:${{ env.NDK_VERSION }}" # Use NDK version instead of compiler timestamp
-          run: ./gradlew --no-daemon --stacktrace --build-cache --parallel --configure-on-demand assembleMainlineRelease
+          CCACHE_COMPILERCHECK: "string:${{ env.NDK_VERSION }}"
+        run: ./gradlew --no-daemon --stacktrace --build-cache --parallel --configure-on-demand assembleMainlineRelease
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mainline-release-build
+          path: |
+            app/build/outputs/apk/mainlineRelease/*.apk
+            app/build/outputs/bundle/mainlineRelease/*.aab
+            app/build/outputs/mapping/mainlineRelease/mapping.txt
+          if-no-files-found: error
+          retention-days: 7
+          
