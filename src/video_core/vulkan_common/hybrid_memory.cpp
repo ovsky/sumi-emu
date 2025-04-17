@@ -205,7 +205,7 @@ void FaultManagedAllocator::ExceptionHandlerThread() {
 
 void FaultManagedAllocator::Initialize(void* base, size_t size) {
 #if defined(__linux__) || defined(__ANDROID__)
-    uffd = syscall(SYS_userfaultfd, O_CLOEXEC | O_NONBLOCK);
+    uffd = static_cast<int>(syscall(SYS_userfaultfd, O_CLOEXEC | O_NONBLOCK));
     if (uffd < 0) {
         LOG_ERROR(Render_Vulkan, "Failed to create userfaultfd, fault handling disabled");
         return;
