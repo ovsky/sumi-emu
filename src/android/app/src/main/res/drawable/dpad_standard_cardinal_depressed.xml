@@ -8,17 +8,17 @@
             <gradient android:endX="110.89" android:endY="-38.27"
                 android:startX="110.89" android:startY="183.51" android:type="linear">
                 <item android:color="#7F000000" android:offset="0"/>
-                <item android:color="#BA000000" android:offset="0.43"/>
-                <item android:color="#FF000000" android:offset="0.5"/>
+                <item android:color="#70000000" android:offset="0.43"/>
+                <item android:color="#61000000" android:offset="0.5"/>
             </gradient>
         </aapt:attr>
     </path>
-    <path android:fillAlpha="0.1" android:fillColor="#fff"
+    <path android:fillAlpha="0.1" android:fillColor="#E0E0E0"
         android:pathData="M195.47,110.32l-16.26,-9.38a0.65,0.65 0,0 0,-1 0.56v18.78a0.66,0.66 0,0 0,1 0.57l16.26,-9.39A0.66,0.66 0,0 0,195.47 110.32Z" android:strokeAlpha="0.1"/>
-    <path android:fillAlpha="0.1" android:fillColor="#fff"
+    <path android:fillAlpha="0.1" android:fillColor="#E0E0E0"
         android:pathData="M26.31,110.32l16.26,-9.38a0.65,0.65 0,0 1,1 0.56v18.78a0.66,0.66 0,0 1,-1 0.57l-16.26,-9.39A0.66,0.66 0,0 1,26.31 110.32Z" android:strokeAlpha="0.1"/>
-    <path android:fillAlpha="0.75" android:fillColor="#fff"
+    <path android:fillAlpha="0.75" android:fillColor="#E0E0E0"
         android:pathData="M110.32,26.31l-9.38,16.26a0.65,0.65 0,0 0,0.56 1h18.78a0.66,0.66 0,0 0,0.57 -1l-9.39,-16.26A0.66,0.66 0,0 0,110.32 26.31Z" android:strokeAlpha="0.75"/>
-    <path android:fillAlpha="0.1" android:fillColor="#fff"
+    <path android:fillAlpha="0.1" android:fillColor="#E0E0E0"
         android:pathData="M110.32,195.47l-9.38,-16.26a0.65,0.65 0,0 1,0.56 -1h18.78a0.66,0.66 0,0 1,0.57 1l-9.39,16.26A0.66,0.66 0,0 1,110.32 195.47Z" android:strokeAlpha="0.1"/>
 </vector>

@@ -34,41 +34,28 @@
             android:gravity="center"
             android:textColor="?attr/colorOnSurface"
             android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@+id/scroll_description"
+            app:layout_constraintBottom_toTopOf="@+id/text_description"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_weight="2"
             tools:text="@string/welcome" />
 
-        <ScrollView
-            android:id="@+id/scroll_description"
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/text_description"
+            style="@style/TextAppearance.Material3.TitleLarge"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:fillViewport="true"
-            android:scrollbars="vertical"
-            android:fadeScrollbars="false"
-            android:clipToPadding="false"
-            android:scrollbarStyle="outsideOverlay"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:paddingHorizontal="16dp"
             app:layout_constraintBottom_toTopOf="@+id/button_action"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/text_title"
-            app:layout_constraintVertical_weight="2">
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/text_description"
-                style="@style/TextAppearance.Material3.TitleLarge"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="16dp"
-                android:textAlignment="center"
-                android:textSize="20sp"
-                app:lineHeight="30sp"
-                tools:text="@string/welcome_description" />
-
-        </ScrollView>
+            app:layout_constraintVertical_weight="2"
+            app:lineHeight="30sp"
+            tools:text="@string/welcome_description" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/text_confirmation"
@@ -85,7 +72,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/scroll_description"
+            app:layout_constraintTop_toBottomOf="@+id/text_description"
             app:layout_constraintVertical_weight="1"
             app:lineHeight="30sp" />
 
@@ -101,7 +88,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/scroll_description"
+            app:layout_constraintTop_toBottomOf="@+id/text_description"
             tools:text="Get started" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

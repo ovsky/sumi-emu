@@ -3,7 +3,7 @@
 
     <style name="Theme.Sumi.Splash.Main" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/sumi_surface</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_sumi</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_sumi_round</item>
         <item name="postSplashScreenTheme">@style/Theme.Sumi.Main</item>
     </style>
 
