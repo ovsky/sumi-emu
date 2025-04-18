@@ -171,7 +171,7 @@ void AsyncCompileShader(const Device& device, const std::string& shader_path,
     }
 
     // Use actual threading for async compilation
-    std::thread([device_ptr = &device, shader_path, callback = std::move(callback)]() mutable {
+    std::thread([device_ptr = &device, shader_path, shader_callback = std::move(callback), callback]() mutable {
         auto startTime = std::chrono::high_resolution_clock::now();
 
         try {
@@ -206,6 +206,8 @@ void AsyncCompileShader(const Device& device, const std::string& shader_path,
                                         spir_v.size() * sizeof(u32));
                     }
 
+                    shader_callback(*shader);
+
                     auto endTime = std::chrono::high_resolution_clock::now();
                     std::chrono::duration<double> duration = endTime - startTime;
                     LOG_INFO(Render_Vulkan, "Shader compiled in {:.2f} seconds: {}",
@@ -215,26 +217,32 @@ void AsyncCompileShader(const Device& device, const std::string& shader_path,
                     VkShaderModule raw_module = *shader;
 
                     // Submit callback to main thread via command queue for thread safety
-                    SubmitCommandToQueue([callback = std::move(callback), raw_module]() {
-                        callback(raw_module);
+                    SubmitCommandToQueue([cb = std::move(callback), raw_module]() {
+                        cb(raw_module);
                     });
                 } else {
                     LOG_ERROR(Render_Vulkan, "Shader validation failed: {}", shader_path);
-                    SubmitCommandToQueue([callback = std::move(callback)]() {
-                        callback(VK_NULL_HANDLE);
+                    SubmitCommandToQueue([cb = std::move(callback)]() {
+                        cb(VK_NULL_HANDLE);
                     });
+                    // shader_callback(VK_NULL_HANDLE);
+
                 }
             } else {
                 LOG_ERROR(Render_Vulkan, "Failed to read shader file: {}", shader_path);
-                SubmitCommandToQueue([callback = std::move(callback)]() {
-                    callback(VK_NULL_HANDLE);
+                SubmitCommandToQueue([cb = std::move(callback)]() {
+                    cb(VK_NULL_HANDLE);
                 });
+                // shader_callback(VK_NULL_HANDLE);
+
             }
         } catch (const std::exception& e) {
             LOG_ERROR(Render_Vulkan, "Error compiling shader: {}", e.what());
-            SubmitCommandToQueue([callback = std::move(callback)]() {
-                callback(VK_NULL_HANDLE);
+            SubmitCommandToQueue([cb = std::move(callback)]() {
+                cb(VK_NULL_HANDLE);
             });
+            // shader_callback(VK_NULL_HANDLE);
+
         }
 
         // Release the compilation flag
