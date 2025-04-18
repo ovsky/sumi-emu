@@ -1,9 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
-// SPDX-FileCopyrightText: Copyright 2025 sumi Emulator Project
+// SPDX-FileCopyrightText: Copyright 2018 sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <algorithm>
-#include <vector>
 #include "common/logging/log.h"
 #include "core/hle/service/ipc_helpers.h"
 #include "core/hle/service/mm/mm_u.h"
@@ -27,158 +25,113 @@ public:
             {7, &MM_U::Get, "Get"},
         };
         // clang-format on
+
         RegisterHandlers(functions);
     }
 
 private:
     void InitializeOld(HLERequestContext& ctx) {
+        LOG_WARNING(Service_MM, "(STUBBED) called.");
+
         IPC::RequestParser rp{ctx};
-        const auto module = rp.PopEnum<Module>();
-        [[maybe_unused]] const auto priority = rp.Pop<u32>();
-        const auto clear_mode = static_cast<EventClearMode>(rp.Pop<u32>());
-
-        LOG_DEBUG(Service_MM, "called. module={:d}, clear_mode={:d}",
-                 static_cast<u32>(module), static_cast<u32>(clear_mode));
-
-        sessions.emplace_back(module, next_request_id++, clear_mode);
+        module = rp.PopEnum<Module>();
+        priority = rp.Pop<Priority>();
+        event_clear_mode = rp.Pop<u32>();
 
         IPC::ResponseBuilder rb{ctx, 2};
         rb.Push(ResultSuccess);
     }
 
     void FinalizeOld(HLERequestContext& ctx) {
+        LOG_WARNING(Service_MM, "(STUBBED) called.");
+
         IPC::RequestParser rp{ctx};
-        const auto module = rp.PopEnum<Module>();
-
-        LOG_DEBUG(Service_MM, "called. module={:d}", static_cast<u32>(module));
-
-        std::erase_if(sessions, [&module](const auto& session) {
-            return session.GetModule() == module;
-        });
+        module = rp.PopEnum<Module>();
 
         IPC::ResponseBuilder rb{ctx, 2};
         rb.Push(ResultSuccess);
     }
 
     void SetAndWaitOld(HLERequestContext& ctx) {
+        LOG_WARNING(Service_MM, "(STUBBED) called.");
+
         IPC::RequestParser rp{ctx};
-        const auto module = rp.PopEnum<Module>();
-        const auto min = rp.Pop<u32>();
-        const auto max = rp.Pop<s32>();
+        module = rp.PopEnum<Module>();
+        min = rp.Pop<Setting>();
+        max = rp.Pop<Setting>();
 
-        LOG_DEBUG(Service_MM, "called. module={:d}, min=0x{:X}, max=0x{:X}",
-                 static_cast<u32>(module), min, max);
-
-        if (auto it = std::find_if(sessions.begin(), sessions.end(),
-                                 [&module](const auto& session) {
-                                     return session.GetModule() == module;
-                                 });
-            it != sessions.end()) {
-            it->SetAndWait(min, max);
-        }
-
+        current = min;
         IPC::ResponseBuilder rb{ctx, 2};
         rb.Push(ResultSuccess);
     }
 
     void GetOld(HLERequestContext& ctx) {
+        LOG_WARNING(Service_MM, "(STUBBED) called.");
+
         IPC::RequestParser rp{ctx};
-        const auto module = rp.PopEnum<Module>();
-
-        LOG_DEBUG(Service_MM, "called. module={:d}", static_cast<u32>(module));
-
-        u32 current_min = 0;
-        if (auto it = std::find_if(sessions.begin(), sessions.end(),
-                                 [&module](const auto& session) {
-                                     return session.GetModule() == module;
-                                 });
-            it != sessions.end()) {
-            current_min = it->GetMin();
-        }
+        module = rp.PopEnum<Module>();
 
         IPC::ResponseBuilder rb{ctx, 3};
         rb.Push(ResultSuccess);
-        rb.Push(current_min);
+        rb.Push(current);
     }
 
     void Initialize(HLERequestContext& ctx) {
+        LOG_WARNING(Service_MM, "(STUBBED) called.");
+
         IPC::RequestParser rp{ctx};
-        const auto module = rp.PopEnum<Module>();
-        [[maybe_unused]] const auto priority = rp.Pop<u32>();
-        const auto clear_mode = static_cast<EventClearMode>(rp.Pop<u32>());
-
-        LOG_DEBUG(Service_MM, "called. module={:d}, clear_mode={:d}",
-                 static_cast<u32>(module), static_cast<u32>(clear_mode));
-
-        const u32 current_id = next_request_id++;
-        sessions.emplace_back(module, current_id, clear_mode);
+        module = rp.PopEnum<Module>();
+        priority = rp.Pop<Priority>();
+        event_clear_mode = rp.Pop<u32>();
 
         IPC::ResponseBuilder rb{ctx, 3};
         rb.Push(ResultSuccess);
-        rb.Push(current_id);
+        rb.Push(request_id);
     }
 
     void Finalize(HLERequestContext& ctx) {
+        LOG_WARNING(Service_MM, "(STUBBED) called.");
+
         IPC::RequestParser rp{ctx};
-        const auto request_id = rp.Pop<u32>();
-
-        LOG_DEBUG(Service_MM, "called. request_id={:d}", request_id);
-
-        std::erase_if(sessions, [&request_id](const auto& session) {
-            return session.GetRequestId() == request_id;
-        });
+        request_id = rp.Pop<u32>();
 
         IPC::ResponseBuilder rb{ctx, 2};
         rb.Push(ResultSuccess);
     }
 
     void SetAndWait(HLERequestContext& ctx) {
+        LOG_WARNING(Service_MM, "(STUBBED) called.");
+
         IPC::RequestParser rp{ctx};
-        const auto request_id = rp.Pop<u32>();
-        const auto min = rp.Pop<u32>();
-        const auto max = rp.Pop<s32>();
+        request_id = rp.Pop<u32>();
+        min = rp.Pop<Setting>();
+        max = rp.Pop<Setting>();
 
-        LOG_DEBUG(Service_MM, "called. request_id={:d}, min=0x{:X}, max=0x{:X}",
-                 request_id, min, max);
-
-        if (auto it = std::find_if(sessions.begin(), sessions.end(),
-                                 [&request_id](const auto& session) {
-                                     return session.GetRequestId() == request_id;
-                                 });
-            it != sessions.end()) {
-            it->SetAndWait(min, max);
-        }
-
+        current = min;
         IPC::ResponseBuilder rb{ctx, 2};
         rb.Push(ResultSuccess);
     }
 
     void Get(HLERequestContext& ctx) {
+        LOG_WARNING(Service_MM, "(STUBBED) called.");
+
         IPC::RequestParser rp{ctx};
-        const auto request_id = rp.Pop<u32>();
-
-        LOG_DEBUG(Service_MM, "called. request_id={:d}", request_id);
-
-        u32 current_min = 0;
-        if (auto it = std::find_if(sessions.begin(), sessions.end(),
-                                 [&request_id](const auto& session) {
-                                     return session.GetRequestId() == request_id;
-                                 });
-            it != sessions.end()) {
-            current_min = it->GetMin();
-        }
+        request_id = rp.Pop<u32>();
 
         IPC::ResponseBuilder rb{ctx, 3};
         rb.Push(ResultSuccess);
-        rb.Push(current_min);
+        rb.Push(current);
     }
 
-    std::vector<Session> sessions;
-    u32 next_request_id{1};
+    Module module{Module::TEST};
+    Priority priority{0};
+    Setting min{0}, max{0}, current{0};
+    u32 request_id{0}, event_clear_mode{0};
 };
 
 void LoopProcess(Core::System& system) {
     auto server_manager = std::make_unique<ServerManager>(system);
+
     server_manager->RegisterNamedService("mm:u", std::make_shared<MM_U>(system));
     ServerManager::RunServer(std::move(server_manager));
 }
