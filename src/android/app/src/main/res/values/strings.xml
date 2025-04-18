@@ -58,9 +58,9 @@
   <string name="add_games_warning_description">Games won\'t be displayed in the Games list if a
     folder isn\'t selected.</string>
   <string name="add_games_warning_help">https://sumi-emu.org/help/quickstart/#dumping-games</string>
-  <string name="home_search_games">Search games</string>
-  <string name="search_settings">Search settings</string>
-  <string name="games_dir_selected">Games directory selected</string>
+  <string name="home_search_games">Search Games</string>
+  <string name="search_settings">Search Settings</string>
+  <string name="games_dir_selected">Games Directory Selected</string>
   <string name="install_prod_keys">Install prod.keys</string>
   <string name="install_prod_keys_description">Required to decrypt retail games</string>
   <string name="install_prod_keys_warning">Skip adding keys?</string>
@@ -96,27 +96,27 @@
     https://sumi-emu.org/help/quickstart/#dumping-decryption-keys</string>
   <string name="install_keys_failure_description">The selected file is incorrect or corrupt. Please
     redump your keys.</string>
-  <string name="gpu_driver_manager">GPU driver manager</string>
+  <string name="gpu_driver_manager">GPU Driver Manager</string>
   <string name="install_gpu_driver">Install GPU driver</string>
   <string name="install_gpu_driver_description">Install alternative drivers for potentially better
-    performance or accuracy</string>
-  <string name="advanced_settings">Advanced settings</string>
-  <string name="advanced_settings_game">Advanced settings: %1$s</string>
-  <string name="settings_description">Configure emulator settings</string>
-  <string name="search_recently_played">Recently played</string>
-  <string name="search_recently_added">Recently added</string>
+    performance or accuracy. It's highly suggested to install custom Mesa/Turnip driver builds.</string>
+  <string name="advanced_settings">Advanced Settings</string>
+  <string name="advanced_settings_game">Advanced Settings: %1$s</string>
+  <string name="settings_description">Configure Emulator Settings</string>
+  <string name="search_recently_played">Recently Played</string>
+  <string name="search_recently_added">Recently Added</string>
   <string name="search_retail">Retail</string>
   <string name="search_homebrew">Homebrew</string>
-  <string name="open_user_folder">Open sumi folder</string>
-  <string name="open_user_folder_description">Manage sumi\'s internal files</string>
+  <string name="open_user_folder">Open Sumi Directory</string>
+  <string name="open_user_folder_description">Manage Sumi\'s internal files</string>
   <string name="theme_and_color_description">Modify the look of the app</string>
   <string name="no_file_manager">No file manager found</string>
-  <string name="notification_no_directory_link">Could not open sumi directory</string>
+  <string name="notification_no_directory_link">Could not open Sumi directory</string>
   <string name="notification_no_directory_link_description">Please locate the user folder with the
     file manager\'s side panel manually.</string>
-  <string name="manage_save_data">Manage save data</string>
+  <string name="manage_save_data">Manage Save Data</string>
   <string name="manage_save_data_description">Save data found. Please select an option below.</string>
-  <string name="import_save_warning">Import save data</string>
+  <string name="import_save_warning">Import Save Data</string>
   <string name="import_save_warning_description">This will overwrite all existing save data with the
     provided file. Are you sure that you want to continue?</string>
   <string name="import_export_saves_description">Import or export save files</string>
@@ -128,8 +128,8 @@
     title ID of the game.</string>
   <string name="import_saves">Import</string>
   <string name="export_saves">Export</string>
-  <string name="install_firmware">Install firmware</string>
-  <string name="install_firmware_description">Required for emulation of system features</string>
+  <string name="install_firmware">Install Firmware</string>
+  <string name="install_firmware_description">Required for system features emulation</string>
   <string name="install_firmware_warning">Firmware installation is mandatory</string>
   <string name="install_firmware_warning_description">Firmware is required for proper emulation. You
     must install firmware to continue.</string>
@@ -163,7 +163,7 @@
   <string name="custom_driver_not_supported">Custom drivers not supported</string>
   <string name="custom_driver_not_supported_description">Custom driver loading isn\'t currently
     supported for this device.\nCheck this option again in the future to see if support was added!</string>
-  <string name="manage_sumi_data">Manage sumi data</string>
+  <string name="manage_sumi_data">Manage Sumi Data</string>
   <string name="manage_sumi_data_description">Import/export firmware, keys, user data, and more!</string>
   <string name="share_save_file">Share save file</string>
   <string name="export_save_failed">Failed to export save</string>
@@ -180,7 +180,7 @@
     <item quantity="one">Successfully imported %d save</item>
     <item quantity="other">Successfully imported %d saves</item>
   </plurals>
-  <string name="no_save_data_found">No save data found</string>
+  <string name="no_save_data_found">No Save Data found</string>
   <string name="verify_installed_content">Verify installed content</string>
   <string name="verify_installed_content_description">Checks all installed content for corruption</string>
   <string name="keys_missing">Encryption keys are missing</string>
@@ -188,7 +188,7 @@
   <string name="keys_missing_help">https://sumi-emu.org/help/quickstart/#dumping-decryption-keys</string>
 
   <!-- Applet launcher strings -->
-  <string name="applets">Applet launcher</string>
+  <string name="applets">Applet Launcher</string>
   <string name="applets_description">Launch system applets using installed firmware</string>
   <string name="applets_error_firmware">Firmware not installed</string>
   <string name="applets_error_applet">Applet not available</string>
@@ -196,7 +196,7 @@
   <string name="album_applet">Album</string>
   <string name="album_applet_description">See images stored in the user screenshots folder with the
     system photo viewer</string>
-  <string name="mii_edit_applet">Mii edit</string>
+  <string name="mii_edit_applet">Mii Edit</string>
   <string name="mii_edit_applet_description">View and edit Miis with the system editor</string>
   <string name="cabinet_applet">Cabinet</string>
   <string name="cabinet_applet_description">Edit and delete data stored on amiibo</string>
@@ -257,23 +257,23 @@
   <string name="are_you_interested">Are you interested?</string>
 
   <!-- General settings strings -->
-  <string name="frame_limit_enable">Limit speed</string>
+  <string name="frame_limit_enable">Limit Speed</string>
   <string name="frame_limit_enable_description">Limits emulation speed to a specified percentage of
     normal speed.</string>
-  <string name="frame_limit_slider">Limit speed percent</string>
+  <string name="frame_limit_slider">Limit Speed Percent</string>
   <string name="frame_limit_slider_description">Specifies the percentage to limit emulation speed.
     100% is the normal speed. Values higher or lower will increase or decrease the speed limit.</string>
-  <string name="cpu_backend">CPU backend</string>
-  <string name="cpu_accuracy">CPU accuracy</string>
+  <string name="cpu_backend">CPU Backend</string>
+  <string name="cpu_accuracy">CPU Accuracy</string>
   <string name="value_with_units">%1$s%2$s</string>
 
   <!-- System settings strings -->
-  <string name="device_name">Device name</string>
+  <string name="device_name">Device Name</string>
   <string name="use_docked_mode">Docked Mode</string>
   <string name="use_docked_mode_description">Increases resolution, decreasing performance. Handheld
     Mode is used when disabled, lowering resolution and increasing performance.</string>
-  <string name="emulated_region">Emulated region</string>
-  <string name="emulated_language">Emulated language</string>
+  <string name="emulated_region">Emulated Region</string>
+  <string name="emulated_language">Emulated Language</string>
   <string name="select_rtc_date">Select RTC date</string>
   <string name="select_rtc_time">Select RTC time</string>
   <string name="use_custom_rtc">Custom RTC</string>
@@ -282,7 +282,7 @@
   <string name="set_custom_rtc">Set custom RTC</string>
 
   <!-- Graphics settings strings -->
-  <string name="renderer_accuracy">Accuracy level</string>
+  <string name="renderer_accuracy">Accuracy Level</string>
   <string name="renderer_resolution">Resolution (Handheld/Docked)</string>
   <string name="renderer_vsync">VSync mode</string>
   <string name="renderer_screen_layout">Orientation</string>
@@ -291,20 +291,20 @@
   <string name="fsr_sharpness">FSR sharpness</string>
   <string name="fsr_sharpness_description">Determines how sharpened the image will look while using
     FSR\'s dynamic contrast</string>
-  <string name="renderer_anti_aliasing">Anti-aliasing method</string>
+  <string name="renderer_anti_aliasing">Anti-aliasing Method</string>
   <string name="renderer_force_max_clock">Force maximum clocks (Adreno only)</string>
   <string name="renderer_force_max_clock_description">Forces the GPU to run at the maximum possible
     clocks (thermal constraints will still be applied).</string>
-  <string name="renderer_asynchronous_shaders">Use asynchronous shaders</string>
+  <string name="renderer_asynchronous_shaders">Use Asynchronous Shaders</string>
   <string name="renderer_asynchronous_shaders_description">Compiles shaders asynchronously, reducing
     stutter but may introduce glitches.</string>
-  <string name="renderer_reactive_flushing">Use reactive flushing</string>
+  <string name="renderer_reactive_flushing">Use Reactive Flushing</string>
   <string name="renderer_reactive_flushing_description">Improves rendering accuracy in some games at
     the cost of performance.</string>
-  <string name="use_disk_shader_cache">Disk shader cache</string>
+  <string name="use_disk_shader_cache">Disk Shader Cache</string>
   <string name="use_disk_shader_cache_description">Reduces stuttering by locally storing and loading
     generated shaders.</string>
-  <string name="anisotropic_filtering">Anisotropic filtering</string>
+  <string name="anisotropic_filtering">Anisotropic Filtering</string>
   <string name="anisotropic_filtering_description">Improves the quality of textures when viewed at
     oblique angles</string>
 
@@ -314,12 +314,12 @@
   <string name="cpu_debug_mode_description">Puts the CPU in a slow debugging mode.</string>
   <string name="gpu">GPU</string>
   <string name="renderer_api">API</string>
-  <string name="renderer_debug">Graphics debugging</string>
+  <string name="renderer_debug">Graphics Debugging</string>
   <string name="renderer_debug_description">Sets the graphics API to a slow debugging mode.</string>
   <string name="fastmem">Fastmem</string>
 
   <!-- Audio settings strings -->
-  <string name="audio_output_engine">Output engine</string>
+  <string name="audio_output_engine">Audio Engine</string>
   <string name="audio_volume">Volume</string>
   <string name="audio_volume_description">Specifies the volume of audio output.</string>
 
@@ -456,7 +456,7 @@
   <string name="save">Save</string>
 
   <!-- GPU driver installation -->
-  <string name="select_gpu_driver">Select GPU driver</string>
+  <string name="select_gpu_driver">Select GPU Driver</string>
   <string name="select_gpu_driver_title">Would you like to replace your current GPU driver?</string>
   <string name="select_gpu_driver_install">Install</string>
   <string name="select_gpu_driver_default">Default</string>
