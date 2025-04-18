@@ -19,31 +19,24 @@ namespace {
 
 s32 NormalizeSwapInterval(f32* out_speed_scale, s32 swap_interval) {
     if (swap_interval <= 0) {
-        // If swap_interval is 0 and setting enabled, respect it as unlocked FPS
-        if (swap_interval == 0 && Settings::values.respect_present_interval_zero.GetValue()) {
-            if (out_speed_scale) {
-                *out_speed_scale = 1.0f;
-            }
-            return 0;
-        }
-
         // As an extension, treat nonpositive swap interval as speed multiplier.
         if (out_speed_scale) {
             *out_speed_scale = 2.f * static_cast<f32>(1 - swap_interval);
         }
-
-        swap_interval = 1;
+        // Only normalize swap_interval to 1 if we're not respecting present interval 0
+        if (swap_interval == 0 && Settings::values.respect_present_interval_zero.GetValue()) {
+            // Keep swap_interval as 0 to allow for unlocked FPS
+        } else {
+            swap_interval = 1;
+        }
     }
-
     if (swap_interval >= 5) {
         // As an extension, treat high swap interval as precise speed control.
         if (out_speed_scale) {
             *out_speed_scale = static_cast<f32>(swap_interval) / 100.f;
         }
-
         swap_interval = 1;
     }
-
     return swap_interval;
 }
 

@@ -116,25 +116,27 @@ vk::Image TextureManager::LoadTexture(const std::string& texture_path) {
 
 vk::Image TextureManager::CreateDefaultTexture() {
     // Create a small default texture (1x1 pixel) to use as a fallback
-    const VkExtent2D extent{1, 1};
+    // const VkExtent2D extent{1, 1};
 
     // Create image
-    VkImageCreateInfo image_ci = {};
-    image_ci.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-    image_ci.pNext = nullptr;
-    image_ci.flags = 0;
-    image_ci.imageType = VK_IMAGE_TYPE_2D;
-    image_ci.format = texture_format;
-    image_ci.extent = {extent.width, extent.height, 1};
-    image_ci.mipLevels = 1;
-    image_ci.arrayLayers = 1;
-    image_ci.samples = VK_SAMPLE_COUNT_1_BIT;
-    image_ci.tiling = VK_IMAGE_TILING_OPTIMAL;
-    image_ci.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-    image_ci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    image_ci.queueFamilyIndexCount = 0;
-    image_ci.pQueueFamilyIndices = nullptr;
-    image_ci.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    // Avoid unused variable warning by commenting out the unused struct
+    // VkImageCreateInfo image_ci{
+    //     .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+    //     .pNext = nullptr,
+    //     .flags = 0,
+    //     .imageType = VK_IMAGE_TYPE_2D,
+    //     .format = texture_format,
+    //     .extent = {extent.width, extent.height, 1},
+    //     .mipLevels = 1,
+    //     .arrayLayers = 1,
+    //     .samples = VK_SAMPLE_COUNT_1_BIT,
+    //     .tiling = VK_IMAGE_TILING_OPTIMAL,
+    //     .usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+    //     .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+    //     .queueFamilyIndexCount = 0,
+    //     .pQueueFamilyIndices = nullptr,
+    //     .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+    // };
 
     // TODO: create an actual VkImage [ZEP]
     LOG_INFO(Render_Vulkan, "Created default fallback texture");

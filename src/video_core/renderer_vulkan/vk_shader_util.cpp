@@ -224,7 +224,7 @@ void AsyncCompileShader(const Device& device, const std::string& shader_path,
     }).detach();
 }
 
-ShaderManager::ShaderManager(const Device& device) : device(device) {
+ShaderManager::ShaderManager(const Device& device_) : device(device_) {
     // Initialize command queue system
     InitializeCommandQueue();
 }
