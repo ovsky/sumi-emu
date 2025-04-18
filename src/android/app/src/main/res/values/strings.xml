@@ -99,7 +99,7 @@
   <string name="gpu_driver_manager">GPU Driver Manager</string>
   <string name="install_gpu_driver">Install GPU driver</string>
   <string name="install_gpu_driver_description">Install alternative drivers for potentially better
-    performance or accuracy. It's highly suggested to install custom Mesa/Turnip driver builds.</string>
+    performance or accuracy. It is highly suggested to install custom Mesa/Turnip driver builds.</string>
   <string name="advanced_settings">Advanced Settings</string>
   <string name="advanced_settings_game">Advanced Settings: %1$s</string>
   <string name="settings_description">Configure Emulator Settings</string>
