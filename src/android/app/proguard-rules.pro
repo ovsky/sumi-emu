@@ -24,8 +24,8 @@
 -dontwarn java.beans.VetoableChangeSupport
 
 # LicenseVerifier protection
--keep class org.citron.citron_emu.utils.LicenseVerifier { *; }
--keepnames class org.citron.citron_emu.utils.LicenseVerifier
+-keep class org.sumi.sumi_emu.utils.LicenseVerifier { *; }
+-keepnames class org.sumi.sumi_emu.utils.LicenseVerifier
 -dontskipnonpubliclibraryclasses
 -dontoptimize
 -dontpreverify

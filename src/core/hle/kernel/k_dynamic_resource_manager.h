@@ -12,8 +12,8 @@ namespace Kernel {
 
 template <typename T, bool ClearNode = false>
 class KDynamicResourceManager {
-    CITRON_NON_COPYABLE(KDynamicResourceManager);
-    CITRON_NON_MOVEABLE(KDynamicResourceManager);
+    SUMI_NON_COPYABLE(KDynamicResourceManager);
+    SUMI_NON_MOVEABLE(KDynamicResourceManager);
 
 public:
     using DynamicSlabType = KDynamicSlabHeap<T, ClearNode>;

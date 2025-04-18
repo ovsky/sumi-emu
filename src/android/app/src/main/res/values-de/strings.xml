@@ -1,17 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
-    <string name="app_disclaimer">Diese Software kann Spiele für die Nintendo Switch abspielen. Keine Spiele oder Spielekeys sind enthalten.&lt;br /&gt;&lt;br /&gt;Bevor du beginnst, bitte halte deine <![CDATA[<b> prod.keys </b>]]> auf deinem Gerät bereit. .&lt;br /&gt;&lt;br /&gt;<![CDATA[<a href=\"https://citron-emu.org/help/quickstart\">Mehr Infos</a>]]></string>
+    <string name="app_disclaimer">Diese Software kann Spiele für die Nintendo Switch abspielen.
+        Keine Spiele oder Spielekeys sind enthalten.&lt;br /&gt;&lt;br /&gt;Bevor du beginnst, bitte
+        halte deine <![CDATA[<b> prod.keys </b>]]> auf deinem Gerät bereit. .&lt;br /&gt;&lt;br /&gt;<![CDATA[<a href=\"https://sumi-emu.org/help/quickstart\">Mehr Infos</a>]]></string>
     <string name="notice_notification_channel_name">Hinweise und Fehler</string>
-    <string name="notice_notification_channel_description">Zeigt Benachrichtigungen an, wenn etwas schief läuft.</string>
-    <string name="notification_permission_not_granted">Berechtigung für Benachrichtigungen nicht erlaubt!</string>
+    <string name="notice_notification_channel_description">Zeigt Benachrichtigungen an, wenn etwas
+        schief läuft.</string>
+    <string name="notification_permission_not_granted">Berechtigung für Benachrichtigungen nicht
+        erlaubt!</string>
 
     <!-- Setup strings -->
     <string name="welcome">Willkommen!</string>
-    <string name="welcome_description">Erfahre wie man &lt;b>citron&lt;/b> einrichtet und beginne mit der Emulation.</string>
+    <string name="welcome_description">Erfahre wie man &lt;b>sumi&lt;/b> einrichtet und beginne mit
+        der Emulation.</string>
     <string name="get_started">Erste Schritte</string>
     <string name="keys">Schlüssel</string>
-    <string name="keys_description">Wähle deine &lt;b>prod.keys&lt;/b> Datei mit dem Button unten aus.</string>
+    <string name="keys_description">Wähle deine &lt;b>prod.keys&lt;/b> Datei mit dem Button unten
+        aus.</string>
     <string name="select_keys">Schlüssel auswählen</string>
     <string name="games">Spiele</string>
     <string name="games_description">Wähle mit dem Knopf unten den &lt;b>Spiele&lt;/b>-Ordner aus.</string>
@@ -28,28 +34,35 @@
     <string name="home_games">Spiele</string>
     <string name="home_search">Suche</string>
     <string name="home_settings">Einstellungen</string>
-    <string name="empty_gamelist">Es wurden keine Dateien gefunden oder es wurde noch kein Spielverzeichnis ausgewählt.</string>
+    <string name="empty_gamelist">Es wurden keine Dateien gefunden oder es wurde noch kein
+        Spielverzeichnis ausgewählt.</string>
     <string name="search_and_filter_games">Spiele suchen und filtern</string>
     <string name="select_games_folder">Spieleverzeichnis auswählen</string>
     <string name="manage_game_folders">Spiele-Ordner verwalten</string>
-    <string name="select_games_folder_description">Erlaubt citron die Spieleliste zu füllen</string>
+    <string name="select_games_folder_description">Erlaubt sumi die Spieleliste zu füllen</string>
     <string name="add_games_warning">Auswahl des Spieleverzeichnisses überspringen?</string>
-    <string name="add_games_warning_description">Spiele werden in der Spieleliste nicht angezeigt, wenn kein Ordner ausgewählt ist.</string>
-    <string name="add_games_warning_help">https://citron-emu.org/help/quickstart/#dumping-games</string>
+    <string name="add_games_warning_description">Spiele werden in der Spieleliste nicht angezeigt,
+        wenn kein Ordner ausgewählt ist.</string>
+    <string name="add_games_warning_help">https://sumi-emu.org/help/quickstart/#dumping-games</string>
     <string name="home_search_games">Spiele suchen</string>
     <string name="search_settings">Einstellungen suchen</string>
     <string name="games_dir_selected">Spieleverzeichnis ausgewählt</string>
     <string name="install_prod_keys">prod.keys installieren</string>
     <string name="install_prod_keys_description">Zum Entschlüsseln von Spielen benötigt</string>
     <string name="install_prod_keys_warning">Hinzufügen der Schlüssel überspringen?</string>
-    <string name="install_prod_keys_warning_description">Für die Emulation von Spielen sind gültige Schlüssel erforderlich. Wenn du fortfährst, funktionieren nur Homebrew-Anwendungen.</string>
-    <string name="install_prod_keys_warning_help">https://citron-emu.org/help/quickstart/#guide-introduction</string>
+    <string name="install_prod_keys_warning_description">Für die Emulation von Spielen sind gültige
+        Schlüssel erforderlich. Wenn du fortfährst, funktionieren nur Homebrew-Anwendungen.</string>
+    <string name="install_prod_keys_warning_help">
+        https://sumi-emu.org/help/quickstart/#guide-introduction</string>
     <string name="notifications">Benachrichtigungen</string>
-    <string name="notifications_description">Erteile mit dem Knopf unten die Berechtigung, Benachrichtigungen zu senden.</string>
+    <string name="notifications_description">Erteile mit dem Knopf unten die Berechtigung,
+        Benachrichtigungen zu senden.</string>
     <string name="give_permission">Berechtigung erteilen</string>
-    <string name="notification_warning_description">citron wird dich nicht über wichtige Informationen benachrichtigen können.</string>
+    <string name="notification_warning_description">sumi wird dich nicht über wichtige Informationen
+        benachrichtigen können.</string>
     <string name="permission_denied">Zugriff verweigert</string>
-    <string name="permission_denied_description">Du hast diese Berechtigung zu oft verweigert und musst sie nun manuell in den Systemeinstellungen erteilen.</string>
+    <string name="permission_denied_description">Du hast diese Berechtigung zu oft verweigert und
+        musst sie nun manuell in den Systemeinstellungen erteilen.</string>
     <string name="about">Über</string>
     <string name="about_description">Build-Version, Credits und mehr</string>
     <string name="warning_help">Hilfe</string>
@@ -60,14 +73,19 @@
     <string name="invalid_keys_file">Ungültige Schlüsseldatei ausgewählt</string>
     <string name="install_keys_success">Schlüssel erfolgreich installiert</string>
     <string name="reading_keys_failure">Fehler beim Lesen der Schlüssel</string>
-    <string name="install_prod_keys_failure_extension_description">Überprüfen Sie, ob Ihre Schlüsseldatei die Erweiterung \".keys\" hat, und versuchen Sie es erneut.</string>
-    <string name="install_amiibo_keys_failure_extension_description">Überprüfen Sie, ob Ihre Schlüsseldatei die Erweiterung \".bin\" hat, und versuchen Sie es erneut.</string>
+    <string name="install_prod_keys_failure_extension_description">Überprüfen Sie, ob Ihre
+        Schlüsseldatei die Erweiterung \".keys\" hat, und versuchen Sie es erneut.</string>
+    <string name="install_amiibo_keys_failure_extension_description">Überprüfen Sie, ob Ihre
+        Schlüsseldatei die Erweiterung \".bin\" hat, und versuchen Sie es erneut.</string>
     <string name="invalid_keys_error">Ungültige Schlüssel</string>
-    <string name="dumping_keys_quickstart_link">https://citron-emu.org/help/quickstart/#dumping-decryption-keys</string>
-    <string name="install_keys_failure_description">Die ausgewählte Datei ist falsch oder beschädigt. Bitte kopieren Sie Ihre Schlüssel erneut.</string>
+    <string name="dumping_keys_quickstart_link">
+        https://sumi-emu.org/help/quickstart/#dumping-decryption-keys</string>
+    <string name="install_keys_failure_description">Die ausgewählte Datei ist falsch oder
+        beschädigt. Bitte kopieren Sie Ihre Schlüssel erneut.</string>
     <string name="gpu_driver_manager">GPU-Treiber Verwaltung</string>
     <string name="install_gpu_driver">GPU-Treiber installieren</string>
-    <string name="install_gpu_driver_description">Alternative Treiber für eventuell bessere Leistung oder Genauigkeit installieren</string>
+    <string name="install_gpu_driver_description">Alternative Treiber für eventuell bessere Leistung
+        oder Genauigkeit installieren</string>
     <string name="advanced_settings">Erweiterte Einstellungen</string>
     <string name="advanced_settings_game">Erweiterte Einstellungen: %1$s</string>
     <string name="settings_description">Emulatoreinstellungen konfigurieren</string>
@@ -75,32 +93,38 @@
     <string name="search_recently_added">Kürzlich hinzugefügt</string>
     <string name="search_retail">Spiele</string>
     <string name="search_homebrew">Homebrew</string>
-    <string name="open_user_folder">citron-Ordner öffnen</string>
-    <string name="open_user_folder_description">citron\'s interne Dateien verwalten</string>
+    <string name="open_user_folder">sumi-Ordner öffnen</string>
+    <string name="open_user_folder_description">sumi\'s interne Dateien verwalten</string>
     <string name="theme_and_color_description">Das Aussehen der App ändern</string>
     <string name="no_file_manager">Kein Dateimanager gefunden</string>
-    <string name="notification_no_directory_link">citron-Verzeichnis konnte nicht geöffnet werden</string>
-    <string name="notification_no_directory_link_description">Bitte suche den Benutzerordner manuell über die Seitenleiste des Dateimanagers.</string>
+    <string name="notification_no_directory_link">sumi-Verzeichnis konnte nicht geöffnet werden</string>
+    <string name="notification_no_directory_link_description">Bitte suche den Benutzerordner manuell
+        über die Seitenleiste des Dateimanagers.</string>
     <string name="manage_save_data">Speicherdaten verwalten</string>
-    <string name="manage_save_data_description">Speicherdaten gefunden. Bitte wähle unten eine Option aus.</string>
+    <string name="manage_save_data_description">Speicherdaten gefunden. Bitte wähle unten eine
+        Option aus.</string>
     <string name="import_save_warning">Speicherdaten importieren</string>
-    <string name="import_save_warning_description">Das überschreibt alle existierenden Speicherdaten für dieses Spiel mit der ausgewählten Datei.
-Wirklich fortfahren?</string>
+    <string name="import_save_warning_description">Das überschreibt alle existierenden Speicherdaten
+        für dieses Spiel mit der ausgewählten Datei.
+        Wirklich fortfahren?</string>
     <string name="import_export_saves_description">Speicherdaten importieren oder exportieren</string>
     <string name="save_files_importing">Importiere Speicherdaten...</string>
     <string name="save_files_exporting">Exportiere Speicherdaten...</string>
     <string name="save_file_imported_success">Erfolgreich importiert</string>
     <string name="save_file_invalid_zip_structure">Ungültige Speicherverzeichnisstruktur</string>
-    <string name="save_file_invalid_zip_structure_description">Der erste Unterordnername muss die Titel-ID des Spiels sein.</string>
+    <string name="save_file_invalid_zip_structure_description">Der erste Unterordnername muss die
+        Titel-ID des Spiels sein.</string>
     <string name="import_saves">Importieren</string>
     <string name="export_saves">Exportieren</string>
     <string name="install_firmware">Firmware installieren</string>
-    <string name="install_firmware_description">Die Firmware muss in einem ZIP-Archiv vorliegen und wird zum Booten einiger Spiele benötigt</string>
+    <string name="install_firmware_description">Die Firmware muss in einem ZIP-Archiv vorliegen und
+        wird zum Booten einiger Spiele benötigt</string>
     <string name="firmware_installing">Firmware wird installiert</string>
     <string name="firmware_installed_success">Die Firmware wurde erfolgreich installiert!</string>
-    <string name="firmware_installed_failure">Bei der Firmware installation ist etwas fehlgeschlagen.</string>
+    <string name="firmware_installed_failure">Bei der Firmware installation ist etwas
+        fehlgeschlagen.</string>
     <string name="share_log">Debug-Logs teilen</string>
-    <string name="share_log_description">Debug-Logs an citron zur Untersuchung absenden</string>
+    <string name="share_log_description">Debug-Logs an sumi zur Untersuchung absenden</string>
     <string name="share_log_missing">Keine Log-Datei gefunden</string>
     <string name="install_game_content">Spiel installieren</string>
     <string name="install_game_content_description">Spiel-Updates oder DLCs installieren</string>
@@ -108,12 +132,13 @@ Wirklich fortfahren?</string>
     <string name="install_game_content_failed_count">%1$d Installationsfehler</string>
     <string name="install_game_content_success_install">%1$d erfolgreich installiert</string>
     <string name="install_game_content_success_overwrite">%1$d erfolgreich überschrieben</string>
-    <string name="install_game_content_help_link">https://citron-emu.org/help/quickstart/#dumping-installed-updates</string>
-    <string name="manage_citron_data">citron-Daten Verwalten</string>
+    <string name="install_game_content_help_link">
+        https://sumi-emu.org/help/quickstart/#dumping-installed-updates</string>
+    <string name="manage_sumi_data">sumi-Daten Verwalten</string>
     <string name="share_save_file">Speicherdaten teilen</string>
     <string name="game_folders">Spiele-Ordner</string>
     <string name="add_game_folder">Spiele-Ordner hinzufügen</string>
-    <string name="keys_missing_help">https://citron-emu.org/help/quickstart/#dumping-decryption-keys</string>
+    <string name="keys_missing_help">https://sumi-emu.org/help/quickstart/#dumping-decryption-keys</string>
 
     <string name="applets_error_firmware">Firmware nicht installiert</string>
     <!-- About screen strings -->
@@ -121,9 +146,9 @@ Wirklich fortfahren?</string>
     <string name="copied_to_clipboard">In die Zwischenablage kopiert</string>
     <string name="about_app_description">Ein quelloffener Switch-Emulator</string>
     <string name="contributors">Beitragende</string>
-    <string name="contributors_description">Gemacht mit \u2764 vom citron Team</string>
-    <string name="contributors_link">https://git.citron-emu.org/Citron/Citron/graphs/contributors</string>
-    <string name="licenses_description">Projekte, die citron für Android möglich machen </string>
+    <string name="contributors_description">Gemacht mit \u2764 vom sumi Team</string>
+    <string name="contributors_link">https://git.sumi-emu.org/Sumi/Sumi/graphs/contributors</string>
+    <string name="licenses_description">Projekte, die sumi für Android möglich machen </string>
     <string name="build">Build</string>
     <string name="user_data">Nutzerdaten</string>
     <string name="importing_user_data">Importiere Nutzerdaten...</string>
@@ -132,14 +157,16 @@ Wirklich fortfahren?</string>
     <string name="user_data_import_success">Nutzerdaten erfolgreich importiert</string>
     <string name="user_data_export_cancelled">Export abgebrochen</string>
     <string name="support_link">https://discord.gg/u77vRWY</string>
-    <string name="website_link">https://citron-emu.org/</string>
-    <string name="github_link">https://git.citron-emu.org</string>
+    <string name="website_link">https://sumi-emu.org/</string>
+    <string name="github_link">https://git.sumi-emu.org</string>
 
     <!-- Early access upgrade strings -->
     <string name="early_access">Early Access</string>
     <string name="get_early_access">Early Access bekommen</string>
-    <string name="play_store_link">https://play.google.com/store/apps/details?id=org.citron.citron_emu.ea</string>
-    <string name="get_early_access_description">Neueste Features, frühzeitiger Zugriff auf Updates und mehr</string>
+    <string name="play_store_link">
+        https://play.google.com/store/apps/details?id=org.sumi.sumi_emu.ea</string>
+    <string name="get_early_access_description">Neueste Features, frühzeitiger Zugriff auf Updates
+        und mehr</string>
     <string name="early_access_benefits">Early Access Vorteile</string>
     <string name="cutting_edge_features">Neueste Features</string>
     <string name="early_access_updates">Früherer Zugriff auf Updates</string>
@@ -151,13 +178,17 @@ Wirklich fortfahren?</string>
 
     <!-- General settings strings -->
     <string name="frame_limit_enable">Limitierte Geschwindigkeit</string>
-    <string name="frame_limit_enable_description">Limitiert die Geschwindigkeit auf einen von dir festgelegten Prozentsatz.</string>
+    <string name="frame_limit_enable_description">Limitiert die Geschwindigkeit auf einen von dir
+        festgelegten Prozentsatz.</string>
     <string name="frame_limit_slider">Geschwindkeitsbegrenzung in Prozent</string>
-    <string name="frame_limit_slider_description">Gibt die prozentuale Geschwindigkeit der Emulation an. 100% sind normal. Werte darüber oder drunter werden die Geschwindigkeit entsprechend verändern.</string>
+    <string name="frame_limit_slider_description">Gibt die prozentuale Geschwindigkeit der Emulation
+        an. 100% sind normal. Werte darüber oder drunter werden die Geschwindigkeit entsprechend
+        verändern.</string>
     <string name="cpu_accuracy">CPU-Genauigkeit</string>
     <string name="use_docked_mode">Gedockter Modus</string>
-    <string name="use_docked_mode_description">Der Gedockte-Modus erhöht die Auflösung, verringert aber die Leistung.
-Wird der Handheld-Modus verwendet, verringert es die Auflösung und erhöht die Leistung.</string>
+    <string name="use_docked_mode_description">Der Gedockte-Modus erhöht die Auflösung, verringert
+        aber die Leistung.
+        Wird der Handheld-Modus verwendet, verringert es die Auflösung und erhöht die Leistung.</string>
     <string name="emulated_region">Emulierte Region</string>
     <string name="emulated_language">Emulierte Sprache</string>
     <string name="select_rtc_date">RTC-Datum auswählen</string>
@@ -172,7 +203,8 @@ Wird der Handheld-Modus verwendet, verringert es die Auflösung und erhöht die 
     <string name="renderer_scaling_filter">Fensteranpassungsfilter</string>
     <string name="renderer_anti_aliasing">Kantenglättung</string>
     <string name="renderer_force_max_clock">Maximale Taktfrequenz erzwingen (nur Adreno)</string>
-    <string name="renderer_force_max_clock_description">Erzwingt den Betrieb der GPU mit der maximal möglichen Taktfrequenz (Temperaturbeschränkungen werden weiterhin angewendet).</string>
+    <string name="renderer_force_max_clock_description">Erzwingt den Betrieb der GPU mit der maximal
+        möglichen Taktfrequenz (Temperaturbeschränkungen werden weiterhin angewendet).</string>
     <string name="renderer_asynchronous_shaders">Asynchrone Shader nutzen</string>
     <!-- Debug settings strings -->
     <string name="cpu">CPU</string>
@@ -234,11 +266,13 @@ Wird der Handheld-Modus verwendet, verringert es die Auflösung und erhöht die 
     <string name="unimplemented_menu">Unimplementiertes Menü</string>
     <string name="loading">Lädt...</string>
     <string name="shutting_down">Beendet...</string>
-    <string name="reset_setting_confirmation">Möchtest du diese Einstellung auf den Standardwert zurücksetzen?</string>
+    <string name="reset_setting_confirmation">Möchtest du diese Einstellung auf den Standardwert
+        zurücksetzen?</string>
     <string name="reset_to_default">Auf Standard zurücksetzen</string>
     <string name="reset_to_default_description">Setzt alle erweiterten Einstellungen zurück</string>
     <string name="reset_all_settings">Alle Einstellungen zurücksetzen?</string>
-    <string name="reset_all_settings_description">Alle erweiterten Einstellungen werden auf ihren Standardwert zurückgesetzt. Dies kann nicht rückgängig gemacht werden.</string>
+    <string name="reset_all_settings_description">Alle erweiterten Einstellungen werden auf ihren
+        Standardwert zurückgesetzt. Dies kann nicht rückgängig gemacht werden.</string>
     <string name="settings_reset">Einstellungen zurückgesetzt</string>
     <string name="close">Schließen</string>
     <string name="learn_more">Mehr erfahren</string>
@@ -304,8 +338,9 @@ Wird der Handheld-Modus verwendet, verringert es die Auflösung und erhöht die 
     <string name="save_data_description">Importiert oder exportiert Speicherdaten für dieses Spiel</string>
     <string name="delete_save_data">Speicherdaten löschen</string>
     <string name="delete_save_data_description">Löscht alle Speicherdaten für dieses Spiel</string>
-    <string name="delete_save_data_warning_description">Das löscht unwiederbringlich alle Speicherdaten für dieses Spiel.
-Wirklich fortfahren?</string>
+    <string name="delete_save_data_warning_description">Das löscht unwiederbringlich alle
+        Speicherdaten für dieses Spiel.
+        Wirklich fortfahren?</string>
     <string name="save_data_deleted_successfully">Speicherdaten erfolgreich gelöscht</string>
     <string name="select_content_type">Inhaltstyp</string>
     <string name="updates_and_dlc">Spiel-Updates und DLCs</string>
@@ -319,9 +354,12 @@ Wirklich fortfahren?</string>
     <string name="verify_no_result">Integritätsüberprüfung konnte nicht durchgeführt werden</string>
     <!-- ROM loading errors -->
     <string name="loader_error_encrypted">Das ROM ist verschlüsselt</string>
-    <string name="loader_error_encrypted_keys_description"><![CDATA[Bitte stelle sicher dass die <a href=\"https://citron-emu.org/help/quickstart/#dumping-prodkeys-and-titlekeys\">prod.keys</a> Datei installiert ist, damit Spiele entschlüsselt werden können.]]></string>
-    <string name="loader_error_video_core">Bei der Initialisierung des Videokerns ist ein Fehler aufgetreten</string>
-    <string name="loader_error_video_core_description">Dies wird normalerweise durch einen inkompatiblen GPU-Treiber verursacht. Die Installation eines passenden GPU-Treibers kann dieses Problem beheben.</string>
+    <string name="loader_error_encrypted_keys_description"><![CDATA[Bitte stelle sicher dass die <a href=\"https://sumi-emu.org/help/quickstart/#dumping-prodkeys-and-titlekeys\">prod.keys</a> Datei installiert ist, damit Spiele entschlüsselt werden können.]]></string>
+    <string name="loader_error_video_core">Bei der Initialisierung des Videokerns ist ein Fehler
+        aufgetreten</string>
+    <string name="loader_error_video_core_description">Dies wird normalerweise durch einen
+        inkompatiblen GPU-Treiber verursacht. Die Installation eines passenden GPU-Treibers kann
+        dieses Problem beheben.</string>
     <string name="loader_error_invalid_format">ROM konnte nicht geladen werden</string>
     <string name="loader_error_file_not_found">ROM-Datei existiert nicht</string>
 
@@ -354,8 +392,11 @@ Wirklich fortfahren?</string>
     <string name="system_archive_general">Ein System-Archiv</string>
     <string name="save_load_error">Speicher-/Ladefehler</string>
     <string name="fatal_error">Schwerwiegender Fehler</string>
-    <string name="fatal_error_message">Ein schwerwiegender Fehler ist aufgetreten. Einzelheiten wurden im Log protokolliert.\nDas Fortsetzen der Emulation kann zu Abstürzen und Bugs führen.</string>
-    <string name="performance_warning">Das Deaktivieren dieser Einstellung führt zu erheblichen Leistungsverlusten! Für ein optimales Erlebnis wird empfohlen, sie aktiviert zu lassen.</string>
+    <string name="fatal_error_message">Ein schwerwiegender Fehler ist aufgetreten. Einzelheiten
+        wurden im Log protokolliert.\nDas Fortsetzen der Emulation kann zu Abstürzen und Bugs
+        führen.</string>
+    <string name="performance_warning">Das Deaktivieren dieser Einstellung führt zu erheblichen
+        Leistungsverlusten! Für ein optimales Erlebnis wird empfohlen, sie aktiviert zu lassen.</string>
     <string name="memory_formatted">%1$s %2$s</string>
     <!-- Region Names -->
     <string name="region_japan">Japan</string>
@@ -386,6 +427,7 @@ Wirklich fortfahren?</string>
     <string name="renderer_accuracy_extreme">Extrem (Langsam)</string>
 
     <!-- Resolutions -->
+    <string name="resolution_pico">0.35X (252p/378p)</string>
     <string name="resolution_half">0.5X (360p/540p)</string>
     <string name="resolution_three_quarter">0.75X (540p/810p)</string>
     <string name="resolution_one">1X (720p/1080p)</string>
@@ -460,7 +502,8 @@ Wirklich fortfahren?</string>
 
     <!-- Black backgrounds theme -->
     <string name="use_black_backgrounds">Schwarze Hintergründe</string>
-    <string name="use_black_backgrounds_description">Bei Verwendung des dunklen Designs, schwarze Hintergründe verwenden.</string>
+    <string name="use_black_backgrounds_description">Bei Verwendung des dunklen Designs, schwarze
+        Hintergründe verwenden.</string>
 
     <!-- Picture-In-Picture -->
     <string name="picture_in_picture">Bild im Bild</string>
@@ -471,4 +514,4 @@ Wirklich fortfahren?</string>
     <!-- Licenses screen strings -->
     <string name="licenses">Lizenzen</string>
     <string name="license_fidelityfx_fsr_description">Hochwertiges Upscaling von AMD</string>
-    </resources>
+</resources>

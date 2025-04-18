@@ -17,8 +17,8 @@ namespace FileSys {
 using namespace Common::Literals;
 
 class CompressedStorage : public IReadOnlyStorage {
-    CITRON_NON_COPYABLE(CompressedStorage);
-    CITRON_NON_MOVEABLE(CompressedStorage);
+    SUMI_NON_COPYABLE(CompressedStorage);
+    SUMI_NON_MOVEABLE(CompressedStorage);
 
 public:
     static constexpr size_t NodeSize = 16_KiB;
@@ -47,8 +47,8 @@ public:
 
 private:
     class CompressedStorageCore {
-        CITRON_NON_COPYABLE(CompressedStorageCore);
-        CITRON_NON_MOVEABLE(CompressedStorageCore);
+        SUMI_NON_COPYABLE(CompressedStorageCore);
+        SUMI_NON_MOVEABLE(CompressedStorageCore);
 
     public:
         CompressedStorageCore() : m_table(), m_data_storage() {}
@@ -674,8 +674,8 @@ private:
     };
 
     class CacheManager {
-        CITRON_NON_COPYABLE(CacheManager);
-        CITRON_NON_MOVEABLE(CacheManager);
+        SUMI_NON_COPYABLE(CacheManager);
+        SUMI_NON_MOVEABLE(CacheManager);
 
     private:
         struct AccessRange {

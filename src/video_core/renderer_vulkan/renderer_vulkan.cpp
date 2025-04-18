@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
-// SPDX-FileCopyrightText: Copyright 2025 citron Emulator Project
+// SPDX-FileCopyrightText: Copyright 2025 sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <algorithm>
@@ -186,7 +186,7 @@ RendererVulkan::RendererVulkan(Core::TelemetrySession& telemetry_session_,
 
     // Preload common shaders if enabled
     if (Settings::values.use_asynchronous_shaders.GetValue()) {
-        // Use a simple shader directory path - can be updated to match Citron's actual path structure
+        // Use a simple shader directory path - can be updated to match Sumi's actual path structure
         const std::string shader_dir = "./shaders";
         std::vector<std::string> common_shaders;
 

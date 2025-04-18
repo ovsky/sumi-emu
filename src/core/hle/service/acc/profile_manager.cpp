@@ -46,7 +46,7 @@ ProfileManager::ProfileManager() {
 
     // Create an user if none are present
     if (user_count == 0) {
-        CreateNewUser(UUID::MakeRandom(), "citron");
+        CreateNewUser(UUID::MakeRandom(), "sumi");
         WriteUserSaveFile();
     }
 
@@ -377,20 +377,20 @@ bool ProfileManager::SetProfileBaseAndData(Common::UUID uuid, const ProfileBase&
 }
 
 void ProfileManager::ParseUserSaveFile() {
-    const auto save_path(FS::GetCitronPath(FS::CitronPath::NANDDir) / ACC_SAVE_AVATORS_BASE_PATH /
+    const auto save_path(FS::GetSumiPath(FS::SumiPath::NANDDir) / ACC_SAVE_AVATORS_BASE_PATH /
                          "profiles.dat");
     const FS::IOFile save(save_path, FS::FileAccessMode::Read, FS::FileType::BinaryFile);
 
     if (!save.IsOpen()) {
         LOG_WARNING(Service_ACC, "Failed to load profile data from save data... Generating new "
-                                 "user 'citron' with random UUID.");
+                                 "user 'sumi' with random UUID.");
         return;
     }
 
     ProfileDataRaw data;
     if (!save.ReadObject(data)) {
         LOG_WARNING(Service_ACC, "profiles.dat is smaller than expected... Generating new user "
-                                 "'citron' with random UUID.");
+                                 "'sumi' with random UUID.");
         return;
     }
 
@@ -429,12 +429,12 @@ void ProfileManager::WriteUserSaveFile() {
         };
     }
 
-    const auto raw_path(FS::GetCitronPath(FS::CitronPath::NANDDir) / "system/save/8000000000000010");
+    const auto raw_path(FS::GetSumiPath(FS::SumiPath::NANDDir) / "system/save/8000000000000010");
     if (FS::IsFile(raw_path) && !FS::RemoveFile(raw_path)) {
         return;
     }
 
-    const auto save_path(FS::GetCitronPath(FS::CitronPath::NANDDir) / ACC_SAVE_AVATORS_BASE_PATH /
+    const auto save_path(FS::GetSumiPath(FS::SumiPath::NANDDir) / ACC_SAVE_AVATORS_BASE_PATH /
                          "profiles.dat");
 
     if (!FS::CreateParentDirs(save_path)) {

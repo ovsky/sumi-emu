@@ -140,7 +140,7 @@ bool AppLoader_NRO::IsHomebrew() {
 }
 
 static constexpr u32 PageAlignSize(u32 size) {
-    return static_cast<u32>((size + Core::Memory::CITRON_PAGEMASK) & ~Core::Memory::CITRON_PAGEMASK);
+    return static_cast<u32>((size + Core::Memory::SUMI_PAGEMASK) & ~Core::Memory::SUMI_PAGEMASK);
 }
 
 static bool LoadNroImpl(Core::System& system, Kernel::KProcess& process,

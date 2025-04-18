@@ -65,7 +65,7 @@ void DefaultSoftwareKeyboardApplet::ShowNormalKeyboard() const {
     LOG_WARNING(Service_AM,
                 "(STUBBED) called, backend requested to show the normal software keyboard.");
 
-    SubmitNormalText(u"citron");
+    SubmitNormalText(u"sumi");
 }
 
 void DefaultSoftwareKeyboardApplet::ShowTextCheckDialog(
@@ -100,7 +100,7 @@ void DefaultSoftwareKeyboardApplet::ShowInlineKeyboard(
              appear_parameters.key_top_as_floating, appear_parameters.enable_backspace_button,
              appear_parameters.enable_return_button, appear_parameters.disable_cancel_button);
 
-    std::thread([this] { SubmitInlineText(u"citron"); }).detach();
+    std::thread([this] { SubmitInlineText(u"sumi"); }).detach();
 }
 
 void DefaultSoftwareKeyboardApplet::HideInlineKeyboard() const {

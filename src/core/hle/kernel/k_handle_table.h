@@ -21,8 +21,8 @@ namespace Kernel {
 class KernelCore;
 
 class KHandleTable {
-    CITRON_NON_COPYABLE(KHandleTable);
-    CITRON_NON_MOVEABLE(KHandleTable);
+    SUMI_NON_COPYABLE(KHandleTable);
+    SUMI_NON_MOVEABLE(KHandleTable);
 
 public:
     static constexpr size_t MaxTableSize = 1024;

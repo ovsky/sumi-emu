@@ -315,8 +315,8 @@ namespace ResultNs {
 namespace ResultImpl {
 template <auto EvaluateResult, class F>
 class ScopedResultGuard {
-    CITRON_NON_COPYABLE(ScopedResultGuard);
-    CITRON_NON_MOVEABLE(ScopedResultGuard);
+    SUMI_NON_COPYABLE(ScopedResultGuard);
+    SUMI_NON_MOVEABLE(ScopedResultGuard);
 
 private:
     Result& m_ref;

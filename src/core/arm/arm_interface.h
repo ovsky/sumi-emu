@@ -47,8 +47,8 @@ enum class Architecture {
 /// Generic ARMv8 CPU interface
 class ArmInterface {
 public:
-    CITRON_NON_COPYABLE(ArmInterface);
-    CITRON_NON_MOVEABLE(ArmInterface);
+    SUMI_NON_COPYABLE(ArmInterface);
+    SUMI_NON_MOVEABLE(ArmInterface);
 
     explicit ArmInterface(bool uses_wall_clock) : m_uses_wall_clock{uses_wall_clock} {}
     virtual ~ArmInterface() = default;

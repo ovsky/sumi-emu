@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
-// SPDX-FileCopyrightText: 2025 citron Emulator Project
+// SPDX-FileCopyrightText: 2025 sumi Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.

@@ -1241,11 +1241,11 @@ else()
         hle/service/ssl/ssl_backend_none.cpp)
 endif()
 
-if (CITRON_USE_PRECOMPILED_HEADERS)
+if (SUMI_USE_PRECOMPILED_HEADERS)
     target_precompile_headers(core PRIVATE precompiled_headers.h)
 endif()
 
-if (CITRON_ENABLE_LTO)
+if (SUMI_ENABLE_LTO)
   set_property(TARGET core PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 

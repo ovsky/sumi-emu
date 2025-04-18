@@ -35,7 +35,7 @@ static u64 GenerateTelemetryId() {
     mbedtls_entropy_context entropy;
     mbedtls_entropy_init(&entropy);
     mbedtls_ctr_drbg_context ctr_drbg;
-    static constexpr std::array<char, 20> personalization{{"citron Telemetry ID"}};
+    static constexpr std::array<char, 20> personalization{{"sumi Telemetry ID"}};
 
     mbedtls_ctr_drbg_init(&ctr_drbg);
     ASSERT(mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy,
@@ -114,7 +114,7 @@ static constexpr const char* TranslateASTCDecodeMode(Settings::AstcDecodeMode mo
 
 u64 GetTelemetryId() {
     u64 telemetry_id{};
-    const auto filename = Common::FS::GetCitronPath(Common::FS::CitronPath::ConfigDir) / "telemetry_id";
+    const auto filename = Common::FS::GetSumiPath(Common::FS::SumiPath::ConfigDir) / "telemetry_id";
 
     bool generate_new_id = !Common::FS::Exists(filename);
 
@@ -156,7 +156,7 @@ u64 GetTelemetryId() {
 
 u64 RegenerateTelemetryId() {
     const u64 new_telemetry_id{GenerateTelemetryId()};
-    const auto filename = Common::FS::GetCitronPath(Common::FS::CitronPath::ConfigDir) / "telemetry_id";
+    const auto filename = Common::FS::GetSumiPath(Common::FS::SumiPath::ConfigDir) / "telemetry_id";
 
     Common::FS::IOFile file{filename, Common::FS::FileAccessMode::Write,
                             Common::FS::FileType::BinaryFile};
@@ -192,8 +192,8 @@ TelemetrySession::~TelemetrySession() {
 
 #ifdef ENABLE_WEB_SERVICE
     auto backend = std::make_unique<WebService::TelemetryJson>(
-        Settings::values.web_api_url.GetValue(), Settings::values.citron_username.GetValue(),
-        Settings::values.citron_token.GetValue());
+        Settings::values.web_api_url.GetValue(), Settings::values.sumi_username.GetValue(),
+        Settings::values.sumi_token.GetValue());
 #else
     auto backend = std::make_unique<Telemetry::NullVisitor>();
 #endif
@@ -282,8 +282,8 @@ void TelemetrySession::AddInitialInfo(Loader::AppLoader& app_loader,
 bool TelemetrySession::SubmitTestcase() {
 #ifdef ENABLE_WEB_SERVICE
     auto backend = std::make_unique<WebService::TelemetryJson>(
-        Settings::values.web_api_url.GetValue(), Settings::values.citron_username.GetValue(),
-        Settings::values.citron_token.GetValue());
+        Settings::values.web_api_url.GetValue(), Settings::values.sumi_username.GetValue(),
+        Settings::values.sumi_token.GetValue());
     field_collection.Accept(*backend);
     return backend->SubmitTestcase();
 #else

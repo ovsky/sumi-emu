@@ -80,8 +80,8 @@ public:
     explicit EmulatedConsole();
     ~EmulatedConsole();
 
-    CITRON_NON_COPYABLE(EmulatedConsole);
-    CITRON_NON_MOVEABLE(EmulatedConsole);
+    SUMI_NON_COPYABLE(EmulatedConsole);
+    SUMI_NON_MOVEABLE(EmulatedConsole);
 
     /// Removes all callbacks created from input devices
     void UnloadInput();

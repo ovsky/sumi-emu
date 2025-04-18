@@ -78,7 +78,7 @@ static CPUCaps Detect() {
     CPUCaps caps = {};
 
     // Assumes the CPU supports the CPUID instruction. Those that don't would likely not support
-    // citron at all anyway
+    // sumi at all anyway
 
     int cpu_id[4];
 

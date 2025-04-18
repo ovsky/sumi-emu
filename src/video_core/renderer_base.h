@@ -30,8 +30,8 @@ struct RendererSettings {
 
 class RendererBase {
 public:
-    CITRON_NON_COPYABLE(RendererBase);
-    CITRON_NON_MOVEABLE(RendererBase);
+    SUMI_NON_COPYABLE(RendererBase);
+    SUMI_NON_MOVEABLE(RendererBase);
 
     explicit RendererBase(Core::Frontend::EmuWindow& window,
                           std::unique_ptr<Core::Frontend::GraphicsContext> context);

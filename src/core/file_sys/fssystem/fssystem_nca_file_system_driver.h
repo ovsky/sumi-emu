@@ -88,8 +88,8 @@ constexpr inline s32 GetKeyTypeValue(u8 key_index, u8 key_generation) {
 }
 
 class NcaReader {
-    CITRON_NON_COPYABLE(NcaReader);
-    CITRON_NON_MOVEABLE(NcaReader);
+    SUMI_NON_COPYABLE(NcaReader);
+    SUMI_NON_MOVEABLE(NcaReader);
 
 public:
     NcaReader();
@@ -154,8 +154,8 @@ private:
 };
 
 class NcaFsHeaderReader {
-    CITRON_NON_COPYABLE(NcaFsHeaderReader);
-    CITRON_NON_MOVEABLE(NcaFsHeaderReader);
+    SUMI_NON_COPYABLE(NcaFsHeaderReader);
+    SUMI_NON_MOVEABLE(NcaFsHeaderReader);
 
 public:
     NcaFsHeaderReader() : m_fs_index(-1) {
@@ -207,8 +207,8 @@ private:
 };
 
 class NcaFileSystemDriver {
-    CITRON_NON_COPYABLE(NcaFileSystemDriver);
-    CITRON_NON_MOVEABLE(NcaFileSystemDriver);
+    SUMI_NON_COPYABLE(NcaFileSystemDriver);
+    SUMI_NON_MOVEABLE(NcaFileSystemDriver);
 
 public:
     struct StorageContext {

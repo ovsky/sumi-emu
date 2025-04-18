@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
-// SPDX-FileCopyrightText: Copyright 2025 citron Emulator Project
+// SPDX-FileCopyrightText: Copyright 2025 sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #pragma once
 
 #include "common/common_types.h"
 
-// This file contains citron's HLE API version constants.
+// This file contains sumi's HLE API version constants.
 
 namespace HLE::ApiVersion {
 

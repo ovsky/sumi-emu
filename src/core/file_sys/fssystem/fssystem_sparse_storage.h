@@ -8,8 +8,8 @@
 namespace FileSys {
 
 class SparseStorage : public IndirectStorage {
-    CITRON_NON_COPYABLE(SparseStorage);
-    CITRON_NON_MOVEABLE(SparseStorage);
+    SUMI_NON_COPYABLE(SparseStorage);
+    SUMI_NON_MOVEABLE(SparseStorage);
 
 private:
     class ZeroStorage : public IReadOnlyStorage {

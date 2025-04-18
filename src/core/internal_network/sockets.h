@@ -9,7 +9,7 @@
 #include <utility>
 
 #if defined(_WIN32)
-#elif !CITRON_UNIX
+#elif !SUMI_UNIX
 #error "Platform not implemented"
 #endif
 
@@ -24,7 +24,7 @@ struct ProxyPacket;
 
 class SocketBase {
 public:
-#ifdef CITRON_UNIX
+#ifdef SUMI_UNIX
     using SOCKET = int;
     static constexpr SOCKET INVALID_SOCKET = -1;
     static constexpr SOCKET SOCKET_ERROR = -1;
@@ -39,8 +39,8 @@ public:
     explicit SocketBase(SOCKET fd_) : fd{fd_} {}
     virtual ~SocketBase() = default;
 
-    CITRON_NON_COPYABLE(SocketBase);
-    CITRON_NON_MOVEABLE(SocketBase);
+    SUMI_NON_COPYABLE(SocketBase);
+    SUMI_NON_MOVEABLE(SocketBase);
 
     virtual Errno Initialize(Domain domain, Type type, Protocol protocol) = 0;
 

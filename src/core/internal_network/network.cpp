@@ -12,7 +12,7 @@
 #ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#elif CITRON_UNIX
+#elif SUMI_UNIX
 #include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -77,7 +77,7 @@ SOCKET GetInterruptSocket() {
 sockaddr TranslateFromSockAddrIn(SockAddrIn input) {
     sockaddr_in result;
 
-#if CITRON_UNIX
+#if SUMI_UNIX
     result.sin_len = sizeof(result);
 #endif
 
@@ -162,7 +162,7 @@ Errno TranslateNativeError(int e, CallType call_type = CallType::Other) {
     }
 }
 
-#elif CITRON_UNIX // ^ _WIN32 v CITRON_UNIX
+#elif SUMI_UNIX // ^ _WIN32 v SUMI_UNIX
 
 using SOCKET = int;
 using WSAPOLLFD = pollfd;
@@ -841,7 +841,7 @@ std::pair<s32, Errno> Socket::Send(std::span<const u8> message, int flags) {
     ASSERT(flags == 0);
 
     int native_flags = 0;
-#if CITRON_UNIX
+#if SUMI_UNIX
     native_flags |= MSG_NOSIGNAL; // do not send us SIGPIPE
 #endif
     const auto result = send(fd, reinterpret_cast<const char*>(message.data()),

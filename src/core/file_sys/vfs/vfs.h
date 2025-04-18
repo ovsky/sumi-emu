@@ -30,8 +30,8 @@ enum class VfsEntryType {
 // functionality, they will need to override.
 class VfsFilesystem {
 public:
-    CITRON_NON_COPYABLE(VfsFilesystem);
-    CITRON_NON_MOVEABLE(VfsFilesystem);
+    SUMI_NON_COPYABLE(VfsFilesystem);
+    SUMI_NON_MOVEABLE(VfsFilesystem);
 
     explicit VfsFilesystem(VirtualDir root);
     virtual ~VfsFilesystem();
@@ -81,8 +81,8 @@ protected:
 // A class representing a file in an abstract filesystem.
 class VfsFile {
 public:
-    CITRON_NON_COPYABLE(VfsFile);
-    CITRON_NON_MOVEABLE(VfsFile);
+    SUMI_NON_COPYABLE(VfsFile);
+    SUMI_NON_MOVEABLE(VfsFile);
 
     VfsFile() = default;
     virtual ~VfsFile();
@@ -184,8 +184,8 @@ public:
 // A class representing a directory in an abstract filesystem.
 class VfsDirectory {
 public:
-    CITRON_NON_COPYABLE(VfsDirectory);
-    CITRON_NON_MOVEABLE(VfsDirectory);
+    SUMI_NON_COPYABLE(VfsDirectory);
+    SUMI_NON_MOVEABLE(VfsDirectory);
 
     VfsDirectory() = default;
     virtual ~VfsDirectory();

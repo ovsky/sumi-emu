@@ -56,10 +56,10 @@ namespace fs = std::filesystem;
 
 /**
  * The PathManagerImpl is a singleton allowing to manage the mapping of
- * CitronPath enums to real filesystem paths.
- * This class provides 2 functions: GetCitronPathImpl and SetCitronPathImpl.
- * These are used by GetCitronPath and SetCitronPath respectively to get or modify
- * the path mapped by the CitronPath enum.
+ * SumiPath enums to real filesystem paths.
+ * This class provides 2 functions: GetSumiPathImpl and SetSumiPathImpl.
+ * These are used by GetSumiPath and SetSumiPath respectively to get or modify
+ * the path mapped by the SumiPath enum.
  */
 class PathManagerImpl {
 public:
@@ -75,62 +75,62 @@ public:
     PathManagerImpl(PathManagerImpl&&) = delete;
     PathManagerImpl& operator=(PathManagerImpl&&) = delete;
 
-    [[nodiscard]] const fs::path& GetCitronPathImpl(CitronPath citron_path) {
-        return citron_paths.at(citron_path);
+    [[nodiscard]] const fs::path& GetSumiPathImpl(SumiPath sumi_path) {
+        return sumi_paths.at(sumi_path);
     }
 
-    void SetCitronPathImpl(CitronPath citron_path, const fs::path& new_path) {
-        citron_paths.insert_or_assign(citron_path, new_path);
+    void SetSumiPathImpl(SumiPath sumi_path, const fs::path& new_path) {
+        sumi_paths.insert_or_assign(sumi_path, new_path);
     }
 
-    void Reinitialize(fs::path citron_path = {}) {
-        fs::path citron_path_cache;
-        fs::path citron_path_config;
+    void Reinitialize(fs::path sumi_path = {}) {
+        fs::path sumi_path_cache;
+        fs::path sumi_path_config;
 
 #ifdef _WIN32
-#ifdef CITRON_ENABLE_PORTABLE
-        citron_path = GetExeDirectory() / PORTABLE_DIR;
+#ifdef SUMI_ENABLE_PORTABLE
+        sumi_path = GetExeDirectory() / PORTABLE_DIR;
 #endif
-        if (!IsDir(citron_path)) {
-            citron_path = GetAppDataRoamingDirectory() / CITRON_DIR;
+        if (!IsDir(sumi_path)) {
+            sumi_path = GetAppDataRoamingDirectory() / SUMI_DIR;
         }
 
-        citron_path_cache = citron_path / CACHE_DIR;
-        citron_path_config = citron_path / CONFIG_DIR;
+        sumi_path_cache = sumi_path / CACHE_DIR;
+        sumi_path_config = sumi_path / CONFIG_DIR;
 #elif ANDROID
-        ASSERT(!citron_path.empty());
-        citron_path_cache = citron_path / CACHE_DIR;
-        citron_path_config = citron_path / CONFIG_DIR;
+        ASSERT(!sumi_path.empty());
+        sumi_path_cache = sumi_path / CACHE_DIR;
+        sumi_path_config = sumi_path / CONFIG_DIR;
 #else
-#ifdef CITRON_ENABLE_PORTABLE
-        citron_path = GetCurrentDir() / PORTABLE_DIR;
+#ifdef SUMI_ENABLE_PORTABLE
+        sumi_path = GetCurrentDir() / PORTABLE_DIR;
 #endif
-        if (Exists(citron_path) && IsDir(citron_path)) {
-            citron_path_cache = citron_path / CACHE_DIR;
-            citron_path_config = citron_path / CONFIG_DIR;
+        if (Exists(sumi_path) && IsDir(sumi_path)) {
+            sumi_path_cache = sumi_path / CACHE_DIR;
+            sumi_path_config = sumi_path / CONFIG_DIR;
         } else {
-            citron_path = GetDataDirectory("XDG_DATA_HOME") / CITRON_DIR;
-            citron_path_cache = GetDataDirectory("XDG_CACHE_HOME") / CITRON_DIR;
-            citron_path_config = GetDataDirectory("XDG_CONFIG_HOME") / CITRON_DIR;
+            sumi_path = GetDataDirectory("XDG_DATA_HOME") / SUMI_DIR;
+            sumi_path_cache = GetDataDirectory("XDG_CACHE_HOME") / SUMI_DIR;
+            sumi_path_config = GetDataDirectory("XDG_CONFIG_HOME") / SUMI_DIR;
         }
 #endif
 
-        GenerateCitronPath(CitronPath::CitronDir, citron_path);
-        GenerateCitronPath(CitronPath::AmiiboDir, citron_path / AMIIBO_DIR);
-        GenerateCitronPath(CitronPath::CacheDir, citron_path_cache);
-        GenerateCitronPath(CitronPath::ConfigDir, citron_path_config);
-        GenerateCitronPath(CitronPath::CrashDumpsDir, citron_path / CRASH_DUMPS_DIR);
-        GenerateCitronPath(CitronPath::DumpDir, citron_path / DUMP_DIR);
-        GenerateCitronPath(CitronPath::KeysDir, citron_path / KEYS_DIR);
-        GenerateCitronPath(CitronPath::LoadDir, citron_path / LOAD_DIR);
-        GenerateCitronPath(CitronPath::LogDir, citron_path / LOG_DIR);
-        GenerateCitronPath(CitronPath::NANDDir, citron_path / NAND_DIR);
-        GenerateCitronPath(CitronPath::PlayTimeDir, citron_path / PLAY_TIME_DIR);
-        GenerateCitronPath(CitronPath::ScreenshotsDir, citron_path / SCREENSHOTS_DIR);
-        GenerateCitronPath(CitronPath::SDMCDir, citron_path / SDMC_DIR);
-        GenerateCitronPath(CitronPath::ShaderDir, citron_path / SHADER_DIR);
-        GenerateCitronPath(CitronPath::TASDir, citron_path / TAS_DIR);
-        GenerateCitronPath(CitronPath::IconsDir, citron_path / ICONS_DIR);
+        GenerateSumiPath(SumiPath::SumiDir, sumi_path);
+        GenerateSumiPath(SumiPath::AmiiboDir, sumi_path / AMIIBO_DIR);
+        GenerateSumiPath(SumiPath::CacheDir, sumi_path_cache);
+        GenerateSumiPath(SumiPath::ConfigDir, sumi_path_config);
+        GenerateSumiPath(SumiPath::CrashDumpsDir, sumi_path / CRASH_DUMPS_DIR);
+        GenerateSumiPath(SumiPath::DumpDir, sumi_path / DUMP_DIR);
+        GenerateSumiPath(SumiPath::KeysDir, sumi_path / KEYS_DIR);
+        GenerateSumiPath(SumiPath::LoadDir, sumi_path / LOAD_DIR);
+        GenerateSumiPath(SumiPath::LogDir, sumi_path / LOG_DIR);
+        GenerateSumiPath(SumiPath::NANDDir, sumi_path / NAND_DIR);
+        GenerateSumiPath(SumiPath::PlayTimeDir, sumi_path / PLAY_TIME_DIR);
+        GenerateSumiPath(SumiPath::ScreenshotsDir, sumi_path / SCREENSHOTS_DIR);
+        GenerateSumiPath(SumiPath::SDMCDir, sumi_path / SDMC_DIR);
+        GenerateSumiPath(SumiPath::ShaderDir, sumi_path / SHADER_DIR);
+        GenerateSumiPath(SumiPath::TASDir, sumi_path / TAS_DIR);
+        GenerateSumiPath(SumiPath::IconsDir, sumi_path / ICONS_DIR);
     }
 
 private:
@@ -140,13 +140,13 @@ private:
 
     ~PathManagerImpl() = default;
 
-    void GenerateCitronPath(CitronPath citron_path, const fs::path& new_path) {
+    void GenerateSumiPath(SumiPath sumi_path, const fs::path& new_path) {
         void(FS::CreateDir(new_path));
 
-        SetCitronPathImpl(citron_path, new_path);
+        SetSumiPathImpl(sumi_path, new_path);
     }
 
-    std::unordered_map<CitronPath, fs::path> citron_paths;
+    std::unordered_map<SumiPath, fs::path> sumi_paths;
 };
 
 bool ValidatePath(const fs::path& path) {
@@ -230,22 +230,22 @@ void SetAppDirectory(const std::string& app_directory) {
     PathManagerImpl::GetInstance().Reinitialize(app_directory);
 }
 
-const fs::path& GetCitronPath(CitronPath citron_path) {
-    return PathManagerImpl::GetInstance().GetCitronPathImpl(citron_path);
+const fs::path& GetSumiPath(SumiPath sumi_path) {
+    return PathManagerImpl::GetInstance().GetSumiPathImpl(sumi_path);
 }
 
-std::string GetCitronPathString(CitronPath citron_path) {
-    return PathToUTF8String(GetCitronPath(citron_path));
+std::string GetSumiPathString(SumiPath sumi_path) {
+    return PathToUTF8String(GetSumiPath(sumi_path));
 }
 
-void SetCitronPath(CitronPath citron_path, const fs::path& new_path) {
+void SetSumiPath(SumiPath sumi_path, const fs::path& new_path) {
     if (!FS::IsDir(new_path)) {
         LOG_ERROR(Common_Filesystem, "Filesystem object at new_path={} is not a directory",
                   PathToUTF8String(new_path));
         return;
     }
 
-    PathManagerImpl::GetInstance().SetCitronPathImpl(citron_path, new_path);
+    PathManagerImpl::GetInstance().SetSumiPathImpl(sumi_path, new_path);
 }
 
 #ifdef _WIN32

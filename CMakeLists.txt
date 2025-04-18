@@ -1,9 +1,9 @@
-# SPDX-FileCopyrightText: 2025 Citron Homebrew Emulator Project
+# SPDX-FileCopyrightText: 2025 Sumi Homebrew Emulator Project
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 cmake_minimum_required(VERSION 3.22)
 
-project(citron)
+project(sumi)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/externals/cmake-modules")
@@ -18,22 +18,22 @@ if (MSVC)
 endif()
 
 # PGO Configuration
-option(CITRON_ENABLE_PGO_INSTRUMENT "Enable Profile-Guided Optimization instrumentation build" OFF)
-option(CITRON_ENABLE_PGO_OPTIMIZE "Enable Profile-Guided Optimization optimization build" OFF)
+option(SUMI_ENABLE_PGO_INSTRUMENT "Enable Profile-Guided Optimization instrumentation build" OFF)
+option(SUMI_ENABLE_PGO_OPTIMIZE "Enable Profile-Guided Optimization optimization build" OFF)
 
 if(MSVC)
-    if(CITRON_ENABLE_PGO_INSTRUMENT)
+    if(SUMI_ENABLE_PGO_INSTRUMENT)
         string(APPEND CMAKE_CXX_FLAGS_RELEASE " /GL /LTCG:PGINSTRUMENT")
         string(APPEND CMAKE_EXE_LINKER_FLAGS_RELEASE " /LTCG:PGINSTRUMENT")
         string(APPEND CMAKE_SHARED_LINKER_FLAGS_RELEASE " /LTCG:PGINSTRUMENT")
-    elseif(CITRON_ENABLE_PGO_OPTIMIZE)
+    elseif(SUMI_ENABLE_PGO_OPTIMIZE)
         string(APPEND CMAKE_CXX_FLAGS_RELEASE " /GL /LTCG:PGOPTIMIZE")
         string(APPEND CMAKE_EXE_LINKER_FLAGS_RELEASE " /LTCG:PGOPTIMIZE")
         string(APPEND CMAKE_SHARED_LINKER_FLAGS_RELEASE " /LTCG:PGOPTIMIZE")
     endif()
 else()
     # GCC and Clang PGO flags
-    if(CITRON_ENABLE_PGO_INSTRUMENT)
+    if(SUMI_ENABLE_PGO_INSTRUMENT)
         if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
             string(APPEND CMAKE_CXX_FLAGS_RELEASE " -fprofile-instr-generate")
             string(APPEND CMAKE_EXE_LINKER_FLAGS_RELEASE " -fprofile-instr-generate")
@@ -43,7 +43,7 @@ else()
             string(APPEND CMAKE_EXE_LINKER_FLAGS_RELEASE " -fprofile-generate")
             string(APPEND CMAKE_SHARED_LINKER_FLAGS_RELEASE " -fprofile-generate")
         endif()
-    elseif(CITRON_ENABLE_PGO_OPTIMIZE)
+    elseif(SUMI_ENABLE_PGO_OPTIMIZE)
         if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
             string(APPEND CMAKE_CXX_FLAGS_RELEASE " -fprofile-instr-use=default.profdata")
             string(APPEND CMAKE_EXE_LINKER_FLAGS_RELEASE " -fprofile-instr-use=default.profdata")
@@ -65,8 +65,8 @@ endif()
 
 # Set bundled sdl2/qt as dependent options.
 option(ENABLE_SDL2 "Enable the SDL2 frontend" ON)
-CMAKE_DEPENDENT_OPTION(CITRON_USE_BUNDLED_SDL2 "Download bundled SDL2 binaries" ON "ENABLE_SDL2;MSVC" OFF)
-CMAKE_DEPENDENT_OPTION(CITRON_USE_EXTERNAL_SDL2 "Compile external SDL2" ON "ENABLE_SDL2;NOT MSVC" OFF)
+CMAKE_DEPENDENT_OPTION(SUMI_USE_BUNDLED_SDL2 "Download bundled SDL2 binaries" ON "ENABLE_SDL2;MSVC" OFF)
+CMAKE_DEPENDENT_OPTION(SUMI_USE_EXTERNAL_SDL2 "Compile external SDL2" ON "ENABLE_SDL2;NOT MSVC" OFF)
 
 cmake_dependent_option(ENABLE_LIBUSB "Enable the use of LibUSB" ON "NOT ANDROID" OFF)
 
@@ -75,47 +75,47 @@ mark_as_advanced(FORCE ENABLE_OPENGL)
 option(ENABLE_QT "Enable the Qt frontend" ON)
 
 option(ENABLE_QT_TRANSLATION "Enable translations for the Qt frontend" OFF)
-CMAKE_DEPENDENT_OPTION(CITRON_USE_BUNDLED_QT "Download bundled Qt binaries" "${MSVC}" "ENABLE_QT" OFF)
+CMAKE_DEPENDENT_OPTION(SUMI_USE_BUNDLED_QT "Download bundled Qt binaries" "${MSVC}" "ENABLE_QT" OFF)
 
 option(ENABLE_WEB_SERVICE "Enable web services (telemetry, etc.)" ON)
 
-option(CITRON_USE_BUNDLED_FFMPEG "Download/Build bundled FFmpeg" "${WIN32}")
+option(SUMI_USE_BUNDLED_FFMPEG "Download/Build bundled FFmpeg" "${WIN32}")
 
-option(CITRON_USE_EXTERNAL_VULKAN_HEADERS "Use Vulkan-Headers from externals" ON)
+option(SUMI_USE_EXTERNAL_VULKAN_HEADERS "Use Vulkan-Headers from externals" ON)
 
-option(CITRON_USE_EXTERNAL_VULKAN_UTILITY_LIBRARIES "Use Vulkan-Utility-Libraries from externals" ON)
+option(SUMI_USE_EXTERNAL_VULKAN_UTILITY_LIBRARIES "Use Vulkan-Utility-Libraries from externals" ON)
 
-option(CITRON_USE_QT_MULTIMEDIA "Use QtMultimedia for Camera" OFF)
+option(SUMI_USE_QT_MULTIMEDIA "Use QtMultimedia for Camera" OFF)
 
-option(CITRON_USE_QT_WEB_ENGINE "Use QtWebEngine for web applet implementation" OFF)
+option(SUMI_USE_QT_WEB_ENGINE "Use QtWebEngine for web applet implementation" OFF)
 
 option(ENABLE_CUBEB "Enables the cubeb audio backend" ON)
 
 option(USE_DISCORD_PRESENCE "Enables Discord Rich Presence" OFF)
 
-option(CITRON_TESTS "Compile tests" "${BUILD_TESTING}")
+option(SUMI_TESTS "Compile tests" "${BUILD_TESTING}")
 
-option(CITRON_USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
+option(SUMI_USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
 
-option(CITRON_DOWNLOAD_ANDROID_VVL "Download validation layer binary for android" ON)
+option(SUMI_DOWNLOAD_ANDROID_VVL "Download validation layer binary for android" ON)
 
-CMAKE_DEPENDENT_OPTION(CITRON_ROOM "Compile LDN room server" ON "NOT ANDROID" OFF)
+CMAKE_DEPENDENT_OPTION(SUMI_ROOM "Compile LDN room server" ON "NOT ANDROID" OFF)
 
-CMAKE_DEPENDENT_OPTION(CITRON_CRASH_DUMPS "Compile crash dump (Minidump) support" OFF "WIN32 OR LINUX" OFF)
+CMAKE_DEPENDENT_OPTION(SUMI_CRASH_DUMPS "Compile crash dump (Minidump) support" OFF "WIN32 OR LINUX" OFF)
 
-option(CITRON_USE_BUNDLED_VCPKG "Use vcpkg for citron dependencies" "${MSVC}")
+option(SUMI_USE_BUNDLED_VCPKG "Use vcpkg for sumi dependencies" "${MSVC}")
 
-option(CITRON_CHECK_SUBMODULES "Check if submodules are present" ON)
+option(SUMI_CHECK_SUBMODULES "Check if submodules are present" ON)
 
-option(CITRON_ENABLE_LTO "Enable link-time optimization" OFF)
+option(SUMI_ENABLE_LTO "Enable link-time optimization" OFF)
 
-option(CITRON_DOWNLOAD_TIME_ZONE_DATA "Always download time zone binaries" OFF)
+option(SUMI_DOWNLOAD_TIME_ZONE_DATA "Always download time zone binaries" OFF)
 
-option(CITRON_ENABLE_PORTABLE "Allow citron to enable portable mode if a user folder is found in the CWD" ON)
+option(SUMI_ENABLE_PORTABLE "Allow sumi to enable portable mode if a user folder is found in the CWD" ON)
 
-option(CITRON_USE_LLVM_DEMANGLE "Use LLVM Demangle" ON)
+option(SUMI_USE_LLVM_DEMANGLE "Use LLVM Demangle" ON)
 
-CMAKE_DEPENDENT_OPTION(CITRON_USE_FASTER_LD "Check if a faster linker is available" ON "NOT WIN32" OFF)
+CMAKE_DEPENDENT_OPTION(SUMI_USE_FASTER_LD "Check if a faster linker is available" ON "NOT WIN32" OFF)
 
 CMAKE_DEPENDENT_OPTION(USE_SYSTEM_MOLTENVK "Use the system MoltenVK lib (instead of the bundled one)" OFF "APPLE" OFF)
 
@@ -136,7 +136,7 @@ if (ANDROID OR WIN32 OR APPLE)
 endif()
 option(ENABLE_OPENSSL "Enable OpenSSL backend for ISslConnection" ${DEFAULT_ENABLE_OPENSSL})
 
-if (ANDROID AND CITRON_DOWNLOAD_ANDROID_VVL)
+if (ANDROID AND SUMI_DOWNLOAD_ANDROID_VVL)
     set(vvl_version "1.4.304.1")
     set(vvl_zip_file "${CMAKE_BINARY_DIR}/externals/vvl-android.zip")
     set(vvl_lib_path "${CMAKE_CURRENT_SOURCE_DIR}/src/android/app/src/main/jniLibs/arm64-v8a/")
@@ -162,7 +162,7 @@ if (ANDROID)
     set(CMAKE_SKIP_INSTALL_RULES ON)
 endif()
 
-if (CITRON_USE_BUNDLED_VCPKG)
+if (SUMI_USE_BUNDLED_VCPKG)
     if (ANDROID)
         set(ENV{ANDROID_NDK_HOME} "${ANDROID_NDK}")
         list(APPEND VCPKG_MANIFEST_FEATURES "android")
@@ -213,8 +213,8 @@ if (CITRON_USE_BUNDLED_VCPKG)
         endif()
     endif()
 
-    if (CITRON_TESTS)
-        list(APPEND VCPKG_MANIFEST_FEATURES "citron-tests")
+    if (SUMI_TESTS)
+        list(APPEND VCPKG_MANIFEST_FEATURES "sumi-tests")
     endif()
     if (ENABLE_WEB_SERVICE)
         list(APPEND VCPKG_MANIFEST_FEATURES "web-service")
@@ -230,16 +230,16 @@ elseif(NOT "$ENV{VCPKG_TOOLCHAIN_FILE}" STREQUAL "")
     include("$ENV{VCPKG_TOOLCHAIN_FILE}")
 endif()
 
-if (CITRON_USE_PRECOMPILED_HEADERS)
+if (SUMI_USE_PRECOMPILED_HEADERS)
     if (MSVC AND CCACHE)
         # buildcache does not properly cache PCH files, leading to compilation errors.
         # See https://github.com/mbitsnbites/buildcache/discussions/230
         message(WARNING "buildcache does not properly support Precompiled Headers. Disabling PCH")
         set(DYNARMIC_USE_PRECOMPILED_HEADERS OFF CACHE BOOL "" FORCE)
-        set(CITRON_USE_PRECOMPILED_HEADERS OFF CACHE BOOL "" FORCE)
+        set(SUMI_USE_PRECOMPILED_HEADERS OFF CACHE BOOL "" FORCE)
     endif()
 endif()
-if (CITRON_USE_PRECOMPILED_HEADERS)
+if (SUMI_USE_PRECOMPILED_HEADERS)
     message(STATUS "Using Precompiled Headers.")
     set(CMAKE_PCH_INSTANTIATE_TEMPLATES ON)
 endif()
@@ -274,7 +274,7 @@ function(check_submodules_present)
     endforeach()
 endfunction()
 
-if(EXISTS ${PROJECT_SOURCE_DIR}/.gitmodules AND CITRON_CHECK_SUBMODULES)
+if(EXISTS ${PROJECT_SOURCE_DIR}/.gitmodules AND SUMI_CHECK_SUBMODULES)
     check_submodules_present()
 endif()
 configure_file(${PROJECT_SOURCE_DIR}/dist/compatibility_list/compatibility_list.qrc
@@ -286,9 +286,9 @@ if (EXISTS ${PROJECT_SOURCE_DIR}/dist/compatibility_list/compatibility_list.json
                    COPYONLY)
 endif()
 if (ENABLE_COMPATIBILITY_LIST_DOWNLOAD AND NOT EXISTS ${PROJECT_BINARY_DIR}/dist/compatibility_list/compatibility_list.json)
-    message(STATUS "Downloading compatibility list for citron...")
+    message(STATUS "Downloading compatibility list for sumi...")
     file(DOWNLOAD
-        https://api.citron-emu.org/gamedb/
+        https://api.sumi-emu.org/gamedb/
         "${PROJECT_BINARY_DIR}/dist/compatibility_list/compatibility_list.json" SHOW_PROGRESS)
 endif()
 if (NOT EXISTS ${PROJECT_BINARY_DIR}/dist/compatibility_list/compatibility_list.json)
@@ -337,7 +337,7 @@ endif()
 message(STATUS "Target architecture: ${ARCHITECTURE}")
 
 if (UNIX)
-    add_definitions(-DCITRON_UNIX=1)
+    add_definitions(-DSUMI_UNIX=1)
 endif()
 
 if (ARCHITECTURE_arm64 AND (ANDROID OR ${CMAKE_SYSTEM_NAME} STREQUAL "Linux"))
@@ -370,7 +370,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 find_package(Boost REQUIRED context)
 find_package(enet MODULE)
 find_package(fmt 11 REQUIRED)
-if (CITRON_USE_LLVM_DEMANGLE)
+if (SUMI_USE_LLVM_DEMANGLE)
     find_package(LLVM MODULE COMPONENTS Demangle)
 endif()
 find_package(lz4 REQUIRED)
@@ -383,11 +383,11 @@ find_package(VulkanMemoryAllocator CONFIG)
 find_package(ZLIB REQUIRED)
 find_package(zstd REQUIRED)
 
-if (NOT CITRON_USE_EXTERNAL_VULKAN_HEADERS)
+if (NOT SUMI_USE_EXTERNAL_VULKAN_HEADERS)
     find_package(VulkanHeaders 1.4.307 REQUIRED)
 endif()
 
-if (NOT CITRON_USE_EXTERNAL_VULKAN_UTILITY_LIBRARIES)
+if (NOT SUMI_USE_EXTERNAL_VULKAN_UTILITY_LIBRARIES)
     find_package(VulkanUtilityLibraries REQUIRED)
 endif()
 
@@ -420,7 +420,7 @@ if (ENABLE_WEB_SERVICE)
     find_package(httplib MODULE COMPONENTS OpenSSL)
 endif()
 
-if (CITRON_TESTS)
+if (SUMI_TESTS)
     find_package(Catch2 REQUIRED)
 endif()
 
@@ -442,14 +442,14 @@ if(ENABLE_QT6 AND Qt6_LOCATION)
     list(APPEND CMAKE_PREFIX_PATH "${Qt6_LOCATION}")
 endif()
 
-# find SDL2 exports a bunch of variables that are needed, so its easier to do this outside of the citron_find_package
+# find SDL2 exports a bunch of variables that are needed, so its easier to do this outside of the sumi_find_package
 if (ENABLE_SDL2)
-    if (CITRON_USE_BUNDLED_SDL2)
+    if (SUMI_USE_BUNDLED_SDL2)
         # Detect toolchain and platform
         if ((MSVC_VERSION GREATER_EQUAL 1920) AND ARCHITECTURE_x86_64)
             set(SDL2_VER "SDL2-2.28.2")
         else()
-            message(FATAL_ERROR "No bundled SDL2 binaries for your toolchain. Disable CITRON_USE_BUNDLED_SDL2 and provide your own.")
+            message(FATAL_ERROR "No bundled SDL2 binaries for your toolchain. Disable SUMI_USE_BUNDLED_SDL2 and provide your own.")
         endif()
 
         if (DEFINED SDL2_VER)
@@ -464,7 +464,7 @@ if (ENABLE_SDL2)
         add_library(SDL2::SDL2 INTERFACE IMPORTED)
         target_link_libraries(SDL2::SDL2 INTERFACE "${SDL2_LIBRARY}")
         target_include_directories(SDL2::SDL2 INTERFACE "${SDL2_INCLUDE_DIR}")
-    elseif (CITRON_USE_EXTERNAL_SDL2)
+    elseif (SUMI_USE_EXTERNAL_SDL2)
         message(STATUS "Using SDL2 from externals.")
     else()
         find_package(SDL2 2.26.4 REQUIRED)
@@ -510,26 +510,26 @@ if (ENABLE_QT)
     message(STATUS "Using host Qt at ${QT_HOST_PATH}")
 endif()
 
-function(set_citron_qt_components)
+function(set_sumi_qt_components)
 # Best practice is to ask for all components at once, so they are from the same version
-set(CITRON_QT_COMPONENTS2 Core Widgets Concurrent)
+set(SUMI_QT_COMPONENTS2 Core Widgets Concurrent)
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-list(APPEND CITRON_QT_COMPONENTS2 DBus)
+list(APPEND SUMI_QT_COMPONENTS2 DBus)
 endif()
-if (CITRON_USE_QT_MULTIMEDIA)
-list(APPEND CITRON_QT_COMPONENTS2 Multimedia)
+if (SUMI_USE_QT_MULTIMEDIA)
+list(APPEND SUMI_QT_COMPONENTS2 Multimedia)
     endif()
-    if (CITRON_USE_QT_WEB_ENGINE)
-    list(APPEND CITRON_QT_COMPONENTS2 WebEngineCore WebEngineWidgets)
+    if (SUMI_USE_QT_WEB_ENGINE)
+    list(APPEND SUMI_QT_COMPONENTS2 WebEngineCore WebEngineWidgets)
     endif()
     if (ENABLE_QT_TRANSLATION)
-    list(APPEND CITRON_QT_COMPONENTS2 LinguistTools)
+    list(APPEND SUMI_QT_COMPONENTS2 LinguistTools)
     endif()
     if (USE_DISCORD_PRESENCE)
-    list(APPEND CITRON_QT_COMPONENTS2 Network)
+    list(APPEND SUMI_QT_COMPONENTS2 Network)
     endif()
-    set(CITRON_QT_COMPONENTS ${CITRON_QT_COMPONENTS2} PARENT_SCOPE)
-    endfunction(set_citron_qt_components)
+    set(SUMI_QT_COMPONENTS ${SUMI_QT_COMPONENTS2} PARENT_SCOPE)
+    endfunction(set_sumi_qt_components)
 
     # List of all FFmpeg components required
     set(FFmpeg_COMPONENTS
@@ -542,20 +542,20 @@ list(APPEND CITRON_QT_COMPONENTS2 Multimedia)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(LIBVA libva)
 endif()
-if (NOT CITRON_USE_BUNDLED_FFMPEG)
+if (NOT SUMI_USE_BUNDLED_FFMPEG)
     # Use system installed FFmpeg
     find_package(FFmpeg REQUIRED QUIET COMPONENTS ${FFmpeg_COMPONENTS})
 endif()
 
 if(ENABLE_QT)
-        set_citron_qt_components()
-        find_package(Qt6 REQUIRED COMPONENTS ${CITRON_QT_COMPONENTS})
+        set_sumi_qt_components()
+        find_package(Qt6 REQUIRED COMPONENTS ${SUMI_QT_COMPONENTS})
         set(QT_MAJOR_VERSION 6)
         # Qt6 sets cxx_std_17 and we need to undo that
         set_target_properties(Qt6::Platform PROPERTIES INTERFACE_COMPILE_FEATURES "")
     endif()
 
-if (WIN32 AND CITRON_CRASH_DUMPS)
+if (WIN32 AND SUMI_CRASH_DUMPS)
     set(BREAKPAD_VER "breakpad-c89f9dd")
     download_bundled_external("breakpad/" ${BREAKPAD_VER} BREAKPAD_PREFIX)
 
@@ -670,7 +670,7 @@ if (MSVC AND CMAKE_GENERATOR STREQUAL "Ninja")
     )
 endif()
 
-if (CITRON_USE_FASTER_LD AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+if (SUMI_USE_FASTER_LD AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # We will assume that if the compiler is GCC, it will attempt to use ld.bfd by default.
     # Try to pick a faster linker.
     find_program(LLD lld)
@@ -706,11 +706,11 @@ endif()
 
 add_subdirectory(src)
 
-# Set citron project or citron-cmd project as default StartUp Project in Visual Studio depending on whether QT is enabled or not
+# Set sumi project or sumi-cmd project as default StartUp Project in Visual Studio depending on whether QT is enabled or not
 if(ENABLE_QT)
-    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT citron)
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT sumi)
 else()
-    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT citron-cmd)
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT sumi-cmd)
 endif()
 
 
@@ -723,13 +723,13 @@ endif()
 # https://specifications.freedesktop.org/shared-mime-info-spec/shared-mime-info-spec-latest.html
 # https://www.freedesktop.org/software/appstream/docs/
 if(ENABLE_QT AND UNIX AND NOT APPLE)
-    install(FILES "dist/org.citron_emu.citron.desktop"
+    install(FILES "dist/org.sumi_emu.sumi.desktop"
             DESTINATION "share/applications")
-    install(FILES "dist/citron.svg"
+    install(FILES "dist/sumi.svg"
             DESTINATION "share/icons/hicolor/scalable/apps"
-            RENAME "org.citron_emu.citron.svg")
-    install(FILES "dist/org.citron_emu.citron.xml"
+            RENAME "org.sumi_emu.sumi.svg")
+    install(FILES "dist/org.sumi_emu.sumi.xml"
             DESTINATION "share/mime/packages")
-    install(FILES "dist/org.citron_emu.citron.metainfo.xml"
+    install(FILES "dist/org.sumi_emu.sumi.metainfo.xml"
             DESTINATION "share/metainfo")
 endif()

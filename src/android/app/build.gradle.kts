@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
-// SPDX-FileCopyrightText: 2025 citron Emulator Project
+// SPDX-FileCopyrightText: 2025 sumi Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import android.annotation.SuppressLint
@@ -26,7 +26,7 @@ val autoVersion = (((System.currentTimeMillis() / 1000) - 1451606400) / 10).toIn
 
 @Suppress("UnstableApiUsage")
 android {
-    namespace = "org.citron.citron_emu"
+    namespace = "org.sumi.sumi_emu"
 
     compileSdkVersion = "android-35"
     ndkVersion = "29.0.13113456 rc1" // "26.1.10909125"
@@ -105,7 +105,7 @@ android {
                 signingConfigs.getByName("default")
             }
 
-            resValue("string", "app_name_suffixed", "Citron")
+            resValue("string", "app_name_suffixed", "Sumi")
             isDefault = true
             isMinifyEnabled = true
             isShrinkResources = true
@@ -120,7 +120,7 @@ android {
         // builds a release build that doesn't need signing
         // Attaches 'debug' suffix to version and package name, allowing installation alongside the release build.
         register("relWithDebInfo") {
-            resValue("string", "app_name_suffixed", "Citron Debug Release")
+            resValue("string", "app_name_suffixed", "Sumi Debug Release")
             signingConfig = signingConfigs.getByName("default")
             isDebuggable = true
             proguardFiles(
@@ -136,7 +136,7 @@ android {
         // Attaches 'debug' suffix to version and package name, allowing installation alongside the release build.
         debug {
             signingConfig = signingConfigs.getByName("default")
-            resValue("string", "app_name_suffixed", "Citron Debug")
+            resValue("string", "app_name_suffixed", "Sumi Debug")
             isDebuggable = true
             isJniDebuggable = true
             versionNameSuffix = "-debug"
@@ -175,9 +175,9 @@ android {
                     "-DENABLE_WEB_SERVICE=0", // Don't use telemetry
                     "-DBUNDLE_SPEEX=ON",
                     "-DANDROID_ARM_NEON=true", // cryptopp requires Neon to work
-                    "-DCITRON_USE_BUNDLED_VCPKG=ON",
-                    "-DCITRON_USE_BUNDLED_FFMPEG=ON",
-                    "-DCITRON_ENABLE_LTO=ON",
+                    "-DSUMI_USE_BUNDLED_VCPKG=ON",
+                    "-DSUMI_USE_BUNDLED_FFMPEG=ON",
+                    "-DSUMI_ENABLE_LTO=ON",
                     "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
                     "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
                 )

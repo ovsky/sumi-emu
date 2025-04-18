@@ -32,11 +32,11 @@ void SinkStream::AppendBuffer(SinkBuffer& buffer, std::span<s16> samples) {
     constexpr s32 min{std::numeric_limits<s16>::min()};
     constexpr s32 max{std::numeric_limits<s16>::max()};
 
-    auto citron_volume{Settings::Volume()};
-    if (citron_volume > 1.0f) {
-        citron_volume = 0.6f + 20 * std::log10(citron_volume);
+    auto sumi_volume{Settings::Volume()};
+    if (sumi_volume > 1.0f) {
+        sumi_volume = 0.6f + 20 * std::log10(sumi_volume);
     }
-    auto volume{system_volume * device_volume * citron_volume};
+    auto volume{system_volume * device_volume * sumi_volume};
 
     if (system_channels == 6 && device_channels == 2) {
         // We're given 6 channels, but our device only outputs 2, so downmix.

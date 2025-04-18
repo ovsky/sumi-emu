@@ -13,8 +13,8 @@ namespace Kernel {
 
 template <typename T, bool ClearNode = false>
 class KDynamicSlabHeap : protected impl::KSlabHeapImpl {
-    CITRON_NON_COPYABLE(KDynamicSlabHeap);
-    CITRON_NON_MOVEABLE(KDynamicSlabHeap);
+    SUMI_NON_COPYABLE(KDynamicSlabHeap);
+    SUMI_NON_MOVEABLE(KDynamicSlabHeap);
 
 public:
     constexpr KDynamicSlabHeap() = default;

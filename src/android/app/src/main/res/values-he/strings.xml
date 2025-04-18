@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
-    <string name="app_disclaimer">התוכנה תריץ משחקים לקונסולת ה Nintendo Switch. אף משחק או קבצים בעלי זכויות יוצרים נכללים.&lt;br /&gt;&lt;br /&gt; לפני שאת/ה מתחיל בבקשה מצא את קובץ <![CDATA[<b>prod.keys</b>]]> על המכשיר.&lt;br /&gt;&lt;br /&gt;<![CDATA[<a href=\"https://citron-emu.org/help/quickstart\">קרא עוד</a>]]></string>
+    <string name="app_disclaimer">התוכנה תריץ משחקים לקונסולת ה Nintendo Switch. אף משחק או קבצים
+        בעלי זכויות יוצרים נכללים.&lt;br /&gt;&lt;br /&gt; לפני שאת/ה מתחיל בבקשה מצא את קובץ <![CDATA[<b>prod.keys</b>]]> על
+        המכשיר.&lt;br /&gt;&lt;br /&gt;<![CDATA[<a href=\"https://sumi-emu.org/help/quickstart\">קרא עוד</a>]]></string>
     <string name="notice_notification_channel_name">התראות ותקלות</string>
     <string name="notice_notification_channel_description">מציג התראות כאשר משהו הולך לא כשורה.</string>
     <string name="notification_permission_not_granted">הרשאות התראות לא ניתנה!</string>
 
     <!-- Setup strings -->
     <string name="welcome">ברוכים הבאים!</string>
-    <string name="welcome_description">למד איך להפעיל &lt;b>citron&lt;/b> וקפוץ ישר לאמולציה.</string>
+    <string name="welcome_description">למד איך להפעיל &lt;b>sumi&lt;/b> וקפוץ ישר לאמולציה.</string>
     <string name="get_started">כדי להתחיל</string>
     <string name="keys">מפתחות</string>
     <string name="keys_description">בחר את קובץ ה &lt;b>prod.keys&lt;/b> שלך עם הכפתור למטה.</string>
@@ -16,7 +18,7 @@
     <string name="games">משחקים</string>
     <string name="games_description">בחר את התיקיית ה &lt;b>Games&lt;/b> שלך עם הכפתור למטה.</string>
     <string name="done">סיום</string>
-    <string name="done_description">את/ה מוכן. \nתהנה/י  מהמשחקים שלך </string>
+    <string name="done_description">את/ה מוכן. \nתהנה/י מהמשחקים שלך </string>
     <string name="text_continue">המשך</string>
     <string name="next">הבא</string>
     <string name="back">אחורה</string>
@@ -32,25 +34,29 @@
     <string name="search_and_filter_games">חפש וסנן משחקים</string>
     <string name="select_games_folder">בחר תיקיית משחקים</string>
     <string name="manage_game_folders">נהל את תיקיית המשחקים</string>
-    <string name="select_games_folder_description">אפשר ל citron  לאכלס את רשימת המשחקים</string>
+    <string name="select_games_folder_description">אפשר ל sumi לאכלס את רשימת המשחקים</string>
     <string name="add_games_warning">לדלג על בחירת תיקיית המשחקים?</string>
-    <string name="add_games_warning_description">משחקים לא יוצגו ברשימת המשחקים  אם לנבחרה תיקיית משחקים.</string>
-    <string name="add_games_warning_help">https://citron-emu.org/help/quickstart/#dumping-games</string>
+    <string name="add_games_warning_description">משחקים לא יוצגו ברשימת המשחקים אם לנבחרה תיקיית
+        משחקים.</string>
+    <string name="add_games_warning_help">https://sumi-emu.org/help/quickstart/#dumping-games</string>
     <string name="home_search_games">חפש משחקים</string>
     <string name="search_settings">חפש בהגדרות</string>
     <string name="games_dir_selected">ספריית משחקים נבחרה</string>
     <string name="install_prod_keys">התקן prod.keys</string>
     <string name="install_prod_keys_description">הכרחי בכדי לפענח משחקים</string>
     <string name="install_prod_keys_warning">לדלג על הוספת מפתחות?</string>
-    <string name="install_prod_keys_warning_description">מפתחות חוקיים הכרחיים כדי לשחק במשחקים. רק אפליקציות פירטיות יפעלו אם תמשיך.</string>
-    <string name="install_prod_keys_warning_help">https://citron-emu.org/help/quickstart/#guide-introduction</string>
+    <string name="install_prod_keys_warning_description">מפתחות חוקיים הכרחיים כדי לשחק במשחקים. רק
+        אפליקציות פירטיות יפעלו אם תמשיך.</string>
+    <string name="install_prod_keys_warning_help">
+        https://sumi-emu.org/help/quickstart/#guide-introduction</string>
     <string name="notifications">התראות</string>
     <string name="notifications_description">תן גישה להתראות עם הכפתור למטה.</string>
     <string name="give_permission">תן הרשאה</string>
     <string name="notification_warning">דלג על מתן הרשאה להתראות?</string>
-    <string name="notification_warning_description">citron  לא יוכל להתריע לך על מידע חשוב.</string>
+    <string name="notification_warning_description">sumi לא יוכל להתריע לך על מידע חשוב.</string>
     <string name="permission_denied">הרשאה נדחתה</string>
-    <string name="permission_denied_description">את/ה דיחת את ההרשאה יותר מדי פעמים ועכשיו את/ה צריך/ה לתת גישה באופן ידני בהגדרות.</string>
+    <string name="permission_denied_description">את/ה דיחת את ההרשאה יותר מדי פעמים ועכשיו את/ה
+        צריך/ה לתת גישה באופן ידני בהגדרות.</string>
     <string name="about">אודות</string>
     <string name="about_description">מספר גירסה, קרדיטים ועוד</string>
     <string name="warning_help">עזרה</string>
@@ -61,14 +67,19 @@
     <string name="invalid_keys_file">קובץ מפתחות לא חוקי נבחר</string>
     <string name="install_keys_success">מפתחות הותקנו בהצלחה</string>
     <string name="reading_keys_failure">שגיאה בקריאת מפתחות ההצפנה</string>
-    <string name="install_prod_keys_failure_extension_description">ודא שלקובץ המפתחות שלך יש סיומת של key. ונסה/י שוב.</string>
-    <string name="install_amiibo_keys_failure_extension_description">ודא/י שלקובץ המפתחות שלך יש סיומת של bin. ונסה/י שוב.</string>
+    <string name="install_prod_keys_failure_extension_description">ודא שלקובץ המפתחות שלך יש סיומת
+        של key. ונסה/י שוב.</string>
+    <string name="install_amiibo_keys_failure_extension_description">ודא/י שלקובץ המפתחות שלך יש
+        סיומת של bin. ונסה/י שוב.</string>
     <string name="invalid_keys_error">מפתחות הצפנה לא חוקיים</string>
-    <string name="dumping_keys_quickstart_link">https://citron-emu.org/help/quickstart/#dumping-decryption-keys</string>
-    <string name="install_keys_failure_description">קבוץ שנבחר מושחת או לא נכון. בבקשה הוצא מחדש את המפתחות שלך.</string>
+    <string name="dumping_keys_quickstart_link">
+        https://sumi-emu.org/help/quickstart/#dumping-decryption-keys</string>
+    <string name="install_keys_failure_description">קבוץ שנבחר מושחת או לא נכון. בבקשה הוצא מחדש את
+        המפתחות שלך.</string>
     <string name="gpu_driver_manager">מנהל הדרייברים של המעבד הגרפי</string>
     <string name="install_gpu_driver">התקן דרייבר למעבד הגרפי</string>
-    <string name="install_gpu_driver_description">התקן דרייברים אחרים בשביל סיכוי לביצועים או דיוק גבוההים יותר</string>
+    <string name="install_gpu_driver_description">התקן דרייברים אחרים בשביל סיכוי לביצועים או דיוק
+        גבוההים יותר</string>
     <string name="advanced_settings">הגדרות מתקדמות</string>
     <string name="advanced_settings_game">הגדרות מתקדמות: %1$s</string>
     <string name="settings_description">הדר את הגדרות האמולטור</string>
@@ -76,49 +87,59 @@
     <string name="search_recently_added">הוסף לאחרונה</string>
     <string name="search_retail">קמעונאי</string>
     <string name="search_homebrew">Homebrew</string>
-    <string name="open_user_folder">פתח את תיקיית citron </string>
-    <string name="open_user_folder_description">נה ל את הקבצים הפנימיין של citron</string>
+    <string name="open_user_folder">פתח את תיקיית sumi </string>
+    <string name="open_user_folder_description">נה ל את הקבצים הפנימיין של sumi</string>
     <string name="theme_and_color_description">ערוך את נראות האפליקציה</string>
     <string name="no_file_manager">לא נמצא מנהל קבצים</string>
-    <string name="notification_no_directory_link">לא יכול לפתוח את ספריית citron</string>
-    <string name="notification_no_directory_link_description">בבקשה מקם את תיקיית המשתמש בפנל הצידי של מנהל הקבצים באופן ידני.</string>
-    <string name="manage_save_data">נהל  מידע שמור</string>
+    <string name="notification_no_directory_link">לא יכול לפתוח את ספריית sumi</string>
+    <string name="notification_no_directory_link_description">בבקשה מקם את תיקיית המשתמש בפנל הצידי
+        של מנהל הקבצים באופן ידני.</string>
+    <string name="manage_save_data">נהל מידע שמור</string>
     <string name="manage_save_data_description">מידע שמור לא נמצא. בבקשה בחר/י אופציה מלמטה</string>
     <string name="import_save_warning">ייבוא נתוני שמירה</string>
-    <string name="import_save_warning_description">פעולה זו תמחק את כל הנתונים הקיימים ותחליף אותם בקובץ שסופק.האם אתה בטוח שברצונך להמשיך?</string>
+    <string name="import_save_warning_description">פעולה זו תמחק את כל הנתונים הקיימים ותחליף אותם
+        בקובץ שסופק.האם אתה בטוח שברצונך להמשיך?</string>
     <string name="import_export_saves_description">יבא או יצא קבצי שמירה</string>
-    <string name="save_files_importing">מייבא  קבצי שמירה...</string>
+    <string name="save_files_importing">מייבא קבצי שמירה...</string>
     <string name="save_files_exporting">מייצא קבצי שמירה...</string>
     <string name="save_file_imported_success">יובא בהצלחה</string>
     <string name="save_file_invalid_zip_structure">מבנה ספריית השמירות לא חוקי</string>
-    <string name="save_file_invalid_zip_structure_description">התת תיקייה הראשונה חייב להיות ה title ID של המשחק</string>
+    <string name="save_file_invalid_zip_structure_description">התת תיקייה הראשונה חייב להיות ה title
+        ID של המשחק</string>
     <string name="import_saves">ייבוא</string>
     <string name="export_saves">ייצוא</string>
     <string name="install_firmware">התקן firmware</string>
-    <string name="install_firmware_description">ה frimware   חייב להיות בקובץ zip והוא הכרחי להפעלת חלק מהמשחקים</string>
+    <string name="install_firmware_description">ה frimware חייב להיות בקובץ zip והוא הכרחי להפעלת
+        חלק מהמשחקים</string>
     <string name="firmware_installing">מתקין frimware</string>
     <string name="firmware_installed_success">ה frimware הותקן בהצלחה</string>
-    <string name="firmware_installed_failure">התקנת ה frimware  נכשלה</string>
-    <string name="firmware_installed_failure_description">ודא שקבצי ה firmware nca נמצאים בשורש ה zip ונסה שוב.</string>
-    <string name="share_log">שתף  את יומני הרישום של מיפוי הבאגים</string>
-    <string name="share_log_description">שתף את קובץ יומני הרישום של citron בכדי לתקן בעיות</string>
+    <string name="firmware_installed_failure">התקנת ה frimware נכשלה</string>
+    <string name="firmware_installed_failure_description">ודא שקבצי ה firmware nca נמצאים בשורש ה
+        zip ונסה שוב.</string>
+    <string name="share_log">שתף את יומני הרישום של מיפוי הבאגים</string>
+    <string name="share_log_description">שתף את קובץ יומני הרישום של sumi בכדי לתקן בעיות</string>
     <string name="share_log_missing">לא נמצא קובץ יומן רישום</string>
     <string name="install_game_content">התקן תוכן משחק</string>
     <string name="install_game_content_description">התקן עדכוני משחק או DLC</string>
     <string name="installing_game_content">מתקין תוכן...</string>
     <string name="install_game_content_failure">תקלה בהתקנת הקובץ (או קבצים) ל NAND</string>
-    <string name="install_game_content_failure_description">בבקשה ודא שהתוכן (או תכנים) חוקיים ושקובץ ה prod.keys מותקן.</string>
-    <string name="install_game_content_failure_base">התקנת משחק בסיס נדחת בכדי להימנע מקונפליקטים אפשריים.</string>
-    <string name="install_game_content_failure_file_extension">רק קבצי NSP ו XCI נתמכים. בבקשה ודא שתוכן (או תכנים) המשחק חוקי.</string>
+    <string name="install_game_content_failure_description">בבקשה ודא שהתוכן (או תכנים) חוקיים
+        ושקובץ ה prod.keys מותקן.</string>
+    <string name="install_game_content_failure_base">התקנת משחק בסיס נדחת בכדי להימנע מקונפליקטים
+        אפשריים.</string>
+    <string name="install_game_content_failure_file_extension">רק קבצי NSP ו XCI נתמכים. בבקשה ודא
+        שתוכן (או תכנים) המשחק חוקי.</string>
     <string name="install_game_content_failed_count">%1$dבעיה (בעיות) התקנה</string>
     <string name="install_game_content_success">תוכן (או תכני) המשחק הותקנו בהצלחה</string>
     <string name="install_game_content_success_install">%1$d הותקן בהצלחה</string>
     <string name="install_game_content_success_overwrite">%1$d נדרס/נכתב מעל בהצלחה</string>
-    <string name="install_game_content_help_link">https://citron-emu.org/help/quickstart/#dumping-installed-updates</string>
+    <string name="install_game_content_help_link">
+        https://sumi-emu.org/help/quickstart/#dumping-installed-updates</string>
     <string name="custom_driver_not_supported">דרייברים מותאמים אישית לא נתמכים</string>
-    <string name="custom_driver_not_supported_description">הטענת דרייבים מותאמים אישית לא נתמך כרגע על מכשיר זה. \nבבקשה בדוק אופציה זו בעתיד בכדי לראות אם נוספה תמיכה!</string>
-    <string name="manage_citron_data">נהל את המידע של citron</string>
-    <string name="manage_citron_data_description">יבא/יצא firmware, keys, מידע של משתמש ועוד!</string>
+    <string name="custom_driver_not_supported_description">הטענת דרייבים מותאמים אישית לא נתמך כרגע
+        על מכשיר זה. \nבבקשה בדוק אופציה זו בעתיד בכדי לראות אם נוספה תמיכה!</string>
+    <string name="manage_sumi_data">נהל את המידע של sumi</string>
+    <string name="manage_sumi_data_description">יבא/יצא firmware, keys, מידע של משתמש ועוד!</string>
     <string name="share_save_file">שתף קובץ שמירה</string>
     <string name="export_save_failed">נכשל בייצוא שמירה</string>
     <string name="game_folders">תיקיית משחקים</string>
@@ -126,16 +147,17 @@
     <string name="add_game_folder">הוסף תיקיית משחקים</string>
     <string name="folder_already_added">התיקייה הזו נוספה כבר!</string>
     <string name="game_folder_properties">מאפייני תיקיית משחקים</string>
-    <string name="keys_missing_help">https://citron-emu.org/help/quickstart/#dumping-decryption-keys</string>
+    <string name="keys_missing_help">https://sumi-emu.org/help/quickstart/#dumping-decryption-keys</string>
 
     <!-- Applet launcher strings -->
     <string name="applets">משגר Applet</string>
     <string name="applets_description">מערכת שיגור Applet משתמשת בתוכנה המותקנת</string>
     <string name="applets_error_firmware">ה Firmware לא מותקן</string>
     <string name="applets_error_applet">Applet לא זמין</string>
-    <string name="applets_error_description"><![CDATA[בבקשה וודא שקבצי ה - <a href=\"https://citron-emu.org/help/quickstart/#dumping-prodkeys-and-titlekeys\">prod.keys</a>ו <a href=\"https://citron-emu.org/help/quickstart/#dumping-system-firmware\">firmware</a>שלך מותקנים ונסה שוב.]]></string>
+    <string name="applets_error_description"><![CDATA[בבקשה וודא שקבצי ה - <a href=\"https://sumi-emu.org/help/quickstart/#dumping-prodkeys-and-titlekeys\">prod.keys</a>ו <a href=\"https://sumi-emu.org/help/quickstart/#dumping-system-firmware\">firmware</a>שלך מותקנים ונסה שוב.]]></string>
     <string name="album_applet">אלבום</string>
-    <string name="album_applet_description">צפה בתמונות השמורות בתיקיית צילומי המסך של המשתמש בעזרת מציג התמונות של המערכת</string>
+    <string name="album_applet_description">צפה בתמונות השמורות בתיקיית צילומי המסך של המשתמש בעזרת
+        מציג התמונות של המערכת</string>
     <string name="mii_edit_applet">עורך Mii</string>
     <string name="mii_edit_applet_description">צפה וערוך דמויות Mii בעזרת עורך המערכת</string>
     <string name="cabinet_applet">ארון</string>
@@ -151,28 +173,31 @@
     <string name="copied_to_clipboard">הועתק ללוח</string>
     <string name="about_app_description">אמולטור Switch עם קוד פתוח</string>
     <string name="contributors">תורמים</string>
-    <string name="contributors_description">נוצר עם \u2764 מקבוצת citron</string>
-    <string name="contributors_link">https://git.citron-emu.org/Citron/Citron/graphs/contributors</string>
-    <string name="licenses_description">פרוייקטים שהופכים את citron ל Android אפשרי</string>
+    <string name="contributors_description">נוצר עם \u2764 מקבוצת sumi</string>
+    <string name="contributors_link">https://git.sumi-emu.org/Sumi/Sumi/graphs/contributors</string>
+    <string name="licenses_description">פרוייקטים שהופכים את sumi ל Android אפשרי</string>
     <string name="build">גרסה</string>
     <string name="user_data">נתוני משתמש</string>
-    <string name="user_data_description">יבא/יצא את כל נתוני האפליקציה.\n\nכאשר מייבאים את נתוני המשתמש, כל נתוני המשתמש הקיימים ימחקו!</string>
+    <string name="user_data_description">יבא/יצא את כל נתוני האפליקציה.\n\nכאשר מייבאים את נתוני
+        המשתמש, כל נתוני המשתמש הקיימים ימחקו!</string>
     <string name="exporting_user_data">מייצא נתוני משתמש...</string>
     <string name="importing_user_data">מייבא נתוני משתמש...</string>
     <string name="import_user_data">יבא נתוני משתמש</string>
-    <string name="invalid_citron_backup">גיבוי citron לא חוקי</string>
+    <string name="invalid_sumi_backup">גיבוי sumi לא חוקי</string>
     <string name="user_data_export_success">נתוני משתמש יוצאו בהצלחה</string>
     <string name="user_data_import_success">נתוני משתמש יובאו בהצלחה</string>
     <string name="user_data_export_cancelled">ייצוא בוטל</string>
-    <string name="user_data_import_failed_description">ודא שנתוני המשתמש נמצאים בשורש קובץ ה zip ושהוא מכיל קובץ סידור ב config/config.ini ונסה שוב.</string>
+    <string name="user_data_import_failed_description">ודא שנתוני המשתמש נמצאים בשורש קובץ ה zip
+        ושהוא מכיל קובץ סידור ב config/config.ini ונסה שוב.</string>
     <string name="support_link">https://discord.gg/u77vRWY</string>
-    <string name="website_link">https://citron-emu.org/</string>
-    <string name="github_link">https://git.citron-emu.org</string>
+    <string name="website_link">https://sumi-emu.org/</string>
+    <string name="github_link">https://git.sumi-emu.org</string>
 
     <!-- Early access upgrade strings -->
     <string name="early_access">גישה מוקדמת</string>
     <string name="get_early_access">קבל גישה מוקדמת</string>
-    <string name="play_store_link">https://play.google.com/store/apps/details?id=org.citron.citron_emu.ea</string>
+    <string name="play_store_link">
+        https://play.google.com/store/apps/details?id=org.sumi.sumi_emu.ea</string>
     <string name="get_early_access_description">תכונות חותכות קצה, גישה מוקדמת לעדכונים, ועוד</string>
     <string name="early_access_benefits">יתרונות של גישה מקודמת</string>
     <string name="cutting_edge_features">תכונות חותכות קצה</string>
@@ -185,15 +210,18 @@
 
     <!-- General settings strings -->
     <string name="frame_limit_enable">הגבל מהירות</string>
-    <string name="frame_limit_enable_description">מגביל את מהירות האמולציה לאחוז מהירות המבוקש מהמהירות הרגילה.</string>
+    <string name="frame_limit_enable_description">מגביל את מהירות האמולציה לאחוז מהירות המבוקש
+        מהמהירות הרגילה.</string>
     <string name="frame_limit_slider">הגבל את אחוז המהירות</string>
-    <string name="frame_limit_slider_description">מדייק את אחוז  מהירות האמולציה. 100% זה מהירות רגילה. ערכים גדולים או קטנים  יאיצו או יאטו את מהירות האמולציה.</string>
+    <string name="frame_limit_slider_description">מדייק את אחוז מהירות האמולציה. 100% זה מהירות
+        רגילה. ערכים גדולים או קטנים יאיצו או יאטו את מהירות האמולציה.</string>
     <string name="cpu_backend">קצה האחורי של המעבד</string>
     <string name="cpu_accuracy">דיוק המעבד</string>
     <string name="value_with_units">%1$s%2$s</string>
 
     <string name="use_docked_mode">מצב עגינה</string>
-    <string name="use_docked_mode_description">מעלה את הרזולוציה, פוגע בביצועים. משתמש במצב נייד כאשר מנוטרל, מפחית את הרזולוציה ומעלה את הביצועים.</string>
+    <string name="use_docked_mode_description">מעלה את הרזולוציה, פוגע בביצועים. משתמש במצב נייד
+        כאשר מנוטרל, מפחית את הרזולוציה ומעלה את הביצועים.</string>
     <string name="emulated_region">אזור אמולציה</string>
     <string name="emulated_language">שפת אמולציה</string>
     <string name="select_rtc_date">בחר תאריך RTC</string>
@@ -211,13 +239,17 @@
     <string name="renderer_scaling_filter">פילטר מתאם חלון</string>
     <string name="renderer_anti_aliasing">שיטת Anti-aliasing</string>
     <string name="renderer_force_max_clock">החזק מהירות שעון מקסימלית (רק ל Adreno)</string>
-    <string name="renderer_force_max_clock_description">מכריח לדחוף את מהירויות המעבד הגרפי למקסימום (הגבלות חום ימשיכו לתפקד).</string>
+    <string name="renderer_force_max_clock_description">מכריח לדחוף את מהירויות המעבד הגרפי למקסימום
+        (הגבלות חום ימשיכו לתפקד).</string>
     <string name="renderer_asynchronous_shaders">השתמש בשיידרים אסינכרונים</string>
-    <string name="renderer_asynchronous_shaders_description">מקמפל שיידרים בצורה אסנכרונית, מפחית תקיעות אך עלול לגרום לבעיות גרפיות.</string>
+    <string name="renderer_asynchronous_shaders_description">מקמפל שיידרים בצורה אסנכרונית, מפחית
+        תקיעות אך עלול לגרום לבעיות גרפיות.</string>
     <string name="renderer_reactive_flushing">השתמש בהבהוב תגובתי</string>
-    <string name="renderer_reactive_flushing_description">משפר את הדיוק של האמולציה במשחקים מסויימים במחיר של ביצועים.</string>
+    <string name="renderer_reactive_flushing_description">משפר את הדיוק של האמולציה במשחקים מסויימים
+        במחיר של ביצועים.</string>
     <string name="use_disk_shader_cache">מטמון השיידר של הדיסק</string>
-    <string name="use_disk_shader_cache_description">מפחית בתקיעות על ידי אחסון מקומי וטעינה של שיידרים הנוצרים. </string>
+    <string name="use_disk_shader_cache_description">מפחית בתקיעות על ידי אחסון מקומי וטעינה של
+        שיידרים הנוצרים. </string>
     <!-- Debug settings strings -->
     <string name="cpu">מעבד</string>
     <string name="cpu_debug_mode">דיבאגינג למעבד</string>
@@ -272,7 +304,8 @@
     <string name="reset_to_default">אפס לברירת המחדל</string>
     <string name="reset_to_default_description">מאפס את כל ההגדרות המתקדמות.</string>
     <string name="reset_all_settings">לאפס את כל ההגדרות?</string>
-    <string name="reset_all_settings_description">כל ההגדרות המתקדמות יאופסו לברירת המחדל. לא ניתן לבטל פעולה זו.</string>
+    <string name="reset_all_settings_description">כל ההגדרות המתקדמות יאופסו לברירת המחדל. לא ניתן
+        לבטל פעולה זו.</string>
     <string name="settings_reset">אפס הגדרות</string>
     <string name="close">סגור</string>
     <string name="learn_more">למד עוד</string>
@@ -293,7 +326,7 @@
     <string name="save">שמור</string>
 
     <!-- GPU driver installation -->
-    <string name="select_gpu_driver">בחר דרייבר  למעבד הגרפי</string>
+    <string name="select_gpu_driver">בחר דרייבר למעבד הגרפי</string>
     <string name="select_gpu_driver_title">אתה מעוניין להחליף את הדרייבר של המעבד הגרפי שלך?</string>
     <string name="select_gpu_driver_install">התקן</string>
     <string name="select_gpu_driver_default">ברירת מחדל</string>
@@ -314,7 +347,8 @@
     <string name="preferences_audio_description">מנוע פלט, עוצמת שמע</string>
     <string name="preferences_theme">צבע ונושא</string>
     <string name="preferences_debug">דיבאג</string>
-    <string name="preferences_debug_description">דיבאגינג עבור מעבד/מעבד גרפי, ממשק תוכנה עבור הגרפיקות, fastmem</string>
+    <string name="preferences_debug_description">דיבאגינג עבור מעבד/מעבד גרפי, ממשק תוכנה עבור
+        הגרפיקות, fastmem</string>
 
     <!-- Game properties -->
     <string name="info">מידע</string>
@@ -322,13 +356,14 @@
     <string name="developer">מפתח</string>
     <string name="version">גרסה</string>
     <string name="add_ons">תוספים</string>
-    <string name="verify_success">אימות  התקינות הצליח!</string>
+    <string name="verify_success">אימות התקינות הצליח!</string>
     <!-- ROM loading errors -->
     <string name="loader_error_encrypted">המשחק שלך מוצפן</string>
-    <string name="loader_error_encrypted_roms_description"><![CDATA[אנא עקוב אחרי המדריכים כדי לבצע redump של <a href=\"https://citron-emu.org/help/quickstart/#dumping-physical-titles-game-cards\">כרטיסי המשחק</a>או <a href=\"https://citron-emu.org/help/quickstart/#dumping-digital-titles-eshop\">הכותרות המותקנות</a> שלך.]]></string>
-    <string name="loader_error_encrypted_keys_description"><![CDATA[אנא וודא שקובץ ה-<a href=\"https://citron-emu.org/help/quickstart/#dumping-prodkeys-and-titlekeys\">prod.keys</a> מותקן כך שניתן יהיה לפענח משחקים.]]></string>
+    <string name="loader_error_encrypted_roms_description"><![CDATA[אנא עקוב אחרי המדריכים כדי לבצע redump של <a href=\"https://sumi-emu.org/help/quickstart/#dumping-physical-titles-game-cards\">כרטיסי המשחק</a>או <a href=\"https://sumi-emu.org/help/quickstart/#dumping-digital-titles-eshop\">הכותרות המותקנות</a> שלך.]]></string>
+    <string name="loader_error_encrypted_keys_description"><![CDATA[אנא וודא שקובץ ה-<a href=\"https://sumi-emu.org/help/quickstart/#dumping-prodkeys-and-titlekeys\">prod.keys</a> מותקן כך שניתן יהיה לפענח משחקים.]]></string>
     <string name="loader_error_video_core">התרחשה בעיה באתחול של ליבת הווידאו</string>
-    <string name="loader_error_video_core_description">זה בדרך כלל נגרם על ידי דרייבר לא מתאים עבור המעבד הגרפי. התקנת דרייבר אשר מתאים למעבד הגרפי יכול לפתור את הבעיה הזו.</string>
+    <string name="loader_error_video_core_description">זה בדרך כלל נגרם על ידי דרייבר לא מתאים עבור
+        המעבד הגרפי. התקנת דרייבר אשר מתאים למעבד הגרפי יכול לפתור את הבעיה הזו.</string>
     <string name="loader_error_invalid_format">אין אפשרות לטעון את המשחק</string>
     <string name="loader_error_file_not_found">קובץ המשחק לא קיים</string>
 
@@ -360,12 +395,15 @@
     <string name="abort_button">אודות</string>
     <string name="continue_button">המשך</string>
     <string name="system_archive_not_found">ארכיון מערכת לא נמצא</string>
-    <string name="system_archive_not_found_message">%s חסר. בבקשה הוצא תא ארכיוני המערכת שלך./nהמשכת האמולציה עלולה לגרום לקריסות ובאגים.</string>
+    <string name="system_archive_not_found_message">%s חסר. בבקשה הוצא תא ארכיוני המערכת שלך./nהמשכת
+        האמולציה עלולה לגרום לקריסות ובאגים.</string>
     <string name="system_archive_general">ארכיון מערכת</string>
     <string name="save_load_error">בעיית שמירה/טעינה</string>
     <string name="fatal_error">שגיאה חמורה</string>
-    <string name="fatal_error_message">שגיאה חמורה התרחשה. בדוק את היומן לפרטים./nהמשך הסימולציה עשוי לגרום לקריסות ולבאגים.</string>
-    <string name="performance_warning">כיבוי הגדרה זו ישפיע משמעותית על ביצועי הסימולציה! לחוויה הטובה ביותר, מומלץ להשאיר את הגדרה זו מופעלת.</string>
+    <string name="fatal_error_message">שגיאה חמורה התרחשה. בדוק את היומן לפרטים./nהמשך הסימולציה
+        עשוי לגרום לקריסות ולבאגים.</string>
+    <string name="performance_warning">כיבוי הגדרה זו ישפיע משמעותית על ביצועי הסימולציה! לחוויה
+        הטובה ביותר, מומלץ להשאיר את הגדרה זו מופעלת.</string>
     <string name="device_memory_inadequate">RAM המכשיר: %1$s/nמומלץ: %2$s</string>
     <string name="memory_formatted">%1$s%2$s</string>
     <string name="no_game_present">אין משחק שניתן להריץ!</string>
@@ -399,6 +437,7 @@
     <string name="renderer_accuracy_extreme">אקסטרים (איטי)</string>
 
     <!-- Resolutions -->
+    <string name="resolution_pico">0.35X (252p/378p)</string>
     <string name="resolution_half">0.5X (360p/540p)</string>
     <string name="resolution_three_quarter">0.75X (540p/810p)</string>
     <string name="resolution_one">1X (720p/1080p)</string>
@@ -490,4 +529,4 @@
     <!-- Licenses screen strings -->
     <string name="licenses">רישיונות</string>
     <string name="license_fidelityfx_fsr_description">אפסקיילינג באיכות גבוהה מ AMD</string>
-    </resources>
+</resources>

@@ -12,7 +12,7 @@ struct UserData {
     std::string username;
     std::string display_name;
     std::string avatar_url;
-    bool moderator = false; ///< Whether the user is a citron Moderator.
+    bool moderator = false; ///< Whether the user is a sumi Moderator.
 };
 
 /**

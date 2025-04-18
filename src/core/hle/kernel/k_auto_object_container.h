@@ -16,8 +16,8 @@ class KProcess;
 
 class KAutoObjectWithListContainer {
 public:
-    CITRON_NON_COPYABLE(KAutoObjectWithListContainer);
-    CITRON_NON_MOVEABLE(KAutoObjectWithListContainer);
+    SUMI_NON_COPYABLE(KAutoObjectWithListContainer);
+    SUMI_NON_MOVEABLE(KAutoObjectWithListContainer);
 
     using ListType = boost::intrusive::rbtree<KAutoObjectWithList>;
 

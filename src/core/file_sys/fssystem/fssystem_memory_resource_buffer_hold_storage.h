@@ -8,8 +8,8 @@
 namespace FileSys {
 
 class MemoryResourceBufferHoldStorage : public IStorage {
-    CITRON_NON_COPYABLE(MemoryResourceBufferHoldStorage);
-    CITRON_NON_MOVEABLE(MemoryResourceBufferHoldStorage);
+    SUMI_NON_COPYABLE(MemoryResourceBufferHoldStorage);
+    SUMI_NON_MOVEABLE(MemoryResourceBufferHoldStorage);
 
 public:
     MemoryResourceBufferHoldStorage(VirtualFile storage, size_t buffer_size)

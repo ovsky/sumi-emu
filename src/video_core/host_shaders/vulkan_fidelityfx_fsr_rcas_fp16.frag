@@ -4,7 +4,7 @@
 #version 460 core
 #extension GL_GOOGLE_include_directive : enable
 
-#define CITRON_USE_FP16
+#define SUMI_USE_FP16
 #define USE_RCAS 1
 #define VERSION 1
 

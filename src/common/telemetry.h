@@ -15,7 +15,7 @@ namespace Common::Telemetry {
 /// Field type, used for grouping fields together in the final submitted telemetry log
 enum class FieldType : u8 {
     None = 0,     ///< No specified field group
-    App,          ///< citron application fields (e.g. version, branch, etc.)
+    App,          ///< sumi application fields (e.g. version, branch, etc.)
     Session,      ///< Emulated session fields (e.g. title ID, log, etc.)
     Performance,  ///< Emulated performance (e.g. fps, emulated CPU speed, etc.)
     UserFeedback, ///< User submitted feedback (e.g. star rating, user notes, etc.)
@@ -52,7 +52,7 @@ public:
 template <typename T>
 class Field : public FieldInterface {
 public:
-    CITRON_NON_COPYABLE(Field);
+    SUMI_NON_COPYABLE(Field);
 
     Field(FieldType type_, std::string_view name_, T value_)
         : name(name_), type(type_), value(std::move(value_)) {}
@@ -101,7 +101,7 @@ private:
  */
 class FieldCollection final {
 public:
-    CITRON_NON_COPYABLE(FieldCollection);
+    SUMI_NON_COPYABLE(FieldCollection);
 
     FieldCollection() = default;
     ~FieldCollection() = default;
@@ -168,7 +168,7 @@ struct VisitorInterface {
  * backend implementation is not available.
  */
 struct NullVisitor final : public VisitorInterface {
-    CITRON_NON_COPYABLE(NullVisitor);
+    SUMI_NON_COPYABLE(NullVisitor);
 
     NullVisitor() = default;
     ~NullVisitor() override = default;

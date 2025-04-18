@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2018 yuzu Emulator Project
-# SPDX-FileCopyrightText: 2025 Citron Emulator Project
+# SPDX-FileCopyrightText: 2025 Sumi Emulator Project
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 add_subdirectory(host_shaders)
@@ -325,7 +325,7 @@ add_library(video_core STATIC
 target_link_libraries(video_core PUBLIC common core)
 target_link_libraries(video_core PUBLIC glad shader_recompiler stb bc_decoder)
 
-if (CITRON_USE_BUNDLED_FFMPEG AND NOT (WIN32 OR ANDROID))
+if (SUMI_USE_BUNDLED_FFMPEG AND NOT (WIN32 OR ANDROID))
     add_dependencies(video_core ffmpeg-build)
 endif()
 
@@ -385,11 +385,11 @@ if (ARCHITECTURE_x86_64 OR ARCHITECTURE_arm64)
     target_link_libraries(video_core PRIVATE dynarmic::dynarmic)
 endif()
 
-if (CITRON_USE_PRECOMPILED_HEADERS)
+if (SUMI_USE_PRECOMPILED_HEADERS)
     target_precompile_headers(video_core PRIVATE precompiled_headers.h)
 endif()
 
-if (CITRON_ENABLE_LTO)
+if (SUMI_ENABLE_LTO)
   set_property(TARGET video_core PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 

@@ -6,13 +6,13 @@
 
     <fragment
         android:id="@+id/gamesFragment"
-        android:name="org.citron.citron_emu.ui.GamesFragment"
+        android:name="org.sumi.sumi_emu.ui.GamesFragment"
         android:label="PlatformGamesFragment" />
 
     <fragment
         android:id="@+id/homeSettingsFragment"
-        android:name="org.citron.citron_emu.fragments.HomeSettingsFragment"
-        android:label="HomeSettingsFragment" >
+        android:name="org.sumi.sumi_emu.fragments.HomeSettingsFragment"
+        android:label="HomeSettingsFragment">
         <action
             android:id="@+id/action_homeSettingsFragment_to_aboutFragment"
             app:destination="@id/aboutFragment" />
@@ -35,8 +35,8 @@
 
     <fragment
         android:id="@+id/firstTimeSetupFragment"
-        android:name="org.citron.citron_emu.fragments.SetupFragment"
-        android:label="FirstTimeSetupFragment" >
+        android:name="org.sumi.sumi_emu.fragments.SetupFragment"
+        android:label="FirstTimeSetupFragment">
         <action
             android:id="@+id/action_firstTimeSetupFragment_to_gamesFragment"
             app:destination="@id/gamesFragment"
@@ -46,13 +46,13 @@
 
     <fragment
         android:id="@+id/searchFragment"
-        android:name="org.citron.citron_emu.fragments.SearchFragment"
+        android:name="org.sumi.sumi_emu.fragments.SearchFragment"
         android:label="SearchFragment" />
 
     <fragment
         android:id="@+id/aboutFragment"
-        android:name="org.citron.citron_emu.fragments.AboutFragment"
-        android:label="AboutFragment" >
+        android:name="org.sumi.sumi_emu.fragments.AboutFragment"
+        android:label="AboutFragment">
         <action
             android:id="@+id/action_aboutFragment_to_licensesFragment"
             app:destination="@id/licensesFragment" />
@@ -60,21 +60,21 @@
 
     <fragment
         android:id="@+id/earlyAccessFragment"
-        android:name="org.citron.citron_emu.fragments.EarlyAccessFragment"
+        android:name="org.sumi.sumi_emu.fragments.EarlyAccessFragment"
         android:label="EarlyAccessFragment" />
 
     <fragment
         android:id="@+id/licensesFragment"
-        android:name="org.citron.citron_emu.fragments.LicensesFragment"
+        android:name="org.sumi.sumi_emu.fragments.LicensesFragment"
         android:label="LicensesFragment" />
 
     <activity
         android:id="@+id/emulationActivity"
-        android:name="org.citron.citron_emu.activities.EmulationActivity"
+        android:name="org.sumi.sumi_emu.activities.EmulationActivity"
         android:label="EmulationActivity">
         <argument
             android:name="game"
-            app:argType="org.citron.citron_emu.model.Game"
+            app:argType="org.sumi.sumi_emu.model.Game"
             app:nullable="true"
             android:defaultValue="@null" />
         <argument
@@ -90,15 +90,15 @@
 
     <activity
         android:id="@+id/settingsActivity"
-        android:name="org.citron.citron_emu.features.settings.ui.SettingsActivity"
+        android:name="org.sumi.sumi_emu.features.settings.ui.SettingsActivity"
         android:label="SettingsActivity">
         <argument
             android:name="game"
-            app:argType="org.citron.citron_emu.model.Game"
+            app:argType="org.sumi.sumi_emu.model.Game"
             app:nullable="true" />
         <argument
             android:name="menuTag"
-            app:argType="org.citron.citron_emu.features.settings.model.Settings$MenuTag" />
+            app:argType="org.sumi.sumi_emu.features.settings.model.Settings$MenuTag" />
     </activity>
 
     <action
@@ -106,41 +106,41 @@
         app:destination="@id/settingsActivity" />
     <fragment
         android:id="@+id/installableFragment"
-        android:name="org.citron.citron_emu.fragments.InstallableFragment"
+        android:name="org.sumi.sumi_emu.fragments.InstallableFragment"
         android:label="InstallableFragment" />
     <fragment
         android:id="@+id/driverManagerFragment"
-        android:name="org.citron.citron_emu.fragments.DriverManagerFragment"
-        android:label="DriverManagerFragment" >
+        android:name="org.sumi.sumi_emu.fragments.DriverManagerFragment"
+        android:label="DriverManagerFragment">
         <argument
             android:name="game"
-            app:argType="org.citron.citron_emu.model.Game"
+            app:argType="org.sumi.sumi_emu.model.Game"
             app:nullable="true"
             android:defaultValue="@null" />
     </fragment>
     <fragment
         android:id="@+id/appletLauncherFragment"
-        android:name="org.citron.citron_emu.fragments.AppletLauncherFragment"
-        android:label="AppletLauncherFragment" >
+        android:name="org.sumi.sumi_emu.fragments.AppletLauncherFragment"
+        android:label="AppletLauncherFragment">
         <action
             android:id="@+id/action_appletLauncherFragment_to_cabinetLauncherDialogFragment"
             app:destination="@id/cabinetLauncherDialogFragment" />
     </fragment>
     <dialog
         android:id="@+id/cabinetLauncherDialogFragment"
-        android:name="org.citron.citron_emu.fragments.CabinetLauncherDialogFragment"
+        android:name="org.sumi.sumi_emu.fragments.CabinetLauncherDialogFragment"
         android:label="CabinetLauncherDialogFragment" />
     <fragment
         android:id="@+id/gameFoldersFragment"
-        android:name="org.citron.citron_emu.fragments.GameFoldersFragment"
+        android:name="org.sumi.sumi_emu.fragments.GameFoldersFragment"
         android:label="GameFoldersFragment" />
     <fragment
         android:id="@+id/perGamePropertiesFragment"
-        android:name="org.citron.citron_emu.fragments.GamePropertiesFragment"
-        android:label="PerGamePropertiesFragment" >
+        android:name="org.sumi.sumi_emu.fragments.GamePropertiesFragment"
+        android:label="PerGamePropertiesFragment">
         <argument
             android:name="game"
-            app:argType="org.citron.citron_emu.model.Game" />
+            app:argType="org.sumi.sumi_emu.model.Game" />
         <action
             android:id="@+id/action_perGamePropertiesFragment_to_gameInfoFragment"
             app:destination="@id/gameInfoFragment" />
@@ -156,19 +156,19 @@
         app:destination="@id/perGamePropertiesFragment" />
     <fragment
         android:id="@+id/gameInfoFragment"
-        android:name="org.citron.citron_emu.fragments.GameInfoFragment"
-        android:label="GameInfoFragment" >
+        android:name="org.sumi.sumi_emu.fragments.GameInfoFragment"
+        android:label="GameInfoFragment">
         <argument
             android:name="game"
-            app:argType="org.citron.citron_emu.model.Game" />
+            app:argType="org.sumi.sumi_emu.model.Game" />
     </fragment>
     <fragment
         android:id="@+id/addonsFragment"
-        android:name="org.citron.citron_emu.fragments.AddonsFragment"
-        android:label="AddonsFragment" >
+        android:name="org.sumi.sumi_emu.fragments.AddonsFragment"
+        android:label="AddonsFragment">
         <argument
             android:name="game"
-            app:argType="org.citron.citron_emu.model.Game" />
+            app:argType="org.sumi.sumi_emu.model.Game" />
     </fragment>
 
 </navigation>

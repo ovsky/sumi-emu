@@ -14,8 +14,8 @@ namespace Kernel {
 namespace {
 
 class KScopedLightLockPair {
-    CITRON_NON_COPYABLE(KScopedLightLockPair);
-    CITRON_NON_MOVEABLE(KScopedLightLockPair);
+    SUMI_NON_COPYABLE(KScopedLightLockPair);
+    SUMI_NON_MOVEABLE(KScopedLightLockPair);
 
 private:
     KLightLock* m_lower;

@@ -18,7 +18,7 @@ class System;
 namespace FileSys {
 
 constexpr const char* GetSaveDataSizeFileName() {
-    return ".citron_save_size";
+    return ".sumi_save_size";
 }
 
 using ProgramId = u64;

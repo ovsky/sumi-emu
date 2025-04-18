@@ -17,7 +17,7 @@ class IntrusiveRedBlackTreeImpl;
 
 #pragma pack(push, 4)
 struct IntrusiveRedBlackTreeNode {
-    CITRON_NON_COPYABLE(IntrusiveRedBlackTreeNode);
+    SUMI_NON_COPYABLE(IntrusiveRedBlackTreeNode);
 
 public:
     using RBEntry = freebsd::RBEntry<IntrusiveRedBlackTreeNode>;
@@ -49,7 +49,7 @@ class IntrusiveRedBlackTree;
 namespace impl {
 
 class IntrusiveRedBlackTreeImpl {
-    CITRON_NON_COPYABLE(IntrusiveRedBlackTreeImpl);
+    SUMI_NON_COPYABLE(IntrusiveRedBlackTreeImpl);
 
 private:
     template <class, class, class>
@@ -261,7 +261,7 @@ using RedBlackKeyType = std::remove_pointer_t<decltype(impl::GetRedBlackKeyType<
 
 template <class T, class Traits, class Comparator>
 class IntrusiveRedBlackTree {
-    CITRON_NON_COPYABLE(IntrusiveRedBlackTree);
+    SUMI_NON_COPYABLE(IntrusiveRedBlackTree);
 
 public:
     using ImplType = impl::IntrusiveRedBlackTreeImpl;

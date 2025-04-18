@@ -161,8 +161,8 @@ add_library(common STATIC
     zstd_compression.h
 )
 
-if (CITRON_ENABLE_PORTABLE)
-    add_compile_definitions(CITRON_ENABLE_PORTABLE)
+if (SUMI_ENABLE_PORTABLE)
+    add_compile_definitions(SUMI_ENABLE_PORTABLE)
 endif()
 
 if (WIN32)
@@ -264,7 +264,7 @@ if (ANDROID)
     target_link_libraries(common PRIVATE android)
 endif()
 
-if (CITRON_USE_PRECOMPILED_HEADERS)
+if (SUMI_USE_PRECOMPILED_HEADERS)
     target_precompile_headers(common PRIVATE precompiled_headers.h)
 endif()
 

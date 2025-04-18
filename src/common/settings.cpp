@@ -114,10 +114,10 @@ void LogSettings() {
         LOG_INFO(Config, "{}: {}", name, Common::FS::PathToUTF8String(path));
     };
 
-    LOG_INFO(Config, "citron Configuration:");
+    LOG_INFO(Config, "sumi Configuration:");
     for (auto& [category, settings] : values.linkage.by_category) {
         for (const auto& setting : settings) {
-            if (setting->Id() == values.citron_token.Id()) {
+            if (setting->Id() == values.sumi_token.Id()) {
                 // Hide the token secret, for security reasons.
                 continue;
             }
@@ -130,11 +130,11 @@ void LogSettings() {
             log_setting(name, setting->Canonicalize());
         }
     }
-    log_path("DataStorage_CacheDir", Common::FS::GetCitronPath(Common::FS::CitronPath::CacheDir));
-    log_path("DataStorage_ConfigDir", Common::FS::GetCitronPath(Common::FS::CitronPath::ConfigDir));
-    log_path("DataStorage_LoadDir", Common::FS::GetCitronPath(Common::FS::CitronPath::LoadDir));
-    log_path("DataStorage_NANDDir", Common::FS::GetCitronPath(Common::FS::CitronPath::NANDDir));
-    log_path("DataStorage_SDMCDir", Common::FS::GetCitronPath(Common::FS::CitronPath::SDMCDir));
+    log_path("DataStorage_CacheDir", Common::FS::GetSumiPath(Common::FS::SumiPath::CacheDir));
+    log_path("DataStorage_ConfigDir", Common::FS::GetSumiPath(Common::FS::SumiPath::ConfigDir));
+    log_path("DataStorage_LoadDir", Common::FS::GetSumiPath(Common::FS::SumiPath::LoadDir));
+    log_path("DataStorage_NANDDir", Common::FS::GetSumiPath(Common::FS::SumiPath::NANDDir));
+    log_path("DataStorage_SDMCDir", Common::FS::GetSumiPath(Common::FS::SumiPath::SDMCDir));
 }
 
 void UpdateGPUAccuracy() {
@@ -258,6 +258,11 @@ const char* TranslateCategory(Category category) {
 void TranslateResolutionInfo(ResolutionSetup setup, ResolutionScalingInfo& info) {
     info.downscale = false;
     switch (setup) {
+    case ResolutionSetup::Res1_EX:
+        info.up_scale = 1;
+        info.down_shift = 1;
+        info.downscale = true;
+        break;
     case ResolutionSetup::Res1_2X:
         info.up_scale = 1;
         info.down_shift = 1;

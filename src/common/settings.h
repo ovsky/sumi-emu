@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
-// SPDX-FileCopyrightText: Copyright 2025 Citron Emulator Project
+// SPDX-FileCopyrightText: Copyright 2025 Sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #pragma once
@@ -480,7 +480,7 @@ struct Values {
         linkage, 0,    "rng_seed",       Category::System, Specialization::Hex,
         true,    true, &rng_seed_enabled};
     Setting<std::string> device_name{
-        linkage, "citron", "device_name", Category::System, Specialization::Default, true, true};
+        linkage, "sumi", "device_name", Category::System, Specialization::Default, true, true};
 
     Setting<s32> current_user{linkage, 0, "current_user", Category::System};
 
@@ -621,9 +621,9 @@ struct Values {
     Setting<bool> enable_telemetry{linkage, true, "enable_telemetry", Category::WebService};
     Setting<std::string> web_api_url{linkage, "api.ynet-fun.xyz", "web_api_url",
                                      Category::WebService};
-    Setting<std::string> citron_username{linkage, std::string(), "citron_username",
+    Setting<std::string> sumi_username{linkage, std::string(), "sumi_username",
                                        Category::WebService};
-    Setting<std::string> citron_token{linkage, std::string(), "citron_token", Category::WebService};
+    Setting<std::string> sumi_token{linkage, std::string(), "sumi_token", Category::WebService};
 
     // Add-Ons
     std::map<u64, std::vector<std::string>> disabled_addons;

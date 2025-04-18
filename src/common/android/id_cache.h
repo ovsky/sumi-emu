@@ -101,14 +101,14 @@ jfieldID GetPlayerInputButtonColorRightField();
 jfieldID GetPlayerInputProfileNameField();
 jfieldID GetPlayerInputUseSystemVibratorField();
 
-jclass GetCitronInputDeviceInterface();
-jmethodID GetCitronDeviceGetName();
-jmethodID GetCitronDeviceGetGUID();
-jmethodID GetCitronDeviceGetPort();
-jmethodID GetCitronDeviceGetSupportsVibration();
-jmethodID GetCitronDeviceVibrate();
-jmethodID GetCitronDeviceGetAxes();
-jmethodID GetCitronDeviceHasKeys();
+jclass GetSumiInputDeviceInterface();
+jmethodID GetSumiDeviceGetName();
+jmethodID GetSumiDeviceGetGUID();
+jmethodID GetSumiDeviceGetPort();
+jmethodID GetSumiDeviceGetSupportsVibration();
+jmethodID GetSumiDeviceVibrate();
+jmethodID GetSumiDeviceGetAxes();
+jmethodID GetSumiDeviceHasKeys();
 jmethodID GetAddNetPlayMessage();
 jmethodID ClearChat();
 } // namespace Android

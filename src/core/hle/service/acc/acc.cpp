@@ -36,7 +36,7 @@ namespace Service::Account {
 constexpr std::size_t THUMBNAIL_SIZE = 0x24000;
 
 static std::filesystem::path GetImagePath(const Common::UUID& uuid) {
-    return Common::FS::GetCitronPath(Common::FS::CitronPath::NANDDir) /
+    return Common::FS::GetSumiPath(Common::FS::SumiPath::NANDDir) /
            fmt::format("system/save/8000000000000010/su/avators/{}.jpg", uuid.FormattedString());
 }
 
@@ -856,7 +856,7 @@ Result Module::Interface::InitializeApplicationInfoBase() {
     case FileSys::StorageId::Host:
     case FileSys::StorageId::NandUser:
     case FileSys::StorageId::SdCard:
-    case FileSys::StorageId::None: // Citron specific, differs from hardware
+    case FileSys::StorageId::None: // Sumi specific, differs from hardware
         application_info.application_type = ApplicationType::Digital;
         break;
     default:
@@ -914,7 +914,7 @@ void Module::Interface::InitializeApplicationInfoV2(HLERequestContext& ctx) {
 
 void Module::Interface::BeginUserRegistration(HLERequestContext& ctx) {
     const auto user_id = Common::UUID::MakeRandom();
-    profile_manager->CreateNewUser(user_id, "citron");
+    profile_manager->CreateNewUser(user_id, "sumi");
 
     LOG_INFO(Service_ACC, "called, uuid={}", user_id.FormattedString());
 

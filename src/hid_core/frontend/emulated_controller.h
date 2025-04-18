@@ -178,8 +178,8 @@ public:
     explicit EmulatedController(NpadIdType npad_id_type_);
     ~EmulatedController();
 
-    CITRON_NON_COPYABLE(EmulatedController);
-    CITRON_NON_MOVEABLE(EmulatedController);
+    SUMI_NON_COPYABLE(EmulatedController);
+    SUMI_NON_MOVEABLE(EmulatedController);
 
     /// Converts the controller type from settings to npad type
     static NpadStyleIndex MapSettingsTypeToNPad(Settings::ControllerType type);

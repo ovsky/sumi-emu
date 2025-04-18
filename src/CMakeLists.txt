@@ -88,7 +88,7 @@ if (MSVC)
         /wd4702 # unreachable code (when used with LTO)
     )
 
-    if (USE_CCACHE OR CITRON_USE_PRECOMPILED_HEADERS)
+    if (USE_CCACHE OR SUMI_USE_PRECOMPILED_HEADERS)
     # when caching, we need to use /Z7 to downgrade debug info to use an older but more cacheable format
     # Precompiled headers are deleted if not using /Z7. See https://github.com/nanoant/CMakePCHCompiler/issues/21
         add_compile_options(/Z7)
@@ -192,20 +192,20 @@ add_subdirectory(input_common)
 add_subdirectory(frontend_common)
 add_subdirectory(shader_recompiler)
 
-if (CITRON_ROOM)
+if (SUMI_ROOM)
      add_subdirectory(dedicated_room)
 endif()
 
-if (CITRON_TESTS)
+if (SUMI_TESTS)
     add_subdirectory(tests)
 endif()
 
 if (ENABLE_SDL2)
-    add_subdirectory(citron_cmd)
+    add_subdirectory(sumi_cmd)
 endif()
 
 if (ENABLE_QT)
-    add_subdirectory(citron)
+    add_subdirectory(sumi)
 endif()
 
 if (ENABLE_WEB_SERVICE)
@@ -214,5 +214,5 @@ endif()
 
 if (ANDROID)
     add_subdirectory(android/app/src/main/jni)
-    target_include_directories(citron-android PRIVATE android/app/src/main)
+    target_include_directories(sumi-android PRIVATE android/app/src/main)
 endif()

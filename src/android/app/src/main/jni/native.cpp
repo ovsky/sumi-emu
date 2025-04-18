@@ -436,24 +436,24 @@ static Core::SystemResultStatus RunEmulation(const std::string& filepath,
 
 extern "C" {
 
-void Java_org_citron_citron_1emu_NativeLibrary_surfaceChanged(JNIEnv* env, jobject instance,
+void Java_org_sumi_sumi_1emu_NativeLibrary_surfaceChanged(JNIEnv* env, jobject instance,
                                                           [[maybe_unused]] jobject surf) {
     EmulationSession::GetInstance().SetNativeWindow(ANativeWindow_fromSurface(env, surf));
     EmulationSession::GetInstance().SurfaceChanged();
 }
 
-void Java_org_citron_citron_1emu_NativeLibrary_surfaceDestroyed(JNIEnv* env, jobject instance) {
+void Java_org_sumi_sumi_1emu_NativeLibrary_surfaceDestroyed(JNIEnv* env, jobject instance) {
     ANativeWindow_release(EmulationSession::GetInstance().NativeWindow());
     EmulationSession::GetInstance().SetNativeWindow(nullptr);
     EmulationSession::GetInstance().SurfaceChanged();
 }
 
-void Java_org_citron_citron_1emu_NativeLibrary_setAppDirectory(JNIEnv* env, jobject instance,
+void Java_org_sumi_sumi_1emu_NativeLibrary_setAppDirectory(JNIEnv* env, jobject instance,
                                                            [[maybe_unused]] jstring j_directory) {
     Common::FS::SetAppDirectory(Common::Android::GetJString(env, j_directory));
 }
 
-int Java_org_citron_citron_1emu_NativeLibrary_installFileToNand(JNIEnv* env, jobject instance,
+int Java_org_sumi_sumi_1emu_NativeLibrary_installFileToNand(JNIEnv* env, jobject instance,
                                                             jstring j_file, jobject jcallback) {
     auto jlambdaClass = env->GetObjectClass(jcallback);
     auto jlambdaInvokeMethod = env->GetMethodID(
@@ -471,7 +471,7 @@ int Java_org_citron_citron_1emu_NativeLibrary_installFileToNand(JNIEnv* env, job
                                    Common::Android::GetJString(env, j_file), callback));
 }
 
-jboolean Java_org_citron_citron_1emu_NativeLibrary_doesUpdateMatchProgram(JNIEnv* env, jobject jobj,
+jboolean Java_org_sumi_sumi_1emu_NativeLibrary_doesUpdateMatchProgram(JNIEnv* env, jobject jobj,
                                                                       jstring jprogramId,
                                                                       jstring jupdatePath) {
     u64 program_id = EmulationSession::GetProgramId(env, jprogramId);
@@ -492,7 +492,7 @@ jboolean Java_org_citron_citron_1emu_NativeLibrary_doesUpdateMatchProgram(JNIEnv
     return false;
 }
 
-void JNICALL Java_org_citron_citron_1emu_NativeLibrary_initializeGpuDriver(JNIEnv* env, jclass clazz,
+void JNICALL Java_org_sumi_sumi_1emu_NativeLibrary_initializeGpuDriver(JNIEnv* env, jclass clazz,
                                                                        jstring hook_lib_dir,
                                                                        jstring custom_driver_dir,
                                                                        jstring custom_driver_name,
@@ -514,7 +514,7 @@ void JNICALL Java_org_citron_citron_1emu_NativeLibrary_initializeGpuDriver(JNIEn
     return android_get_device_api_level() >= 28 && CheckKgslPresent();
 }
 
-jboolean JNICALL Java_org_citron_citron_1emu_utils_GpuDriverHelper_supportsCustomDriverLoading(
+jboolean JNICALL Java_org_sumi_sumi_1emu_utils_GpuDriverHelper_supportsCustomDriverLoading(
     JNIEnv* env, jobject instance) {
 #ifdef ARCHITECTURE_arm64
     // If the KGSL device exists custom drivers can be loaded using adrenotools
@@ -524,7 +524,7 @@ jboolean JNICALL Java_org_citron_citron_1emu_utils_GpuDriverHelper_supportsCusto
 #endif
 }
 
-jobjectArray Java_org_citron_citron_1emu_utils_GpuDriverHelper_getSystemDriverInfo(
+jobjectArray Java_org_sumi_sumi_1emu_utils_GpuDriverHelper_getSystemDriverInfo(
     JNIEnv* env, jobject j_obj, jobject j_surf, jstring j_hook_lib_dir) {
     const char* file_redirect_dir_{};
     int featureFlags{};
@@ -556,32 +556,32 @@ jobjectArray Java_org_citron_citron_1emu_utils_GpuDriverHelper_getSystemDriverIn
     return j_driver_info;
 }
 
-jboolean Java_org_citron_citron_1emu_NativeLibrary_reloadKeys(JNIEnv* env, jclass clazz) {
+jboolean Java_org_sumi_sumi_1emu_NativeLibrary_reloadKeys(JNIEnv* env, jclass clazz) {
     Core::Crypto::KeyManager::Instance().ReloadKeys();
     return static_cast<jboolean>(Core::Crypto::KeyManager::Instance().AreKeysLoaded());
 }
 
-void Java_org_citron_citron_1emu_NativeLibrary_unpauseEmulation(JNIEnv* env, jclass clazz) {
+void Java_org_sumi_sumi_1emu_NativeLibrary_unpauseEmulation(JNIEnv* env, jclass clazz) {
     EmulationSession::GetInstance().UnPauseEmulation();
 }
 
-void Java_org_citron_citron_1emu_NativeLibrary_pauseEmulation(JNIEnv* env, jclass clazz) {
+void Java_org_sumi_sumi_1emu_NativeLibrary_pauseEmulation(JNIEnv* env, jclass clazz) {
     EmulationSession::GetInstance().PauseEmulation();
 }
 
-void Java_org_citron_citron_1emu_NativeLibrary_stopEmulation(JNIEnv* env, jclass clazz) {
+void Java_org_sumi_sumi_1emu_NativeLibrary_stopEmulation(JNIEnv* env, jclass clazz) {
     EmulationSession::GetInstance().HaltEmulation();
 }
 
-jboolean Java_org_citron_citron_1emu_NativeLibrary_isRunning(JNIEnv* env, jclass clazz) {
+jboolean Java_org_sumi_sumi_1emu_NativeLibrary_isRunning(JNIEnv* env, jclass clazz) {
     return static_cast<jboolean>(EmulationSession::GetInstance().IsRunning());
 }
 
-jboolean Java_org_citron_citron_1emu_NativeLibrary_isPaused(JNIEnv* env, jclass clazz) {
+jboolean Java_org_sumi_sumi_1emu_NativeLibrary_isPaused(JNIEnv* env, jclass clazz) {
     return static_cast<jboolean>(EmulationSession::GetInstance().IsPaused());
 }
 
-void Java_org_citron_citron_1emu_NativeLibrary_initializeSystem(JNIEnv* env, jclass clazz,
+void Java_org_sumi_sumi_1emu_NativeLibrary_initializeSystem(JNIEnv* env, jclass clazz,
                                                             jboolean reload) {
     // Initialize the emulated system.
     if (!reload) {
@@ -590,7 +590,7 @@ void Java_org_citron_citron_1emu_NativeLibrary_initializeSystem(JNIEnv* env, jcl
     EmulationSession::GetInstance().InitializeSystem(reload);
 }
 
-jdoubleArray Java_org_citron_citron_1emu_NativeLibrary_getPerfStats(JNIEnv* env, jclass clazz) {
+jdoubleArray Java_org_sumi_sumi_1emu_NativeLibrary_getPerfStats(JNIEnv* env, jclass clazz) {
     jdoubleArray j_stats = env->NewDoubleArray(4);
 
     if (EmulationSession::GetInstance().IsRunning()) {
@@ -606,7 +606,7 @@ jdoubleArray Java_org_citron_citron_1emu_NativeLibrary_getPerfStats(JNIEnv* env,
     return j_stats;
 }
 
-jstring Java_org_citron_citron_1emu_NativeLibrary_getCpuBackend(JNIEnv* env, jclass clazz) {
+jstring Java_org_sumi_sumi_1emu_NativeLibrary_getCpuBackend(JNIEnv* env, jclass clazz) {
     if (Settings::IsNceEnabled()) {
         return Common::Android::ToJString(env, "NCE");
     }
@@ -614,21 +614,21 @@ jstring Java_org_citron_citron_1emu_NativeLibrary_getCpuBackend(JNIEnv* env, jcl
     return Common::Android::ToJString(env, "JIT");
 }
 
-jstring Java_org_citron_citron_1emu_NativeLibrary_getGpuDriver(JNIEnv* env, jobject jobj) {
+jstring Java_org_sumi_sumi_1emu_NativeLibrary_getGpuDriver(JNIEnv* env, jobject jobj) {
     return Common::Android::ToJString(
         env, EmulationSession::GetInstance().System().GPU().Renderer().GetDeviceVendor());
 }
 
-void Java_org_citron_citron_1emu_NativeLibrary_applySettings(JNIEnv* env, jobject jobj) {
+void Java_org_sumi_sumi_1emu_NativeLibrary_applySettings(JNIEnv* env, jobject jobj) {
     EmulationSession::GetInstance().System().ApplySettings();
     EmulationSession::GetInstance().System().HIDCore().ReloadInputDevices();
 }
 
-void Java_org_citron_citron_1emu_NativeLibrary_logSettings(JNIEnv* env, jobject jobj) {
+void Java_org_sumi_sumi_1emu_NativeLibrary_logSettings(JNIEnv* env, jobject jobj) {
     Settings::LogSettings();
 }
 
-void Java_org_citron_citron_1emu_NativeLibrary_run(JNIEnv* env, jobject jobj, jstring j_path,
+void Java_org_sumi_sumi_1emu_NativeLibrary_run(JNIEnv* env, jobject jobj, jstring j_path,
                                                jint j_program_index,
                                                jboolean j_frontend_initiated) {
     const std::string path = Common::Android::GetJString(env, j_path);
@@ -642,25 +642,25 @@ void Java_org_citron_citron_1emu_NativeLibrary_run(JNIEnv* env, jobject jobj, js
     }
 }
 
-void Java_org_citron_citron_1emu_NativeLibrary_logDeviceInfo(JNIEnv* env, jclass clazz) {
-    LOG_INFO(Frontend, "citron Version: {}-{}", Common::g_scm_branch, Common::g_scm_desc);
+void Java_org_sumi_sumi_1emu_NativeLibrary_logDeviceInfo(JNIEnv* env, jclass clazz) {
+    LOG_INFO(Frontend, "sumi Version: {}-{}", Common::g_scm_branch, Common::g_scm_desc);
     LOG_INFO(Frontend, "Host OS: Android API level {}", android_get_device_api_level());
 }
 
-void Java_org_citron_citron_1emu_NativeLibrary_submitInlineKeyboardText(JNIEnv* env, jclass clazz,
+void Java_org_sumi_sumi_1emu_NativeLibrary_submitInlineKeyboardText(JNIEnv* env, jclass clazz,
                                                                     jstring j_text) {
     const std::u16string input = Common::UTF8ToUTF16(Common::Android::GetJString(env, j_text));
     EmulationSession::GetInstance().SoftwareKeyboard()->SubmitInlineKeyboardText(input);
 }
 
-void Java_org_citron_citron_1emu_NativeLibrary_submitInlineKeyboardInput(JNIEnv* env, jclass clazz,
+void Java_org_sumi_sumi_1emu_NativeLibrary_submitInlineKeyboardInput(JNIEnv* env, jclass clazz,
                                                                      jint j_key_code) {
     EmulationSession::GetInstance().SoftwareKeyboard()->SubmitInlineKeyboardInput(j_key_code);
 }
 
-void Java_org_citron_citron_1emu_NativeLibrary_initializeEmptyUserDirectory(JNIEnv* env,
+void Java_org_sumi_sumi_1emu_NativeLibrary_initializeEmptyUserDirectory(JNIEnv* env,
                                                                         jobject instance) {
-    const auto nand_dir = Common::FS::GetCitronPath(Common::FS::CitronPath::NANDDir);
+    const auto nand_dir = Common::FS::GetSumiPath(Common::FS::SumiPath::NANDDir);
     auto vfs_nand_dir = EmulationSession::GetInstance().System().GetFilesystem()->OpenDirectory(
         Common::FS::PathToUTF8String(nand_dir), FileSys::OpenMode::Read);
 
@@ -678,7 +678,7 @@ void Java_org_citron_citron_1emu_NativeLibrary_initializeEmptyUserDirectory(JNIE
     }
 }
 
-jstring Java_org_citron_citron_1emu_NativeLibrary_getAppletLaunchPath(JNIEnv* env, jclass clazz,
+jstring Java_org_sumi_sumi_1emu_NativeLibrary_getAppletLaunchPath(JNIEnv* env, jclass clazz,
                                                                   jlong jid) {
     auto bis_system =
         EmulationSession::GetInstance().System().GetFileSystemController().GetSystemNANDContents();
@@ -695,18 +695,18 @@ jstring Java_org_citron_citron_1emu_NativeLibrary_getAppletLaunchPath(JNIEnv* en
     return Common::Android::ToJString(env, applet_nca->GetFullPath());
 }
 
-void Java_org_citron_citron_1emu_NativeLibrary_setCurrentAppletId(JNIEnv* env, jclass clazz,
+void Java_org_sumi_sumi_1emu_NativeLibrary_setCurrentAppletId(JNIEnv* env, jclass clazz,
                                                               jint jappletId) {
     EmulationSession::GetInstance().SetAppletId(jappletId);
 }
 
-void Java_org_citron_citron_1emu_NativeLibrary_setCabinetMode(JNIEnv* env, jclass clazz,
+void Java_org_sumi_sumi_1emu_NativeLibrary_setCabinetMode(JNIEnv* env, jclass clazz,
                                                           jint jcabinetMode) {
     EmulationSession::GetInstance().System().GetFrontendAppletHolder().SetCabinetMode(
         static_cast<Service::NFP::CabinetMode>(jcabinetMode));
 }
 
-jboolean Java_org_citron_citron_1emu_NativeLibrary_isFirmwareAvailable(JNIEnv* env, jclass clazz) {
+jboolean Java_org_sumi_sumi_1emu_NativeLibrary_isFirmwareAvailable(JNIEnv* env, jclass clazz) {
     auto bis_system =
         EmulationSession::GetInstance().System().GetFileSystemController().GetSystemNANDContents();
     if (!bis_system) {
@@ -722,7 +722,7 @@ jboolean Java_org_citron_citron_1emu_NativeLibrary_isFirmwareAvailable(JNIEnv* e
     return true;
 }
 
-jobjectArray Java_org_citron_citron_1emu_NativeLibrary_getPatchesForFile(JNIEnv* env, jobject jobj,
+jobjectArray Java_org_sumi_sumi_1emu_NativeLibrary_getPatchesForFile(JNIEnv* env, jobject jobj,
                                                                      jstring jpath,
                                                                      jstring jprogramId) {
     const auto path = Common::Android::GetJString(env, jpath);
@@ -758,27 +758,27 @@ jobjectArray Java_org_citron_citron_1emu_NativeLibrary_getPatchesForFile(JNIEnv*
     return jpatchArray;
 }
 
-void Java_org_citron_citron_1emu_NativeLibrary_removeUpdate(JNIEnv* env, jobject jobj,
+void Java_org_sumi_sumi_1emu_NativeLibrary_removeUpdate(JNIEnv* env, jobject jobj,
                                                         jstring jprogramId) {
     auto program_id = EmulationSession::GetProgramId(env, jprogramId);
     ContentManager::RemoveUpdate(EmulationSession::GetInstance().System().GetFileSystemController(),
                                  program_id);
 }
 
-void Java_org_citron_citron_1emu_NativeLibrary_removeDLC(JNIEnv* env, jobject jobj,
+void Java_org_sumi_sumi_1emu_NativeLibrary_removeDLC(JNIEnv* env, jobject jobj,
                                                      jstring jprogramId) {
     auto program_id = EmulationSession::GetProgramId(env, jprogramId);
     ContentManager::RemoveAllDLC(EmulationSession::GetInstance().System(), program_id);
 }
 
-void Java_org_citron_citron_1emu_NativeLibrary_removeMod(JNIEnv* env, jobject jobj, jstring jprogramId,
+void Java_org_sumi_sumi_1emu_NativeLibrary_removeMod(JNIEnv* env, jobject jobj, jstring jprogramId,
                                                      jstring jname) {
     auto program_id = EmulationSession::GetProgramId(env, jprogramId);
     ContentManager::RemoveMod(EmulationSession::GetInstance().System().GetFileSystemController(),
                               program_id, Common::Android::GetJString(env, jname));
 }
 
-jobjectArray Java_org_citron_citron_1emu_NativeLibrary_verifyInstalledContents(JNIEnv* env,
+jobjectArray Java_org_sumi_sumi_1emu_NativeLibrary_verifyInstalledContents(JNIEnv* env,
                                                                            jobject jobj,
                                                                            jobject jcallback) {
     auto jlambdaClass = env->GetObjectClass(jcallback);
@@ -802,7 +802,7 @@ jobjectArray Java_org_citron_citron_1emu_NativeLibrary_verifyInstalledContents(J
     return jresult;
 }
 
-jint Java_org_citron_citron_1emu_NativeLibrary_verifyGameContents(JNIEnv* env, jobject jobj,
+jint Java_org_sumi_sumi_1emu_NativeLibrary_verifyGameContents(JNIEnv* env, jobject jobj,
                                                               jstring jpath, jobject jcallback) {
     auto jlambdaClass = env->GetObjectClass(jcallback);
     auto jlambdaInvokeMethod = env->GetMethodID(
@@ -818,7 +818,7 @@ jint Java_org_citron_citron_1emu_NativeLibrary_verifyGameContents(JNIEnv* env, j
         session.System(), Common::Android::GetJString(env, jpath), callback));
 }
 
-jstring Java_org_citron_citron_1emu_NativeLibrary_getSavePath(JNIEnv* env, jobject jobj,
+jstring Java_org_sumi_sumi_1emu_NativeLibrary_getSavePath(JNIEnv* env, jobject jobj,
                                                           jstring jprogramId) {
     auto program_id = EmulationSession::GetProgramId(env, jprogramId);
     if (program_id == 0) {
@@ -832,7 +832,7 @@ jstring Java_org_citron_citron_1emu_NativeLibrary_getSavePath(JNIEnv* env, jobje
     const auto user_id = manager.GetUser(static_cast<std::size_t>(0));
     ASSERT(user_id);
 
-    const auto nandDir = Common::FS::GetCitronPath(Common::FS::CitronPath::NANDDir);
+    const auto nandDir = Common::FS::GetSumiPath(Common::FS::SumiPath::NANDDir);
     auto vfsNandDir = system.GetFilesystem()->OpenDirectory(Common::FS::PathToUTF8String(nandDir),
                                                             FileSys::OpenMode::Read);
 
@@ -842,7 +842,7 @@ jstring Java_org_citron_citron_1emu_NativeLibrary_getSavePath(JNIEnv* env, jobje
     return Common::Android::ToJString(env, user_save_data_path);
 }
 
-jstring Java_org_citron_citron_1emu_NativeLibrary_getDefaultProfileSaveDataRoot(JNIEnv* env,
+jstring Java_org_sumi_sumi_1emu_NativeLibrary_getDefaultProfileSaveDataRoot(JNIEnv* env,
                                                                             jobject jobj,
                                                                             jboolean jfuture) {
     Service::Account::ProfileManager manager;
@@ -855,23 +855,23 @@ jstring Java_org_citron_citron_1emu_NativeLibrary_getDefaultProfileSaveDataRoot(
     return Common::Android::ToJString(env, user_save_data_root);
 }
 
-void Java_org_citron_citron_1emu_NativeLibrary_addFileToFilesystemProvider(JNIEnv* env, jobject jobj,
+void Java_org_sumi_sumi_1emu_NativeLibrary_addFileToFilesystemProvider(JNIEnv* env, jobject jobj,
                                                                        jstring jpath) {
     EmulationSession::GetInstance().ConfigureFilesystemProvider(
         Common::Android::GetJString(env, jpath));
 }
 
-void Java_org_citron_citron_1emu_NativeLibrary_clearFilesystemProvider(JNIEnv* env, jobject jobj) {
+void Java_org_sumi_sumi_1emu_NativeLibrary_clearFilesystemProvider(JNIEnv* env, jobject jobj) {
     EmulationSession::GetInstance().GetContentProvider()->ClearAllEntries();
 }
 
-jboolean Java_org_citron_citron_1emu_NativeLibrary_areKeysPresent(JNIEnv* env, jobject jobj) {
+jboolean Java_org_sumi_sumi_1emu_NativeLibrary_areKeysPresent(JNIEnv* env, jobject jobj) {
     auto& system = EmulationSession::GetInstance().System();
     system.GetFileSystemController().CreateFactories(*system.GetFilesystem());
     return ContentManager::AreKeysPresent();
 }
 
-JNIEXPORT jint JNICALL Java_org_citron_citron_1emu_network_NetPlayManager_netPlayCreateRoom(
+JNIEXPORT jint JNICALL Java_org_sumi_sumi_1emu_network_NetPlayManager_netPlayCreateRoom(
         JNIEnv* env, [[maybe_unused]] jobject obj, jstring ipaddress, jint port,
         jstring username, jstring password, jstring room_name, jint max_players) {
     return static_cast<jint>(
@@ -880,7 +880,7 @@ JNIEXPORT jint JNICALL Java_org_citron_citron_1emu_network_NetPlayManager_netPla
                               Common::Android::GetJString(env, room_name), max_players));
 }
 
-JNIEXPORT jint JNICALL Java_org_citron_citron_1emu_network_NetPlayManager_netPlayJoinRoom(
+JNIEXPORT jint JNICALL Java_org_sumi_sumi_1emu_network_NetPlayManager_netPlayJoinRoom(
         JNIEnv* env, [[maybe_unused]] jobject obj, jstring ipaddress, jint port,
         jstring username, jstring password) {
     return static_cast<jint>(
@@ -889,63 +889,63 @@ JNIEXPORT jint JNICALL Java_org_citron_citron_1emu_network_NetPlayManager_netPla
 }
 
 JNIEXPORT jobjectArray JNICALL
-Java_org_citron_citron_1emu_network_NetPlayManager_netPlayRoomInfo(
+Java_org_sumi_sumi_1emu_network_NetPlayManager_netPlayRoomInfo(
         JNIEnv* env, [[maybe_unused]] jobject obj) {
     return Common::Android::ToJStringArray(env, NetPlayRoomInfo());
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_citron_citron_1emu_network_NetPlayManager_netPlayIsJoined(
+Java_org_sumi_sumi_1emu_network_NetPlayManager_netPlayIsJoined(
         [[maybe_unused]] JNIEnv* env, [[maybe_unused]] jobject obj) {
     return NetPlayIsJoined();
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_citron_citron_1emu_network_NetPlayManager_netPlayIsHostedRoom(
+Java_org_sumi_sumi_1emu_network_NetPlayManager_netPlayIsHostedRoom(
         [[maybe_unused]] JNIEnv* env, [[maybe_unused]] jobject obj) {
     return NetPlayIsHostedRoom();
 }
 
 JNIEXPORT void JNICALL
-Java_org_citron_citron_1emu_network_NetPlayManager_netPlaySendMessage(
+Java_org_sumi_sumi_1emu_network_NetPlayManager_netPlaySendMessage(
         JNIEnv* env, [[maybe_unused]] jobject obj, jstring msg) {
     NetPlaySendMessage(Common::Android::GetJString(env, msg));
 }
 
-JNIEXPORT void JNICALL Java_org_citron_citron_1emu_network_NetPlayManager_netPlayKickUser(
+JNIEXPORT void JNICALL Java_org_sumi_sumi_1emu_network_NetPlayManager_netPlayKickUser(
         JNIEnv* env, [[maybe_unused]] jobject obj, jstring username) {
     NetPlayKickUser(Common::Android::GetJString(env, username));
 }
 
-JNIEXPORT void JNICALL Java_org_citron_citron_1emu_network_NetPlayManager_netPlayLeaveRoom(
+JNIEXPORT void JNICALL Java_org_sumi_sumi_1emu_network_NetPlayManager_netPlayLeaveRoom(
         [[maybe_unused]] JNIEnv* env, [[maybe_unused]] jobject obj) {
     NetPlayLeaveRoom();
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_citron_citron_1emu_network_NetPlayManager_netPlayIsModerator(
+Java_org_sumi_sumi_1emu_network_NetPlayManager_netPlayIsModerator(
         [[maybe_unused]] JNIEnv* env, [[maybe_unused]] jobject obj) {
     return NetPlayIsModerator();
 }
 
 JNIEXPORT jobjectArray JNICALL
-Java_org_citron_citron_1emu_network_NetPlayManager_netPlayGetBanList(
+Java_org_sumi_sumi_1emu_network_NetPlayManager_netPlayGetBanList(
         JNIEnv* env, [[maybe_unused]] jobject obj) {
     return Common::Android::ToJStringArray(env, NetPlayGetBanList());
 }
 
-JNIEXPORT void JNICALL Java_org_citron_citron_1emu_network_NetPlayManager_netPlayBanUser(
+JNIEXPORT void JNICALL Java_org_sumi_sumi_1emu_network_NetPlayManager_netPlayBanUser(
         JNIEnv* env, [[maybe_unused]] jobject obj, jstring username) {
     NetPlayBanUser(Common::Android::GetJString(env, username));
 }
 
-JNIEXPORT void JNICALL Java_org_citron_citron_1emu_network_NetPlayManager_netPlayUnbanUser(
+JNIEXPORT void JNICALL Java_org_sumi_sumi_1emu_network_NetPlayManager_netPlayUnbanUser(
         JNIEnv* env, [[maybe_unused]] jobject obj, jstring username) {
     NetPlayUnbanUser(Common::Android::GetJString(env, username));
 }
 
 JNIEXPORT void JNICALL
-Java_org_citron_citron_1emu_NativeLibrary_netPlayInit(
+Java_org_sumi_sumi_1emu_NativeLibrary_netPlayInit(
         JNIEnv* env, [[maybe_unused]] jobject obj) {
     NetworkInit(&EmulationSession::GetInstance().System().GetRoomNetwork());
 }

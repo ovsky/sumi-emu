@@ -1,4 +1,5 @@
-<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer_layout"
@@ -6,7 +7,7 @@
     android:layout_height="match_parent"
     android:keepScreenOn="true"
     android:defaultFocusHighlightEnabled="false"
-    tools:context="org.citron.citron_emu.fragments.EmulationFragment"
+    tools:context="org.sumi.sumi_emu.fragments.EmulationFragment"
     tools:openDrawer="start">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -19,7 +20,7 @@
             android:layout_height="match_parent">
 
             <!-- This is what everything is rendered to during emulation -->
-            <org.citron.citron_emu.views.FixedRatioSurfaceView
+            <org.sumi.sumi_emu.views.FixedRatioSurfaceView
                 android:id="@+id/surface_emulation"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -115,7 +116,7 @@
             android:layout_gravity="bottom">
 
             <!-- This is the onscreen input overlay -->
-            <org.citron.citron_emu.overlay.InputOverlay
+            <org.sumi.sumi_emu.overlay.InputOverlay
                 android:id="@+id/surface_input_overlay"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

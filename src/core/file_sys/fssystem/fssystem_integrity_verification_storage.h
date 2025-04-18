@@ -11,8 +11,8 @@
 namespace FileSys {
 
 class IntegrityVerificationStorage : public IReadOnlyStorage {
-    CITRON_NON_COPYABLE(IntegrityVerificationStorage);
-    CITRON_NON_MOVEABLE(IntegrityVerificationStorage);
+    SUMI_NON_COPYABLE(IntegrityVerificationStorage);
+    SUMI_NON_MOVEABLE(IntegrityVerificationStorage);
 
 public:
     static constexpr s64 HashSize = 256 / 8;

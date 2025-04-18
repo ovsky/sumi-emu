@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2014 Citra Emulator Project
-// SPDX-FileCopyrightText: 2025 Citron Emulator Project
+// SPDX-FileCopyrightText: 2025 Sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #pragma once
@@ -42,9 +42,9 @@ namespace Core::Memory {
  * Page size used by the ARM architecture. This is the smallest granularity with which memory can
  * be mapped.
  */
-constexpr std::size_t CITRON_PAGEBITS = 12;
-constexpr u64 CITRON_PAGESIZE = 1ULL << CITRON_PAGEBITS;
-constexpr u64 CITRON_PAGEMASK = CITRON_PAGESIZE - 1;
+constexpr std::size_t SUMI_PAGEBITS = 12;
+constexpr u64 SUMI_PAGESIZE = 1ULL << SUMI_PAGEBITS;
+constexpr u64 SUMI_PAGEMASK = SUMI_PAGESIZE - 1;
 
 /// Emulated memory size (4GB)
 constexpr u64 EMULATED_MEMORY_SIZE = 4ULL * 1024 * 1024 * 1024;
@@ -79,7 +79,7 @@ public:
     Memory(const Memory&) = delete;
     Memory& operator=(const Memory&) = delete;
 
-    Memory(Memory&&) = default;
+    Memory(Memory&&) = delete;
     Memory& operator=(Memory&&) = delete;
 
     /**

@@ -57,8 +57,8 @@ struct HierarchicalIntegrityVerificationSizeSet {
 static_assert(std::is_trivial_v<HierarchicalIntegrityVerificationSizeSet>);
 
 class HierarchicalIntegrityVerificationStorage : public IReadOnlyStorage {
-    CITRON_NON_COPYABLE(HierarchicalIntegrityVerificationStorage);
-    CITRON_NON_MOVEABLE(HierarchicalIntegrityVerificationStorage);
+    SUMI_NON_COPYABLE(HierarchicalIntegrityVerificationStorage);
+    SUMI_NON_MOVEABLE(HierarchicalIntegrityVerificationStorage);
 
 public:
     using GenerateRandomFunction = void (*)(void* dst, size_t size);

@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Define old and new strings
-old="citron"
-new="citron"
+old="sumi"
+new="sumi"
 
 # Find and rename directories first
 find . -depth -type d -name "*${old}*" | while read -r dir; do

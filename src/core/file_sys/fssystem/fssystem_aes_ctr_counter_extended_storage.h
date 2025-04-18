@@ -14,8 +14,8 @@ namespace FileSys {
 using namespace Common::Literals;
 
 class AesCtrCounterExtendedStorage : public IReadOnlyStorage {
-    CITRON_NON_COPYABLE(AesCtrCounterExtendedStorage);
-    CITRON_NON_MOVEABLE(AesCtrCounterExtendedStorage);
+    SUMI_NON_COPYABLE(AesCtrCounterExtendedStorage);
+    SUMI_NON_MOVEABLE(AesCtrCounterExtendedStorage);
 
 public:
     static constexpr size_t BlockSize = 0x10;

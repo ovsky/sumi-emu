@@ -6,14 +6,14 @@ set -e
 # check arguments
 if [[ $# != 2 ]]; then
     >&2 echo "Invalid arguments!"
-    echo "Usage: $0 torzu|citron <build dir>"
+    echo "Usage: $0 torzu|sumi <build dir>"
     exit 1
 fi
 
 BUILD_APP="$1"
-if [[ "${BUILD_APP}" != "torzu" && "${BUILD_APP}" != "citron" ]]; then
+if [[ "${BUILD_APP}" != "torzu" && "${BUILD_APP}" != "sumi" ]]; then
     >&2 echo "Invalid arguments!"
-    echo "Usage: $0 torzu|citron <build dir>"
+    echo "Usage: $0 torzu|sumi <build dir>"
     exit 1
 fi
 

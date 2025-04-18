@@ -17,8 +17,8 @@ class KMemoryRegion final : public Common::IntrusiveRedBlackTreeBaseNode<KMemory
     friend class KMemoryRegionTree;
 
 public:
-    CITRON_NON_COPYABLE(KMemoryRegion);
-    CITRON_NON_MOVEABLE(KMemoryRegion);
+    SUMI_NON_COPYABLE(KMemoryRegion);
+    SUMI_NON_MOVEABLE(KMemoryRegion);
 
     constexpr KMemoryRegion() = default;
     constexpr KMemoryRegion(u64 address, u64 last_address)
@@ -123,8 +123,8 @@ private:
         Common::IntrusiveRedBlackTreeBaseTraits<KMemoryRegion>::TreeType<KMemoryRegion>;
 
 public:
-    CITRON_NON_COPYABLE(KMemoryRegionTree);
-    CITRON_NON_MOVEABLE(KMemoryRegionTree);
+    SUMI_NON_COPYABLE(KMemoryRegionTree);
+    SUMI_NON_MOVEABLE(KMemoryRegionTree);
 
     using value_type = TreeType::value_type;
     using size_type = TreeType::size_type;
@@ -327,8 +327,8 @@ private:
 
 class KMemoryRegionAllocator final {
 public:
-    CITRON_NON_COPYABLE(KMemoryRegionAllocator);
-    CITRON_NON_MOVEABLE(KMemoryRegionAllocator);
+    SUMI_NON_COPYABLE(KMemoryRegionAllocator);
+    SUMI_NON_MOVEABLE(KMemoryRegionAllocator);
 
     static constexpr size_t MaxMemoryRegions = 200;
 

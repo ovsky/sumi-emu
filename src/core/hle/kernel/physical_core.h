@@ -26,8 +26,8 @@ public:
     PhysicalCore(KernelCore& kernel, std::size_t core_index);
     ~PhysicalCore();
 
-    CITRON_NON_COPYABLE(PhysicalCore);
-    CITRON_NON_MOVEABLE(PhysicalCore);
+    SUMI_NON_COPYABLE(PhysicalCore);
+    SUMI_NON_MOVEABLE(PhysicalCore);
 
     // Execute guest code running on the given thread.
     void RunThread(KThread* thread);

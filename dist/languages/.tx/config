@@ -1,13 +1,13 @@
 [main]
 host = https://www.transifex.com
 
-[o:citron-emulator:p:citron:r:emulator]
+[o:sumi-emulator:p:sumi:r:emulator]
 file_filter = <lang>.ts
 source_file = en.ts
 source_lang = en
 type = QT
 
-[o:citron-emulator:p:citron:r:citron-android]
+[o:sumi-emulator:p:sumi:r:sumi-android]
 file_filter = ../../src/android/app/src/main/res/values-<lang>/strings.xml
 source_file = ../../src/android/app/src/main/res/values/strings.xml
 type = ANDROID

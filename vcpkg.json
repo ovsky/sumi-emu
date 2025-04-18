@@ -1,65 +1,65 @@
 {
-    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
-    "name": "citron",
-    "builtin-baseline": "c82f74667287d3dc386bce81e44964370c91a289",
-    "version": "1.0",
-    "dependencies": [
-        "boost-algorithm",
-        "boost-asio",
-        "boost-bind",
-        "boost-config",
-        "boost-container",
-        "boost-context",
-        "boost-crc",
-        "boost-functional",
-        "boost-heap",
-        "boost-icl",
-        "boost-intrusive",
-        "boost-mpl",
-        "boost-process",
-        "boost-range",
-        "boost-spirit",
-        "boost-test",
-        "boost-timer",
-        "boost-variant",
-        "fmt",
-        "lz4",
-        "nlohmann-json",
-        "zlib",
-        "zstd"
-    ],
-    "features": {
-        "citron-tests": {
-            "description": "Compile tests",
-            "dependencies": [ "catch2" ]
-        },
-        "web-service": {
-            "description": "Enable web services (telemetry, etc.)",
-            "dependencies": [
-                {
-                    "name": "openssl",
-                    "platform": "windows"
-                }
-            ]
-        },
-        "android": {
-            "description": "Enable Android dependencies",
-            "dependencies": [
-                {
-                    "name": "oboe",
-                    "platform": "android"
-                }
-            ]
-        }
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "sumi",
+  "builtin-baseline": "c82f74667287d3dc386bce81e44964370c91a289",
+  "version": "1.0",
+  "dependencies": [
+    "boost-algorithm",
+    "boost-asio",
+    "boost-bind",
+    "boost-config",
+    "boost-container",
+    "boost-context",
+    "boost-crc",
+    "boost-functional",
+    "boost-heap",
+    "boost-icl",
+    "boost-intrusive",
+    "boost-mpl",
+    "boost-process",
+    "boost-range",
+    "boost-spirit",
+    "boost-test",
+    "boost-timer",
+    "boost-variant",
+    "fmt",
+    "lz4",
+    "nlohmann-json",
+    "zlib",
+    "zstd"
+  ],
+  "features": {
+    "sumi-tests": {
+      "description": "Compile tests",
+      "dependencies": ["catch2"]
     },
-    "overrides": [
+    "web-service": {
+      "description": "Enable web services (telemetry, etc.)",
+      "dependencies": [
         {
-            "name": "catch2",
-            "version": "3.8.0"
-        },
-        {
-            "name": "fmt",
-            "version": "11.0.2"
+          "name": "openssl",
+          "platform": "windows"
         }
-    ]
+      ]
+    },
+    "android": {
+      "description": "Enable Android dependencies",
+      "dependencies": [
+        {
+          "name": "oboe",
+          "platform": "android"
+        }
+      ]
+    }
+  },
+  "overrides": [
+    {
+      "name": "catch2",
+      "version": "3.8.0"
+    },
+    {
+      "name": "fmt",
+      "version": "11.0.2"
+    }
+  ]
 }

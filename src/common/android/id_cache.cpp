@@ -83,14 +83,14 @@ static jfieldID s_player_input_button_color_right_field;
 static jfieldID s_player_input_profile_name_field;
 static jfieldID s_player_input_use_system_vibrator_field;
 
-static jclass s_citron_input_device_interface;
-static jmethodID s_citron_input_device_get_name;
-static jmethodID s_citron_input_device_get_guid;
-static jmethodID s_citron_input_device_get_port;
-static jmethodID s_citron_input_device_get_supports_vibration;
-static jmethodID s_citron_input_device_vibrate;
-static jmethodID s_citron_input_device_get_axes;
-static jmethodID s_citron_input_device_has_keys;
+static jclass s_sumi_input_device_interface;
+static jmethodID s_sumi_input_device_get_name;
+static jmethodID s_sumi_input_device_get_guid;
+static jmethodID s_sumi_input_device_get_port;
+static jmethodID s_sumi_input_device_get_supports_vibration;
+static jmethodID s_sumi_input_device_vibrate;
+static jmethodID s_sumi_input_device_get_axes;
+static jmethodID s_sumi_input_device_has_keys;
 static jmethodID s_add_netplay_message;
 static jmethodID s_clear_chat;
 
@@ -361,36 +361,36 @@ jfieldID GetPlayerInputUseSystemVibratorField() {
     return s_player_input_use_system_vibrator_field;
 }
 
-jclass GetCitronInputDeviceInterface() {
-    return s_citron_input_device_interface;
+jclass GetSumiInputDeviceInterface() {
+    return s_sumi_input_device_interface;
 }
 
-jmethodID GetCitronDeviceGetName() {
-    return s_citron_input_device_get_name;
+jmethodID GetSumiDeviceGetName() {
+    return s_sumi_input_device_get_name;
 }
 
-jmethodID GetCitronDeviceGetGUID() {
-    return s_citron_input_device_get_guid;
+jmethodID GetSumiDeviceGetGUID() {
+    return s_sumi_input_device_get_guid;
 }
 
-jmethodID GetCitronDeviceGetPort() {
-    return s_citron_input_device_get_port;
+jmethodID GetSumiDeviceGetPort() {
+    return s_sumi_input_device_get_port;
 }
 
-jmethodID GetCitronDeviceGetSupportsVibration() {
-    return s_citron_input_device_get_supports_vibration;
+jmethodID GetSumiDeviceGetSupportsVibration() {
+    return s_sumi_input_device_get_supports_vibration;
 }
 
-jmethodID GetCitronDeviceVibrate() {
-    return s_citron_input_device_vibrate;
+jmethodID GetSumiDeviceVibrate() {
+    return s_sumi_input_device_vibrate;
 }
 
-jmethodID GetCitronDeviceGetAxes() {
-    return s_citron_input_device_get_axes;
+jmethodID GetSumiDeviceGetAxes() {
+    return s_sumi_input_device_get_axes;
 }
 
-jmethodID GetCitronDeviceHasKeys() {
-    return s_citron_input_device_has_keys;
+jmethodID GetSumiDeviceHasKeys() {
+    return s_sumi_input_device_has_keys;
 }
 
 jmethodID GetAddNetPlayMessage() {
@@ -414,14 +414,14 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
         return JNI_ERR;
 
     // Initialize Java classes
-    const jclass native_library_class = env->FindClass("org/citron/citron_emu/NativeLibrary");
+    const jclass native_library_class = env->FindClass("org/sumi/sumi_emu/NativeLibrary");
     s_native_library_class = reinterpret_cast<jclass>(env->NewGlobalRef(native_library_class));
     s_disk_cache_progress_class = reinterpret_cast<jclass>(env->NewGlobalRef(
-        env->FindClass("org/citron/citron_emu/disk_shader_cache/DiskShaderCacheProgress")));
+        env->FindClass("org/sumi/sumi_emu/disk_shader_cache/DiskShaderCacheProgress")));
     s_load_callback_stage_class = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass(
-        "org/citron/citron_emu/disk_shader_cache/DiskShaderCacheProgress$LoadCallbackStage")));
+        "org/sumi/sumi_emu/disk_shader_cache/DiskShaderCacheProgress$LoadCallbackStage")));
 
-    const jclass game_dir_class = env->FindClass("org/citron/citron_emu/model/GameDir");
+    const jclass game_dir_class = env->FindClass("org/sumi/sumi_emu/model/GameDir");
     s_game_dir_class = reinterpret_cast<jclass>(env->NewGlobalRef(game_dir_class));
     s_game_dir_constructor = env->GetMethodID(game_dir_class, "<init>", "(Ljava/lang/String;Z)V");
     env->DeleteLocalRef(game_dir_class);
@@ -438,7 +438,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     s_on_program_changed =
         env->GetStaticMethodID(s_native_library_class, "onProgramChanged", "(I)V");
 
-    const jclass game_class = env->FindClass("org/citron/citron_emu/model/Game");
+    const jclass game_class = env->FindClass("org/sumi/sumi_emu/model/Game");
     s_game_class = reinterpret_cast<jclass>(env->NewGlobalRef(game_class));
     s_game_constructor = env->GetMethodID(game_class, "<init>",
                                           "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/"
@@ -464,7 +464,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     env->DeleteLocalRef(pair_class);
 
     const jclass overlay_control_data_class =
-        env->FindClass("org/citron/citron_emu/overlay/model/OverlayControlData");
+        env->FindClass("org/sumi/sumi_emu/overlay/model/OverlayControlData");
     s_overlay_control_data_class =
         reinterpret_cast<jclass>(env->NewGlobalRef(overlay_control_data_class));
     s_overlay_control_data_constructor =
@@ -482,7 +482,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
         env->GetFieldID(overlay_control_data_class, "foldablePosition", "Lkotlin/Pair;");
     env->DeleteLocalRef(overlay_control_data_class);
 
-    const jclass patch_class = env->FindClass("org/citron/citron_emu/model/Patch");
+    const jclass patch_class = env->FindClass("org/sumi/sumi_emu/model/Patch");
     s_patch_class = reinterpret_cast<jclass>(env->NewGlobalRef(patch_class));
     s_patch_constructor = env->GetMethodID(
         patch_class, "<init>",
@@ -514,7 +514,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     env->DeleteLocalRef(boolean_class);
 
     const jclass player_input_class =
-        env->FindClass("org/citron/citron_emu/features/input/model/PlayerInput");
+        env->FindClass("org/sumi/sumi_emu/features/input/model/PlayerInput");
     s_player_input_class = reinterpret_cast<jclass>(env->NewGlobalRef(player_input_class));
     s_player_input_constructor = env->GetMethodID(
         player_input_class, "<init>",
@@ -544,23 +544,23 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
         env->GetFieldID(player_input_class, "useSystemVibrator", "Z");
     env->DeleteLocalRef(player_input_class);
 
-    const jclass citron_input_device_interface =
-        env->FindClass("org/citron/citron_emu/features/input/CitronInputDevice");
-    s_citron_input_device_interface =
-        reinterpret_cast<jclass>(env->NewGlobalRef(citron_input_device_interface));
-    s_citron_input_device_get_name =
-        env->GetMethodID(citron_input_device_interface, "getName", "()Ljava/lang/String;");
-    s_citron_input_device_get_guid =
-        env->GetMethodID(citron_input_device_interface, "getGUID", "()Ljava/lang/String;");
-    s_citron_input_device_get_port = env->GetMethodID(citron_input_device_interface, "getPort", "()I");
-    s_citron_input_device_get_supports_vibration =
-        env->GetMethodID(citron_input_device_interface, "getSupportsVibration", "()Z");
-    s_citron_input_device_vibrate = env->GetMethodID(citron_input_device_interface, "vibrate", "(F)V");
-    s_citron_input_device_get_axes =
-        env->GetMethodID(citron_input_device_interface, "getAxes", "()[Ljava/lang/Integer;");
-    s_citron_input_device_has_keys =
-        env->GetMethodID(citron_input_device_interface, "hasKeys", "([I)[Z");
-    env->DeleteLocalRef(citron_input_device_interface);
+    const jclass sumi_input_device_interface =
+        env->FindClass("org/sumi/sumi_emu/features/input/SumiInputDevice");
+    s_sumi_input_device_interface =
+        reinterpret_cast<jclass>(env->NewGlobalRef(sumi_input_device_interface));
+    s_sumi_input_device_get_name =
+        env->GetMethodID(sumi_input_device_interface, "getName", "()Ljava/lang/String;");
+    s_sumi_input_device_get_guid =
+        env->GetMethodID(sumi_input_device_interface, "getGUID", "()Ljava/lang/String;");
+    s_sumi_input_device_get_port = env->GetMethodID(sumi_input_device_interface, "getPort", "()I");
+    s_sumi_input_device_get_supports_vibration =
+        env->GetMethodID(sumi_input_device_interface, "getSupportsVibration", "()Z");
+    s_sumi_input_device_vibrate = env->GetMethodID(sumi_input_device_interface, "vibrate", "(F)V");
+    s_sumi_input_device_get_axes =
+        env->GetMethodID(sumi_input_device_interface, "getAxes", "()[Ljava/lang/Integer;");
+    s_sumi_input_device_has_keys =
+        env->GetMethodID(sumi_input_device_interface, "hasKeys", "([I)[Z");
+    env->DeleteLocalRef(sumi_input_device_interface);
     s_add_netplay_message = env->GetStaticMethodID(s_native_library_class, "addNetPlayMessage",
                                                    "(ILjava/lang/String;)V");
     s_clear_chat = env->GetStaticMethodID(s_native_library_class, "clearChat", "()V");
@@ -596,7 +596,7 @@ void JNI_OnUnload(JavaVM* vm, void* reserved) {
     env->DeleteGlobalRef(s_integer_class);
     env->DeleteGlobalRef(s_boolean_class);
     env->DeleteGlobalRef(s_player_input_class);
-    env->DeleteGlobalRef(s_citron_input_device_interface);
+    env->DeleteGlobalRef(s_sumi_input_device_interface);
 
     // UnInitialize applets
     SoftwareKeyboard::CleanupJNI(env);

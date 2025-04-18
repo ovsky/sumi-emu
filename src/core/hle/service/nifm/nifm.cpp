@@ -396,11 +396,11 @@ void IGeneralService::GetCurrentNetworkProfile(HLERequestContext& ctx) {
                 .mtu{1500},
             },
             .uuid{0xdeadbeef, 0xdeadbeef},
-            .network_name{"citron Network"},
+            .network_name{"sumi Network"},
             .wireless_setting_data{
                 .ssid_length{12},
-                .ssid{"citron Network"},
-                .passphrase{"citronpassword"},
+                .ssid{"sumi Network"},
+                .passphrase{"sumipassword"},
             },
         };
     }();

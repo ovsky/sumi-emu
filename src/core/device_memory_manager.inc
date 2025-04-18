@@ -132,7 +132,7 @@ struct EmptyAllocator {
 template <typename DTraits>
 struct DeviceMemoryManagerAllocator {
     static constexpr size_t device_virtual_bits = DTraits::device_virtual_bits;
-    static constexpr DAddr first_address = 1ULL << Memory::CITRON_PAGEBITS;
+    static constexpr DAddr first_address = 1ULL << Memory::SUMI_PAGEBITS;
     static constexpr DAddr max_device_area = 1ULL << device_virtual_bits;
 
     DeviceMemoryManagerAllocator() : main_allocator(first_address) {}
@@ -162,18 +162,18 @@ struct DeviceMemoryManagerAllocator {
 template <typename Traits>
 DeviceMemoryManager<Traits>::DeviceMemoryManager(const DeviceMemory& device_memory_)
     : physical_base{reinterpret_cast<const uintptr_t>(device_memory_.buffer.BackingBasePointer())},
-      device_inter{nullptr}, compressed_physical_ptr(device_as_size >> Memory::CITRON_PAGEBITS),
+      device_inter{nullptr}, compressed_physical_ptr(device_as_size >> Memory::SUMI_PAGEBITS),
       compressed_device_addr(1ULL << ((Settings::values.memory_layout_mode.GetValue() ==
                                                Settings::MemoryLayout::Memory_4Gb
                                            ? physical_min_bits
                                            : physical_max_bits) -
-                                      Memory::CITRON_PAGEBITS)),
-      continuity_tracker(device_as_size >> Memory::CITRON_PAGEBITS),
-      cpu_backing_address(device_as_size >> Memory::CITRON_PAGEBITS) {
+                                      Memory::SUMI_PAGEBITS)),
+      continuity_tracker(device_as_size >> Memory::SUMI_PAGEBITS),
+      cpu_backing_address(device_as_size >> Memory::SUMI_PAGEBITS) {
     impl = std::make_unique<DeviceMemoryManagerAllocator<Traits>>();
     cached_pages = std::make_unique<CachedPages>();
 
-    const size_t total_virtual = device_as_size >> Memory::CITRON_PAGEBITS;
+    const size_t total_virtual = device_as_size >> Memory::SUMI_PAGEBITS;
     for (size_t i = 0; i < total_virtual; i++) {
         compressed_physical_ptr[i] = 0;
         continuity_tracker[i] = 1;
@@ -183,7 +183,7 @@ DeviceMemoryManager<Traits>::DeviceMemoryManager(const DeviceMemory& device_memo
                                                 Settings::MemoryLayout::Memory_4Gb
                                             ? physical_min_bits
                                             : physical_max_bits) -
-                                       Memory::CITRON_PAGEBITS);
+                                       Memory::SUMI_PAGEBITS);
     for (size_t i = 0; i < total_phys; i++) {
         compressed_device_addr[i] = 0;
     }
@@ -216,17 +216,17 @@ template <typename Traits>
 void DeviceMemoryManager<Traits>::Map(DAddr address, VAddr virtual_address, size_t size, Asid asid,
                                       bool track) {
     Core::Memory::Memory* process_memory = registered_processes[asid.id];
-    size_t start_page_d = address >> Memory::CITRON_PAGEBITS;
-    size_t num_pages = Common::AlignUp(size, Memory::CITRON_PAGESIZE) >> Memory::CITRON_PAGEBITS;
+    size_t start_page_d = address >> Memory::SUMI_PAGEBITS;
+    size_t num_pages = Common::AlignUp(size, Memory::SUMI_PAGESIZE) >> Memory::SUMI_PAGEBITS;
     std::scoped_lock lk(mapping_guard);
     for (size_t i = 0; i < num_pages; i++) {
-        const VAddr new_vaddress = virtual_address + i * Memory::CITRON_PAGESIZE;
+        const VAddr new_vaddress = virtual_address + i * Memory::SUMI_PAGESIZE;
         auto* ptr = process_memory->GetPointerSilent(Common::ProcessAddress(new_vaddress));
         if (ptr == nullptr) [[unlikely]] {
             compressed_physical_ptr[start_page_d + i] = 0;
             continue;
         }
-        auto phys_addr = static_cast<u32>(GetRawPhysicalAddr(ptr) >> Memory::CITRON_PAGEBITS) + 1U;
+        auto phys_addr = static_cast<u32>(GetRawPhysicalAddr(ptr) >> Memory::SUMI_PAGEBITS) + 1U;
         compressed_physical_ptr[start_page_d + i] = phys_addr;
         InsertCPUBacking(start_page_d + i, new_vaddress, asid);
         const u32 base_dev = compressed_device_addr[phys_addr - 1U];
@@ -249,8 +249,8 @@ void DeviceMemoryManager<Traits>::Map(DAddr address, VAddr virtual_address, size
 
 template <typename Traits>
 void DeviceMemoryManager<Traits>::Unmap(DAddr address, size_t size) {
-    size_t start_page_d = address >> Memory::CITRON_PAGEBITS;
-    size_t num_pages = Common::AlignUp(size, Memory::CITRON_PAGESIZE) >> Memory::CITRON_PAGEBITS;
+    size_t start_page_d = address >> Memory::SUMI_PAGEBITS;
+    size_t num_pages = Common::AlignUp(size, Memory::SUMI_PAGESIZE) >> Memory::SUMI_PAGEBITS;
     device_inter->InvalidateRegion(address, size);
     std::scoped_lock lk(mapping_guard);
     for (size_t i = 0; i < num_pages; i++) {
@@ -278,13 +278,13 @@ template <typename Traits>
 void DeviceMemoryManager<Traits>::TrackContinuityImpl(DAddr address, VAddr virtual_address,
                                                       size_t size, Asid asid) {
     Core::Memory::Memory* process_memory = registered_processes[asid.id];
-    size_t start_page_d = address >> Memory::CITRON_PAGEBITS;
-    size_t num_pages = Common::AlignUp(size, Memory::CITRON_PAGESIZE) >> Memory::CITRON_PAGEBITS;
+    size_t start_page_d = address >> Memory::SUMI_PAGEBITS;
+    size_t num_pages = Common::AlignUp(size, Memory::SUMI_PAGESIZE) >> Memory::SUMI_PAGEBITS;
     uintptr_t last_ptr = 0;
     size_t page_count = 1;
     for (size_t i = num_pages; i > 0; i--) {
         size_t index = i - 1;
-        const VAddr new_vaddress = virtual_address + index * Memory::CITRON_PAGESIZE;
+        const VAddr new_vaddress = virtual_address + index * Memory::SUMI_PAGESIZE;
         const uintptr_t new_ptr = reinterpret_cast<uintptr_t>(
             process_memory->GetPointerSilent(Common::ProcessAddress(new_vaddress)));
         if (new_ptr + page_size == last_ptr) {
@@ -333,26 +333,26 @@ void DeviceMemoryManager<Traits>::InnerGatherDeviceAddresses(Common::ScratchBuff
 template <typename Traits>
 template <typename T>
 T* DeviceMemoryManager<Traits>::GetPointer(DAddr address) {
-    const size_t index = address >> Memory::CITRON_PAGEBITS;
-    const size_t offset = address & Memory::CITRON_PAGEMASK;
+    const size_t index = address >> Memory::SUMI_PAGEBITS;
+    const size_t offset = address & Memory::SUMI_PAGEMASK;
     auto phys_addr = compressed_physical_ptr[index];
     if (phys_addr == 0) [[unlikely]] {
         return nullptr;
     }
-    return GetPointerFromRaw<T>((static_cast<PAddr>(phys_addr - 1) << Memory::CITRON_PAGEBITS) +
+    return GetPointerFromRaw<T>((static_cast<PAddr>(phys_addr - 1) << Memory::SUMI_PAGEBITS) +
                                 offset);
 }
 
 template <typename Traits>
 template <typename T>
 const T* DeviceMemoryManager<Traits>::GetPointer(DAddr address) const {
-    const size_t index = address >> Memory::CITRON_PAGEBITS;
-    const size_t offset = address & Memory::CITRON_PAGEMASK;
+    const size_t index = address >> Memory::SUMI_PAGEBITS;
+    const size_t offset = address & Memory::SUMI_PAGEMASK;
     auto phys_addr = compressed_physical_ptr[index];
     if (phys_addr == 0) [[unlikely]] {
         return nullptr;
     }
-    return GetPointerFromRaw<T>((static_cast<PAddr>(phys_addr - 1) << Memory::CITRON_PAGEBITS) +
+    return GetPointerFromRaw<T>((static_cast<PAddr>(phys_addr - 1) << Memory::SUMI_PAGEBITS) +
                                 offset);
 }
 
@@ -382,15 +382,15 @@ template <typename Traits>
 void DeviceMemoryManager<Traits>::WalkBlock(DAddr addr, std::size_t size, auto on_unmapped,
                                             auto on_memory, auto increment) {
     std::size_t remaining_size = size;
-    std::size_t page_index = addr >> Memory::CITRON_PAGEBITS;
-    std::size_t page_offset = addr & Memory::CITRON_PAGEMASK;
+    std::size_t page_index = addr >> Memory::SUMI_PAGEBITS;
+    std::size_t page_offset = addr & Memory::SUMI_PAGEMASK;
 
     while (remaining_size) {
         const size_t next_pages = static_cast<std::size_t>(continuity_tracker[page_index]);
         const std::size_t copy_amount =
-            std::min((next_pages << Memory::CITRON_PAGEBITS) - page_offset, remaining_size);
+            std::min((next_pages << Memory::SUMI_PAGEBITS) - page_offset, remaining_size);
         const auto current_vaddr =
-            static_cast<u64>((page_index << Memory::CITRON_PAGEBITS) + page_offset);
+            static_cast<u64>((page_index << Memory::SUMI_PAGEBITS) + page_offset);
         SCOPE_EXIT{
             page_index += next_pages;
             page_offset = 0;
@@ -404,7 +404,7 @@ void DeviceMemoryManager<Traits>::WalkBlock(DAddr addr, std::size_t size, auto o
             continue;
         }
         auto* mem_ptr = GetPointerFromRaw<u8>(
-            (static_cast<PAddr>(phys_addr - 1) << Memory::CITRON_PAGEBITS) + page_offset);
+            (static_cast<PAddr>(phys_addr - 1) << Memory::SUMI_PAGEBITS) + page_offset);
         on_memory(copy_amount, mem_ptr);
     }
 }
@@ -526,31 +526,31 @@ void DeviceMemoryManager<Traits>::UpdatePagesCachedCount(DAddr addr, size_t size
     const auto MarkRegionCaching = &DeviceMemoryManager<Traits>::DeviceMethods::MarkRegionCaching;
 
     std::atomic_thread_fence(std::memory_order_acquire);
-    const size_t page_end = Common::DivCeil(addr + size, Memory::CITRON_PAGESIZE);
-    size_t page = addr >> Memory::CITRON_PAGEBITS;
+    const size_t page_end = Common::DivCeil(addr + size, Memory::SUMI_PAGESIZE);
+    size_t page = addr >> Memory::SUMI_PAGEBITS;
     auto [asid, base_vaddress] = ExtractCPUBacking(page);
     auto* memory_device_inter = registered_processes[asid.id];
     const auto release_pending = [&] {
         if (uncache_bytes > 0) {
             if (memory_device_inter != nullptr) {
-                MarkRegionCaching(memory_device_inter, uncache_begin << Memory::CITRON_PAGEBITS,
+                MarkRegionCaching(memory_device_inter, uncache_begin << Memory::SUMI_PAGEBITS,
                                   uncache_bytes, false);
             }
             uncache_bytes = 0;
         }
         if (cache_bytes > 0) {
             if (memory_device_inter != nullptr) {
-                MarkRegionCaching(memory_device_inter, cache_begin << Memory::CITRON_PAGEBITS,
+                MarkRegionCaching(memory_device_inter, cache_begin << Memory::SUMI_PAGEBITS,
                                   cache_bytes, true);
             }
             cache_bytes = 0;
         }
     };
-    size_t old_vpage = (base_vaddress >> Memory::CITRON_PAGEBITS) - 1;
+    size_t old_vpage = (base_vaddress >> Memory::SUMI_PAGEBITS) - 1;
     for (; page != page_end; ++page) {
         CounterAtomicType& count = cached_pages->at(page >> subentries_shift).Count(page);
         auto [asid_2, vpage] = ExtractCPUBacking(page);
-        vpage >>= Memory::CITRON_PAGEBITS;
+        vpage >>= Memory::SUMI_PAGEBITS;
 
         if (vpage == 0) [[unlikely]] {
             release_pending();
@@ -576,9 +576,9 @@ void DeviceMemoryManager<Traits>::UpdatePagesCachedCount(DAddr addr, size_t size
             if (uncache_bytes == 0) {
                 uncache_begin = vpage;
             }
-            uncache_bytes += Memory::CITRON_PAGESIZE;
+            uncache_bytes += Memory::SUMI_PAGESIZE;
         } else if (uncache_bytes > 0) {
-            MarkRegionCaching(memory_device_inter, uncache_begin << Memory::CITRON_PAGEBITS,
+            MarkRegionCaching(memory_device_inter, uncache_begin << Memory::SUMI_PAGEBITS,
                               uncache_bytes, false);
             uncache_bytes = 0;
         }
@@ -586,9 +586,9 @@ void DeviceMemoryManager<Traits>::UpdatePagesCachedCount(DAddr addr, size_t size
             if (cache_bytes == 0) {
                 cache_begin = vpage;
             }
-            cache_bytes += Memory::CITRON_PAGESIZE;
+            cache_bytes += Memory::SUMI_PAGESIZE;
         } else if (cache_bytes > 0) {
-            MarkRegionCaching(memory_device_inter, cache_begin << Memory::CITRON_PAGEBITS,
+            MarkRegionCaching(memory_device_inter, cache_begin << Memory::SUMI_PAGEBITS,
                               cache_bytes, true);
             cache_bytes = 0;
         }

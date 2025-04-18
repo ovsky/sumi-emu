@@ -33,8 +33,8 @@ class KScopedSchedulerLockAndSleep;
 
 class KScheduler final {
 public:
-    CITRON_NON_COPYABLE(KScheduler);
-    CITRON_NON_MOVEABLE(KScheduler);
+    SUMI_NON_COPYABLE(KScheduler);
+    SUMI_NON_MOVEABLE(KScheduler);
 
     using LockType = KAbstractSchedulerLock<KScheduler>;
 

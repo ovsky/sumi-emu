@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Citron Homebrew Emulator Project
+# SPDX-FileCopyrightText: 2025 Sumi Homebrew Emulator Project
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 # This function downloads a binary library package from our external repo.

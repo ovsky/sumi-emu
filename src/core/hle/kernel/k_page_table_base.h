@@ -49,8 +49,8 @@ class KResourceLimit;
 class KSystemResource;
 
 class KPageTableBase {
-    CITRON_NON_COPYABLE(KPageTableBase);
-    CITRON_NON_MOVEABLE(KPageTableBase);
+    SUMI_NON_COPYABLE(KPageTableBase);
+    SUMI_NON_MOVEABLE(KPageTableBase);
 
 public:
     using TraversalEntry = Common::PageTable::TraversalEntry;

@@ -81,8 +81,8 @@ public:
     explicit EmulatedDevices();
     ~EmulatedDevices();
 
-    CITRON_NON_COPYABLE(EmulatedDevices);
-    CITRON_NON_MOVEABLE(EmulatedDevices);
+    SUMI_NON_COPYABLE(EmulatedDevices);
+    SUMI_NON_MOVEABLE(EmulatedDevices);
 
     /// Removes all callbacks created from input devices
     void UnloadInput();

@@ -27,8 +27,8 @@ private:                                                                        
     static constexpr inline ClassTokenType ClassToken() { return ::Kernel::ClassToken<CLASS>; }    \
                                                                                                    \
 public:                                                                                            \
-    CITRON_NON_COPYABLE(CLASS);                                                                      \
-    CITRON_NON_MOVEABLE(CLASS);                                                                      \
+    SUMI_NON_COPYABLE(CLASS);                                                                      \
+    SUMI_NON_MOVEABLE(CLASS);                                                                      \
                                                                                                    \
     using BaseClass = BASE_CLASS;                                                                  \
     static constexpr TypeObj GetStaticTypeObj() {                                                  \
@@ -211,7 +211,7 @@ private:
 template <typename T>
 class KScopedAutoObject {
 public:
-    CITRON_NON_COPYABLE(KScopedAutoObject);
+    SUMI_NON_COPYABLE(KScopedAutoObject);
 
     constexpr KScopedAutoObject() = default;
 

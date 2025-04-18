@@ -9,7 +9,7 @@
 namespace detail {
 template <class F>
 class ScopeGuard {
-    CITRON_NON_COPYABLE(ScopeGuard);
+    SUMI_NON_COPYABLE(ScopeGuard);
 
 private:
     F f;

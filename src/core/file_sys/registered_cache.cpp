@@ -370,7 +370,7 @@ std::optional<NcaID> RegisteredCache::GetNcaIDFromMetadata(u64 title_id,
     if (type == ContentRecordType::Meta && meta_id.find(title_id) != meta_id.end())
         return meta_id.at(title_id);
 
-    const auto res1 = CheckMapForContentRecord(citron_meta, title_id, type);
+    const auto res1 = CheckMapForContentRecord(sumi_meta, title_id, type);
     if (res1)
         return res1;
     return CheckMapForContentRecord(meta, title_id, type);
@@ -437,8 +437,8 @@ void RegisteredCache::ProcessFiles(const std::vector<NcaID>& ids) {
     }
 }
 
-void RegisteredCache::AccumulateCitronMeta() {
-    const auto meta_dir = dir->GetSubdirectory("citron_meta");
+void RegisteredCache::AccumulateSumiMeta() {
+    const auto meta_dir = dir->GetSubdirectory("sumi_meta");
     if (meta_dir == nullptr) {
         return;
     }
@@ -449,7 +449,7 @@ void RegisteredCache::AccumulateCitronMeta() {
         }
 
         CNMT cnmt(file);
-        citron_meta.insert_or_assign(cnmt.GetTitleID(), std::move(cnmt));
+        sumi_meta.insert_or_assign(cnmt.GetTitleID(), std::move(cnmt));
     }
 }
 
@@ -460,7 +460,7 @@ void RegisteredCache::Refresh() {
 
     const auto ids = AccumulateFiles();
     ProcessFiles(ids);
-    AccumulateCitronMeta();
+    AccumulateSumiMeta();
 }
 
 RegisteredCache::RegisteredCache(VirtualDir dir_, ContentProviderParsingFunction parsing_function)
@@ -485,9 +485,9 @@ std::optional<u32> RegisteredCache::GetEntryVersion(u64 title_id) const {
         return meta_iter->second.GetTitleVersion();
     }
 
-    const auto citron_meta_iter = citron_meta.find(title_id);
-    if (citron_meta_iter != citron_meta.cend()) {
-        return citron_meta_iter->second.GetTitleVersion();
+    const auto sumi_meta_iter = sumi_meta.find(title_id);
+    if (sumi_meta_iter != sumi_meta.cend()) {
+        return sumi_meta_iter->second.GetTitleVersion();
     }
 
     return std::nullopt;
@@ -519,7 +519,7 @@ void RegisteredCache::IterateAllMetadata(
             }
         }
     }
-    for (const auto& kv : citron_meta) {
+    for (const auto& kv : sumi_meta) {
         const auto& cnmt = kv.second;
         for (const auto& rec : cnmt.GetContentRecords()) {
             if (GetFileAtID(rec.nca_id) != nullptr && filter(cnmt, rec)) {
@@ -668,7 +668,7 @@ InstallResult RegisteredCache::InstallEntry(const NCA& nca, TitleType type,
     mbedtls_sha256_ret(data.data(), data.size(), c_rec.hash.data(), 0);
     std::memcpy(&c_rec.nca_id, &c_rec.hash, 16);
     const CNMT new_cnmt(header, opt_header, {c_rec}, {});
-    if (!RawInstallCitronMeta(new_cnmt)) {
+    if (!RawInstallSumiMeta(new_cnmt)) {
         return InstallResult::ErrorMetaFailed;
     }
     return RawInstallNCA(nca, copy, overwrite_if_exists, c_rec.nca_id);
@@ -693,7 +693,7 @@ InstallResult RegisteredCache::InstallEntry(const NCA& nca, const CNMTHeader& ba
     };
     const OptionalHeader opt_header{0, 0};
     const CNMT new_cnmt(header, opt_header, {base_record}, {});
-    if (!RawInstallCitronMeta(new_cnmt)) {
+    if (!RawInstallSumiMeta(new_cnmt)) {
         return InstallResult::ErrorMetaFailed;
     }
     return RawInstallNCA(nca, copy, overwrite_if_exists, base_record.nca_id);
@@ -749,9 +749,9 @@ bool RegisteredCache::RemoveExistingEntry(u64 title_id) const {
                          deleted_html || deleted_legal);
     }
 
-    // If patch entries for any program exist in citron meta, remove them
+    // If patch entries for any program exist in sumi meta, remove them
     for (u8 i = 0; i < 0x10; i++) {
-        const auto meta_dir = dir->CreateDirectoryRelative("citron_meta");
+        const auto meta_dir = dir->CreateDirectoryRelative("sumi_meta");
         const auto filename = GetCNMTName(TitleType::Update, title_id + i);
         if (meta_dir->GetFile(filename)) {
             removed_data |= meta_dir->DeleteFile(filename);
@@ -802,9 +802,9 @@ InstallResult RegisteredCache::RawInstallNCA(const NCA& nca, const VfsCopyFuncti
                                                   : InstallResult::ErrorCopyFailed;
 }
 
-bool RegisteredCache::RawInstallCitronMeta(const CNMT& cnmt) {
+bool RegisteredCache::RawInstallSumiMeta(const CNMT& cnmt) {
     // Reasoning behind this method can be found in the comment for InstallEntry, NCA overload.
-    const auto meta_dir = dir->CreateDirectoryRelative("citron_meta");
+    const auto meta_dir = dir->CreateDirectoryRelative("sumi_meta");
     const auto filename = GetCNMTName(cnmt.GetType(), cnmt.GetTitleID());
     if (meta_dir->GetFile(filename) == nullptr) {
         auto out = meta_dir->CreateFile(filename);
@@ -823,11 +823,11 @@ bool RegisteredCache::RawInstallCitronMeta(const CNMT& cnmt) {
         }
     }
     Refresh();
-    return std::find_if(citron_meta.begin(), citron_meta.end(),
+    return std::find_if(sumi_meta.begin(), sumi_meta.end(),
                         [&cnmt](const std::pair<u64, CNMT>& kv) {
                             return kv.second.GetType() == cnmt.GetType() &&
                                    kv.second.GetTitleID() == cnmt.GetTitleID();
-                        }) != citron_meta.end();
+                        }) != sumi_meta.end();
 }
 
 ContentProviderUnion::~ContentProviderUnion() = default;

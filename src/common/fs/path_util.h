@@ -10,8 +10,8 @@
 
 namespace Common::FS {
 
-enum class CitronPath {
-    CitronDir,        // Where citron stores its data.
+enum class SumiPath {
+    SumiDir,        // Where sumi stores its data.
     AmiiboDir,      // Where Amiibo backups are stored.
     CacheDir,       // Where cached filesystem data is stored.
     ConfigDir,      // Where config files are stored.
@@ -22,7 +22,7 @@ enum class CitronPath {
     LogDir,         // Where log files are stored.
     NANDDir,        // Where the emulated NAND is stored.
     PlayTimeDir,    // Where play time data is stored.
-    ScreenshotsDir, // Where citron screenshots are stored.
+    ScreenshotsDir, // Where sumi screenshots are stored.
     SDMCDir,        // Where the emulated SDMC is stored.
     ShaderDir,      // Where shaders are stored.
     TASDir,         // Where TAS scripts are stored.
@@ -193,39 +193,39 @@ template <typename Path>
 void SetAppDirectory(const std::string& app_directory);
 
 /**
- * Gets the filesystem path associated with the CitronPath enum.
+ * Gets the filesystem path associated with the SumiPath enum.
  *
- * @param citron_path CitronPath enum
+ * @param sumi_path SumiPath enum
  *
- * @returns The filesystem path associated with the CitronPath enum.
+ * @returns The filesystem path associated with the SumiPath enum.
  */
-[[nodiscard]] const std::filesystem::path& GetCitronPath(CitronPath citron_path);
+[[nodiscard]] const std::filesystem::path& GetSumiPath(SumiPath sumi_path);
 
 /**
- * Gets the filesystem path associated with the CitronPath enum as a UTF-8 encoded std::string.
+ * Gets the filesystem path associated with the SumiPath enum as a UTF-8 encoded std::string.
  *
- * @param citron_path CitronPath enum
+ * @param sumi_path SumiPath enum
  *
- * @returns The filesystem path associated with the CitronPath enum as a UTF-8 encoded std::string.
+ * @returns The filesystem path associated with the SumiPath enum as a UTF-8 encoded std::string.
  */
-[[nodiscard]] std::string GetCitronPathString(CitronPath citron_path);
+[[nodiscard]] std::string GetSumiPathString(SumiPath sumi_path);
 
 /**
- * Sets a new filesystem path associated with the CitronPath enum.
+ * Sets a new filesystem path associated with the SumiPath enum.
  * If the filesystem object at new_path is not a directory, this function will not do anything.
  *
- * @param citron_path CitronPath enum
+ * @param sumi_path SumiPath enum
  * @param new_path New filesystem path
  */
-void SetCitronPath(CitronPath citron_path, const std::filesystem::path& new_path);
+void SetSumiPath(SumiPath sumi_path, const std::filesystem::path& new_path);
 
 #ifdef _WIN32
 template <typename Path>
-void SetCitronPath(CitronPath citron_path, const Path& new_path) {
+void SetSumiPath(SumiPath sumi_path, const Path& new_path) {
     if constexpr (IsChar<typename Path::value_type>) {
-        SetCitronPath(citron_path, ToU8String(new_path));
+        SetSumiPath(sumi_path, ToU8String(new_path));
     } else {
-        SetCitronPath(citron_path, std::filesystem::path{new_path});
+        SetSumiPath(sumi_path, std::filesystem::path{new_path});
     }
 }
 #endif
@@ -257,14 +257,14 @@ void SetCitronPath(CitronPath citron_path, const Path& new_path) {
 [[nodiscard]] std::filesystem::path GetHomeDirectory();
 
 /**
- * Gets the relevant paths for citron to store its data based on the given XDG environment variable.
+ * Gets the relevant paths for sumi to store its data based on the given XDG environment variable.
  * See https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
  * Defaults to $HOME/.local/share for main application data,
  * $HOME/.cache for cached data, and $HOME/.config for configuration files.
  *
  * @param env_name XDG environment variable name
  *
- * @returns The path where citron should store its data.
+ * @returns The path where sumi should store its data.
  */
 [[nodiscard]] std::filesystem::path GetDataDirectory(const std::string& env_name);
 
@@ -288,11 +288,11 @@ enum class DirectorySeparator {
 };
 
 // Splits the path on '/' or '\' and put the components into a vector
-// i.e. "C:\Users\Citron\Documents\save.bin" becomes {"C:", "Users", "Citron", "Documents", "save.bin" }
+// i.e. "C:\Users\Sumi\Documents\save.bin" becomes {"C:", "Users", "Sumi", "Documents", "save.bin" }
 [[nodiscard]] std::vector<std::string_view> SplitPathComponents(std::string_view filename);
 
 // Splits the path on '/' or '\' and put the components into a vector
-// i.e. "C:\Users\Citron\Documents\save.bin" becomes {"C:", "Users", "Citron", "Documents", "save.bin" }
+// i.e. "C:\Users\Sumi\Documents\save.bin" becomes {"C:", "Users", "Sumi", "Documents", "save.bin" }
 [[nodiscard]] std::vector<std::string> SplitPathComponentsCopy(std::string_view filename);
 
 // Removes trailing slash, makes all '\\' into '/', and removes duplicate '/'. Makes '/' into '\\'

@@ -15,8 +15,8 @@ namespace FileSys {
 class DirectoryPathParser;
 
 class Path {
-    CITRON_NON_COPYABLE(Path);
-    CITRON_NON_MOVEABLE(Path);
+    SUMI_NON_COPYABLE(Path);
+    SUMI_NON_MOVEABLE(Path);
 
 private:
     static constexpr const char* EmptyPath = "";
@@ -27,7 +27,7 @@ private:
 
 public:
     class WriteBuffer {
-        CITRON_NON_COPYABLE(WriteBuffer);
+        SUMI_NON_COPYABLE(WriteBuffer);
 
     private:
         char* m_buffer;

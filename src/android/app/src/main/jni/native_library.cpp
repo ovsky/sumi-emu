@@ -6,12 +6,12 @@
 
 extern "C" {
 
-JNIEXPORT jboolean JNICALL Java_org_citron_citron_1emu_NativeLibrary_isFirmwareAvailable(
+JNIEXPORT jboolean JNICALL Java_org_sumi_sumi_1emu_NativeLibrary_isFirmwareAvailable(
     JNIEnv* env, jobject obj) {
     return Core::Crypto::KeyManager::Instance().IsFirmwareAvailable();
 }
 
-JNIEXPORT jboolean JNICALL Java_org_citron_citron_1emu_NativeLibrary_checkFirmwarePresence(
+JNIEXPORT jboolean JNICALL Java_org_sumi_sumi_1emu_NativeLibrary_checkFirmwarePresence(
     JNIEnv* env, jobject obj) {
     constexpr u64 MiiEditId = 0x0100000000001009; // Mii Edit applet ID
     constexpr u64 QLaunchId = 0x0100000000001000; // Home Menu applet ID

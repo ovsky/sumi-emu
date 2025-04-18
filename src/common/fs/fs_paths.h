@@ -3,12 +3,12 @@
 
 #pragma once
 
-// citron data directories
+// sumi data directories
 
-#define CITRON_DIR "citron"
+#define SUMI_DIR "sumi"
 #define PORTABLE_DIR "user"
 
-// Sub-directories contained within a citron data directory
+// Sub-directories contained within a sumi data directory
 
 #define AMIIBO_DIR "amiibo"
 #define CACHE_DIR "cache"
@@ -26,6 +26,6 @@
 #define TAS_DIR "tas"
 #define ICONS_DIR "icons"
 
-// citron-specific files
+// sumi-specific files
 
-#define LOG_FILE "citron_log.txt"
+#define LOG_FILE "sumi_log.txt"

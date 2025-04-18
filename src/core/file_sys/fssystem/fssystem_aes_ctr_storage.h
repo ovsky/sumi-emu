@@ -14,8 +14,8 @@
 namespace FileSys {
 
 class AesCtrStorage : public IStorage {
-    CITRON_NON_COPYABLE(AesCtrStorage);
-    CITRON_NON_MOVEABLE(AesCtrStorage);
+    SUMI_NON_COPYABLE(AesCtrStorage);
+    SUMI_NON_MOVEABLE(AesCtrStorage);
 
 public:
     static constexpr size_t BlockSize = 0x10;

@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
-// SPDX-FileCopyrightText: Copyright 2025 Citron Emulator Project
+// SPDX-FileCopyrightText: Copyright 2025 Sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <atomic>
@@ -261,7 +261,7 @@ void ShaderCache::LoadDiskResources(u64 title_id, std::stop_token stop_loading,
     if (title_id == 0) {
         return;
     }
-    const auto shader_dir{Common::FS::GetCitronPath(Common::FS::CitronPath::ShaderDir)};
+    const auto shader_dir{Common::FS::GetSumiPath(Common::FS::SumiPath::ShaderDir)};
     const auto base_dir{shader_dir / fmt::format("{:016x}", title_id)};
     if (!Common::FS::CreateDir(shader_dir) || !Common::FS::CreateDir(base_dir)) {
         LOG_ERROR(Common_Filesystem, "Failed to create shader cache directories");

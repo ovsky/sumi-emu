@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
-// SPDX-FileCopyrightText: Copyright 2025 citron Emulator Project
+// SPDX-FileCopyrightText: Copyright 2025 sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <cstring>
@@ -32,7 +32,7 @@ std::condition_variable commandQueueCondition;
 std::atomic<bool> isCommandQueueActive{true};
 std::thread commandQueueThread;
 
-// Pointer to Citron's scheduler for integration
+// Pointer to Sumi's scheduler for integration
 Scheduler* globalScheduler = nullptr;
 
 // Command queue worker thread (multi-threaded command recording)
@@ -95,7 +95,7 @@ void SetGlobalScheduler(Scheduler* scheduler) {
     globalScheduler = scheduler;
 }
 
-// Submit a Vulkan command to the existing Citron scheduler
+// Submit a Vulkan command to the existing Sumi scheduler
 void SubmitToScheduler(std::function<void(vk::CommandBuffer)> command) {
     if (globalScheduler) {
         globalScheduler->Record(std::move(command));
@@ -104,7 +104,7 @@ void SubmitToScheduler(std::function<void(vk::CommandBuffer)> command) {
     }
 }
 
-// Flush the Citron scheduler - use when needing to ensure commands are executed
+// Flush the Sumi scheduler - use when needing to ensure commands are executed
 u64 FlushScheduler(VkSemaphore signal_semaphore, VkSemaphore wait_semaphore) {
     if (globalScheduler) {
         return globalScheduler->Flush(signal_semaphore, wait_semaphore);
@@ -415,7 +415,7 @@ void ShaderManager::WaitForCompilation() {
     }
 }
 
-// Integrate with Citron's scheduler for shader operations
+// Integrate with Sumi's scheduler for shader operations
 void ShaderManager::SetScheduler(Scheduler* scheduler) {
     SetGlobalScheduler(scheduler);
 }
