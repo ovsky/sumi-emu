@@ -58,7 +58,7 @@ struct Values {
     // Input/performance overlay settings
     std::vector<OverlayControlData> overlay_control_data;
     Settings::Setting<s32> overlay_scale{linkage, 50, "control_scale", Settings::Category::Overlay};
-    Settings::Setting<s32> overlay_opacity{linkage, 100, "control_opacity",
+    Settings::Setting<s32> overlay_opacity{linkage, 40, "control_opacity",
                                            Settings::Category::Overlay};
 
     Settings::Setting<bool> joystick_rel_center{linkage, true, "joystick_rel_center",
