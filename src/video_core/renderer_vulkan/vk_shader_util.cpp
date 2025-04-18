@@ -171,9 +171,11 @@ void AsyncCompileShader(const Device& device, const std::string& shader_path,
     }
 
     // Use actual threading for async compilation
-    std::thread([device_ptr = &device, shader_path, shader_callback = std::move(callback), callback]() mutable {
+    std::thread([device_ptr = &device, shader_path, callback = std::move(callback)]() mutable {
+        auto startTime = std::chrono::high_resolution_clock::now();
+
         try {
-            std::vector<u32> spv_code;
+            std::vector<u32> spir_v;
             bool success = false;
 
             // Check if the file exists and attempt to read it
@@ -184,15 +186,15 @@ void AsyncCompileShader(const Device& device, const std::string& shader_path,
                     size_t file_size = static_cast<size_t>(shader_file.tellg());
                     shader_file.seekg(0, std::ios::beg);
 
-                    spv_code.resize(file_size / sizeof(u32));
-                    if (shader_file.read(reinterpret_cast<char*>(spv_code.data()), file_size)) {
+                    spir_v.resize(file_size / sizeof(u32));
+                    if (shader_file.read(reinterpret_cast<char*>(spir_v.data()), file_size)) {
                         success = true;
                     }
                 }
             }
 
             if (success) {
-                vk::ShaderModule shader = BuildShader(*device_ptr, spv_code);
+                vk::ShaderModule shader = BuildShader(*device_ptr, spir_v);
                 if (IsShaderValid(*shader)) {
                     // Cache the compiled shader to disk for faster loading next time
                     std::string cache_path = std::string(SHADER_CACHE_DIR) + "/" +
@@ -200,23 +202,39 @@ void AsyncCompileShader(const Device& device, const std::string& shader_path,
 
                     std::ofstream cache_file(cache_path, std::ios::binary);
                     if (cache_file) {
-                        cache_file.write(reinterpret_cast<const char*>(spv_code.data()),
-                                        spv_code.size() * sizeof(u32));
+                        cache_file.write(reinterpret_cast<const char*>(spir_v.data()),
+                                        spir_v.size() * sizeof(u32));
                     }
 
-                    // Directly invoke the callback with the compiled shader
-                    shader_callback(*shader);
+                    auto endTime = std::chrono::high_resolution_clock::now();
+                    std::chrono::duration<double> duration = endTime - startTime;
+                    LOG_INFO(Render_Vulkan, "Shader compiled in {:.2f} seconds: {}",
+                            duration.count(), shader_path);
+
+                    // Store the module pointer for the callback
+                    VkShaderModule raw_module = *shader;
+
+                    // Submit callback to main thread via command queue for thread safety
+                    SubmitCommandToQueue([callback = std::move(callback), raw_module]() {
+                        callback(raw_module);
+                    });
                 } else {
                     LOG_ERROR(Render_Vulkan, "Shader validation failed: {}", shader_path);
-                    shader_callback(VK_NULL_HANDLE);
+                    SubmitCommandToQueue([callback = std::move(callback)]() {
+                        callback(VK_NULL_HANDLE);
+                    });
                 }
             } else {
                 LOG_ERROR(Render_Vulkan, "Failed to read shader file: {}", shader_path);
-                shader_callback(VK_NULL_HANDLE);
+                SubmitCommandToQueue([callback = std::move(callback)]() {
+                    callback(VK_NULL_HANDLE);
+                });
             }
         } catch (const std::exception& e) {
             LOG_ERROR(Render_Vulkan, "Error compiling shader: {}", e.what());
-            callback(VK_NULL_HANDLE);
+            SubmitCommandToQueue([callback = std::move(callback)]() {
+                callback(VK_NULL_HANDLE);
+            });
         }
 
         // Release the compilation flag
