@@ -21,7 +21,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <application
         android:name="org.sumi.sumi_emu.SumiApplication"
         android:label="@string/app_name_suffixed"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/ic_sumi"
+        android:roundIcon="@drawable/ic_sumi_round"
         android:allowBackup="true"
         android:hasFragileUserData="false"
         android:supportsRtl="true"
