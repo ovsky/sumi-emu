@@ -41,20 +41,18 @@ public:
             {
                 [[maybe_unused]] std::conditional_t<with_state, StateType, int> state{func()};
                 while (!stop_token.stop_requested()) {
-                    Task task;
-                    {
-                        std::unique_lock lock{queue_mutex};
-                        if (requests.empty()) {
-                            wait_condition.notify_all();
-                        }
-                        Common::CondvarWait(condition, lock, stop_token,
-                                            [this] { return !requests.empty(); });
+                    std::unique_lock lock{queue_mutex};
+                    if (requests.empty()) {
+                        wait_condition.notify_all();
+                        Common::CondvarWait(condition, lock, stop_token, [this] { return !requests.empty(); });
                         if (stop_token.stop_requested()) {
-                            break;
+                            continue;
                         }
-                        task = std::move(requests.front());
-                        requests.pop();
                     }
+                    auto task = std::move(requests.front());
+                    requests.pop();
+                    lock.unlock();
+
                     if constexpr (with_state) {
                         task(&state);
                     } else {
