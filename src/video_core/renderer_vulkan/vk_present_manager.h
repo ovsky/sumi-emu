@@ -50,6 +50,8 @@ public:
     void RecreateFrame(Frame* frame, u32 width, u32 height, VkFormat image_view_format,
                        VkRenderPass rd);
 
+    void ReleaseFrame(Frame* frame);
+
     /// Waits for the present thread to finish presenting all queued frames.
     void WaitPresent();
 

@@ -157,11 +157,18 @@ Frame* PresentManager::GetRenderFrame() {
     return frame;
 }
 
+// Encapsulates the copy to swapchain in a command buffer and submits it to the queue.
+void PresentManager::ReleaseFrame(Frame* frame) {
+    std::scoped_lock lock{free_mutex};
+    free_queue.push(frame);
+    free_cv.notify_one();
+}
+
 void PresentManager::Present(Frame* frame) {
     if (!use_present_thread) {
         scheduler.WaitWorker();
         CopyToSwapchain(frame);
-        free_queue.push(frame);
+        ReleaseFrame(frame);
         return;
     }
 
@@ -288,8 +295,7 @@ void PresentManager::PresentThread(std::stop_token token) {
 
         // Free the frame for reuse
         std::scoped_lock fl{free_mutex};
-        free_queue.push(frame);
-        free_cv.notify_one();
+        ReleaseFrame(frame);
     }
 }
 
