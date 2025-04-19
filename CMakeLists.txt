@@ -137,7 +137,7 @@ endif()
 option(ENABLE_OPENSSL "Enable OpenSSL backend for ISslConnection" ${DEFAULT_ENABLE_OPENSSL})
 
 if (ANDROID AND SUMI_DOWNLOAD_ANDROID_VVL)
-    set(vvl_version "1.4.304.1")
+    set(vvl_version "1.4.313.0")
     set(vvl_zip_file "${CMAKE_BINARY_DIR}/externals/vvl-android.zip")
     set(vvl_lib_path "${CMAKE_CURRENT_SOURCE_DIR}/src/android/app/src/main/jniLibs/arm64-v8a/")
     set(vvl_final_lib "${vvl_lib_path}/libVkLayer_khronos_validation.so")
