@@ -165,10 +165,16 @@ void PresentManager::Present(Frame* frame) {
         return;
     }
 
-    scheduler.Record([this, frame](vk::CommandBuffer) {
-        std::unique_lock lock{queue_mutex};
-        present_queue.push(frame);
-        frame_cv.notify_one();
+    scheduler.Record([this, &frame](vk::CommandBuffer) {
+        std::unique_lock lock(queue_mutex);
+        frame_cv.wait(lock, [&] { return !present_queue.empty(); });
+
+        frame = present_queue.front();
+        present_queue.pop();
+
+        // std::unique_lock lock{queue_mutex};
+        // present_queue.push(frame);
+        // frame_cv.notify_one();
     });
 }
 
@@ -195,7 +201,7 @@ void PresentManager::RecreateFrame(Frame* frame, u32 width, u32 height, VkFormat
         .arrayLayers = 1,
         .samples = VK_SAMPLE_COUNT_1_BIT,
         .tiling = VK_IMAGE_TILING_OPTIMAL,
-        .usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+        .usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
         .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
         .queueFamilyIndexCount = 0,
         .pQueueFamilyIndices = nullptr,
@@ -327,10 +333,12 @@ void PresentManager::CopyToSwapchainImpl(Frame* frame) {
 
     // If the size of the incoming frames has changed, recreate the swapchain
     // to account for that.
-    const bool is_suboptimal = swapchain.NeedsRecreation();
-    const bool size_changed =
-        swapchain.GetWidth() != frame->width || swapchain.GetHeight() != frame->height;
-    if (is_suboptimal || size_changed) {
+    //    const bool is_suboptimal = swapchain.NeedsRecreation();
+
+        // Remove redundant checks
+    if (swapchain.NeedsRecreation() ||
+        swapchain.GetWidth() != frame->width ||
+        swapchain.GetHeight() != frame->height) {
         RecreateSwapchain(frame);
     }
 
@@ -339,7 +347,7 @@ void PresentManager::CopyToSwapchainImpl(Frame* frame) {
     }
 
     const vk::CommandBuffer cmdbuf{frame->cmdbuf};
-    cmdbuf.Begin({
+    frame->cmdbuf.Begin({
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
         .pNext = nullptr,
         .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
