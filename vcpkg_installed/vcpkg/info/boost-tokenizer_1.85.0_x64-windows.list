@@ -1,0 +1,15 @@
+x64-windows/
+x64-windows/include/
+x64-windows/include/boost/
+x64-windows/include/boost/token_functions.hpp
+x64-windows/include/boost/token_iterator.hpp
+x64-windows/include/boost/tokenizer.hpp
+x64-windows/share/
+x64-windows/share/boost-tokenizer/
+x64-windows/share/boost-tokenizer/copyright
+x64-windows/share/boost-tokenizer/vcpkg.spdx.json
+x64-windows/share/boost-tokenizer/vcpkg_abi_info.txt
+x64-windows/share/boost_tokenizer/
+x64-windows/share/boost_tokenizer/boost_tokenizer-config-version.cmake
+x64-windows/share/boost_tokenizer/boost_tokenizer-config.cmake
+x64-windows/share/boost_tokenizer/boost_tokenizer-targets.cmake

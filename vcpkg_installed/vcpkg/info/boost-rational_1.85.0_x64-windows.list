@@ -1,0 +1,13 @@
+x64-windows/
+x64-windows/include/
+x64-windows/include/boost/
+x64-windows/include/boost/rational.hpp
+x64-windows/share/
+x64-windows/share/boost-rational/
+x64-windows/share/boost-rational/copyright
+x64-windows/share/boost-rational/vcpkg.spdx.json
+x64-windows/share/boost-rational/vcpkg_abi_info.txt
+x64-windows/share/boost_rational/
+x64-windows/share/boost_rational/boost_rational-config-version.cmake
+x64-windows/share/boost_rational/boost_rational-config.cmake
+x64-windows/share/boost_rational/boost_rational-targets.cmake

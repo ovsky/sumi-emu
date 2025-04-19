@@ -1,0 +1,15 @@
+x64-windows/
+x64-windows/include/
+x64-windows/include/boost/
+x64-windows/include/boost/implicit_cast.hpp
+x64-windows/include/boost/polymorphic_cast.hpp
+x64-windows/include/boost/polymorphic_pointer_cast.hpp
+x64-windows/share/
+x64-windows/share/boost-conversion/
+x64-windows/share/boost-conversion/copyright
+x64-windows/share/boost-conversion/vcpkg.spdx.json
+x64-windows/share/boost-conversion/vcpkg_abi_info.txt
+x64-windows/share/boost_conversion/
+x64-windows/share/boost_conversion/boost_conversion-config-version.cmake
+x64-windows/share/boost_conversion/boost_conversion-config.cmake
+x64-windows/share/boost_conversion/boost_conversion-targets.cmake

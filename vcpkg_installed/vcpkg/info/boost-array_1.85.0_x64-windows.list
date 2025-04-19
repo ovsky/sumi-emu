@@ -1,0 +1,13 @@
+x64-windows/
+x64-windows/include/
+x64-windows/include/boost/
+x64-windows/include/boost/array.hpp
+x64-windows/share/
+x64-windows/share/boost-array/
+x64-windows/share/boost-array/copyright
+x64-windows/share/boost-array/vcpkg.spdx.json
+x64-windows/share/boost-array/vcpkg_abi_info.txt
+x64-windows/share/boost_array/
+x64-windows/share/boost_array/boost_array-config-version.cmake
+x64-windows/share/boost_array/boost_array-config.cmake
+x64-windows/share/boost_array/boost_array-targets.cmake
