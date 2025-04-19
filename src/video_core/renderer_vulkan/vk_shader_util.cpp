@@ -43,7 +43,7 @@ void CommandQueueWorker() {
             std::unique_lock<std::mutex> lock(commandQueueMutex);
             if (commandQueue.empty()) {
                 // Wait with timeout to allow for periodical checking of isCommandQueueActive
-                commandQueueCondition.wait_for(lock, std::chrono::milliseconds(100),
+                commandQueueCondition.wait_for(lock, std::chrono::milliseconds(50),
                     []{ return !commandQueue.empty() || !isCommandQueueActive.load(); });
 
                 // If we woke up but the queue is still empty and we should still be active, loop
@@ -68,6 +68,9 @@ void InitializeCommandQueue() {
     if (!commandQueueThread.joinable()) {
         isCommandQueueActive.store(true);
         commandQueueThread = std::thread(CommandQueueWorker);
+    }else
+    {
+        commandQueueThread.join();
     }
 }
 
