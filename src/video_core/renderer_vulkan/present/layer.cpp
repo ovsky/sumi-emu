@@ -7,6 +7,7 @@
 #include "common/settings.h"
 #include "video_core/framebuffer_config.h"
 #include "video_core/renderer_vulkan/present/fsr.h"
+#include "video_core/renderer_vulkan/present/cas.h"
 #include "video_core/renderer_vulkan/present/fxaa.h"
 #include "video_core/renderer_vulkan/present/layer.h"
 #include "video_core/renderer_vulkan/present/present_push_constants.h"
@@ -52,15 +53,66 @@ Layer::Layer(const Device& device_, MemoryAllocator& memory_allocator_, Schedule
              VkExtent2D output_size, VkDescriptorSetLayout layout, const PresentFilters& filters_)
     : device(device_), memory_allocator(memory_allocator_), scheduler(scheduler_),
       device_memory(device_memory_), filters(filters_), image_count(image_count_) {
+
+    cas = std::make_unique<CAS>(device, memory_allocator_, scheduler, descriptor_pool);
+
+    UpdateScalingFilter();
+
     CreateDescriptorPool();
     CreateDescriptorSets(layout);
     if (filters.get_scaling_filter() == Settings::ScalingFilter::Fsr) {
         CreateFSR(output_size);
     }
+    if (filters.get_scaling_filter() == Settings::ScalingFilter::Cas) {
+        CreateFSR(output_size);
+    }
+}
+
+void Layer::UpdateScalingFilter() {
+    fsr = false;
+    cas = false;
+
+    switch (Settings::values.scaling_filter) {
+    case Settings::ScalingFilter::Fsr:
+        fsr = true;
+        fsr = std::make_unique<FSR>(device, allocator, scheduler, descriptor_pool);
+        break;
+    case Settings::ScalingFilter::Cas:
+        cas = true;
+        cas = std::make_unique<CAS>(device, allocator, scheduler, descriptor_pool);
+        cas->SetSharpness(Settings::values.cas_sharpness);
+        break;
+    default:
+        break;
+    }
+}
+
+void Layer::ReloadFilters() {
+    fsr.reset();
+    cas.reset();
+    UpdateScalingFilter();
+}
+
+void Layer::OnSwapchainRecreated(vk::Extent2D new_extent) {
+    if (cas) {
+        cas->SetExtent(new_extent);
+    }
+    if (fsr) {
+        fsr->SetExtent(new_extent);
+    }
 }
 
 Layer::~Layer() {
     ReleaseRawImages();
+}
+
+void Layer::Draw(vk::CommandBuffer command_buffer, vk::ImageView image_view,
+    vk::Extent2D extent, Common::Rectangle<int> screen) {
+    if (cas) {
+    cas->Draw(texture_cache, image_view, extent);
+    } else if (fsr) {
+    fsr->Draw(texture_cache, image_view, extent);
+    }
 }
 
 void Layer::ConfigureDraw(PresentPushConstants* out_push_constants,
@@ -103,8 +155,12 @@ void Layer::ConfigureDraw(PresentPushConstants* out_push_constants,
     };
 
     if (fsr) {
-        source_image_view = fsr->Draw(scheduler, image_index, source_image, source_image_view,
-                                      render_extent, crop_rect);
+        source_image_view = fsr->Draw(scheduler, image_index, source_image, source_image_view, render_extent, crop_rect);
+        crop_rect = {0, 0, 1, 1};
+    }
+    else if
+    {
+        source_image_view = cas->Draw(scheduler, image_index, source_image, source_image_view, render_extent, crop_rect);
         crop_rect = {0, 0, 1, 1};
     }
 

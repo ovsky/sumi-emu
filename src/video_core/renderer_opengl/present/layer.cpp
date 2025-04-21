@@ -75,6 +75,15 @@ GLuint Layer::ConfigureDraw(std::array<GLfloat, 3 * 2>& out_matrix,
         crop = {0, 0, 1, 1};
     }
 
+    if (filters.get_scaling_filter() == Settings::ScalingFilter::Cas) {
+        if (!cas || cas->NeedsRecreation(layout.screen)) {
+            cas = std::make_unique<FSR>(layout.screen.GetWidth(), layout.screen.GetHeight());
+        }
+
+        texture = cas->Draw(program_manager, texture, info.scaled_width, info.scaled_height, crop);
+        crop = {0, 0, 1, 1};
+    }
+
     out_matrix =
         MakeOrthographicMatrix(static_cast<float>(layout.width), static_cast<float>(layout.height));
 

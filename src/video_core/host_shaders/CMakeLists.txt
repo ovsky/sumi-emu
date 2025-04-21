@@ -15,6 +15,8 @@ set(GLSL_INCLUDES
 )
 
 set(SHADER_FILES
+    filters/cas.vert
+    filters/cas.frag
     astc_decoder.comp
     blit_color_float.frag
     block_linear_unswizzle_2d.comp

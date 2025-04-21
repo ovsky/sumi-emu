@@ -61,6 +61,8 @@ add_library(video_core STATIC
     framebuffer_config.h
     fsr.cpp
     fsr.h
+    host_shaders/filters/cas.cpp
+    host_shaders/filters/cas.h
     host1x/codecs/codec.cpp
     host1x/codecs/codec.h
     host1x/codecs/h264.cpp
@@ -123,6 +125,8 @@ add_library(video_core STATIC
     renderer_opengl/present/filters.h
     renderer_opengl/present/fsr.cpp
     renderer_opengl/present/fsr.h
+#    renderer_opengl/present/cas.cpp
+#    renderer_opengl/present/cas.h
     renderer_opengl/present/fxaa.cpp
     renderer_opengl/present/fxaa.h
     renderer_opengl/present/layer.cpp
@@ -180,6 +184,8 @@ add_library(video_core STATIC
     renderer_vulkan/present/fsr.h
     renderer_vulkan/present/fxaa.cpp
     renderer_vulkan/present/fxaa.h
+    renderer_vulkan/present/cas.h
+    renderer_vulkan/present/cas.cpp
     renderer_vulkan/present/layer.cpp
     renderer_vulkan/present/layer.h
     renderer_vulkan/present/present_push_constants.h
@@ -377,6 +383,7 @@ if (ARCHITECTURE_x86_64)
     target_sources(video_core PRIVATE
         macro/macro_jit_x64.cpp
         macro/macro_jit_x64.h
+        filters/cas.cpp
     )
     target_link_libraries(video_core PUBLIC xbyak::xbyak)
 endif()

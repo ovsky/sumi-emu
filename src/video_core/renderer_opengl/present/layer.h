@@ -56,6 +56,9 @@ public:
                          const Tegra::FramebufferConfig& framebuffer,
                          const Layout::FramebufferLayout& layout, bool invert_y);
 
+    bool cas = false;
+
+
 private:
     /// Loads framebuffer from emulated memory into the active OpenGL texture.
     FramebufferTextureInfo LoadFBToScreenInfo(const Tegra::FramebufferConfig& framebuffer);
@@ -77,6 +80,7 @@ private:
     TextureInfo framebuffer_texture;
 
     std::unique_ptr<FSR> fsr;
+//    std::unique_ptr<CAS> cas;
     std::unique_ptr<FXAA> fxaa;
     std::unique_ptr<SMAA> smaa;
 };
