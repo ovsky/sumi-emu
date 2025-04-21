@@ -123,6 +123,8 @@ add_library(video_core STATIC
     renderer_opengl/present/filters.h
     renderer_opengl/present/fsr.cpp
     renderer_opengl/present/fsr.h
+    renderer_opengl/present/cas.cpp
+    renderer_opengl/present/cas.h
     renderer_opengl/present/fxaa.cpp
     renderer_opengl/present/fxaa.h
     renderer_opengl/present/layer.cpp

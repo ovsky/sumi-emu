@@ -6,6 +6,7 @@
 #include "video_core/renderer_opengl/gl_blit_screen.h"
 #include "video_core/renderer_opengl/gl_rasterizer.h"
 #include "video_core/renderer_opengl/present/fsr.h"
+#include "video_core/renderer_opengl/present/cas.h"
 #include "video_core/renderer_opengl/present/fxaa.h"
 #include "video_core/renderer_opengl/present/layer.h"
 #include "video_core/renderer_opengl/present/present_uniforms.h"
@@ -72,6 +73,16 @@ GLuint Layer::ConfigureDraw(std::array<GLfloat, 3 * 2>& out_matrix,
         }
 
         texture = fsr->Draw(program_manager, texture, info.scaled_width, info.scaled_height, crop);
+        crop = {0, 0, 1, 1};
+    }
+
+    if (filters.get_scaling_filter() == Settings::ScalingFilter::Cas) {
+        if (!cas || cas->NeedsRecreation(layout.screen)) {
+            cas = std::make_unique<CAS>(layout.screen.GetWidth(), layout.screen.GetHeight());
+            // cas = std::make_unique<CAS>(device, scheduler, memory_manager);
+        }
+
+        texture = cas->Draw(program_manager, texture, info.scaled_width, info.scaled_height, crop);
         crop = {0, 0, 1, 1};
     }
 

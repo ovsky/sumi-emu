@@ -7,6 +7,7 @@
 #include "common/settings.h"
 #include "video_core/framebuffer_config.h"
 #include "video_core/renderer_vulkan/present/fsr.h"
+#include "video_core/renderer_vulkan/present/cas.h"
 #include "video_core/renderer_vulkan/present/fxaa.h"
 #include "video_core/renderer_vulkan/present/layer.h"
 #include "video_core/renderer_vulkan/present/present_push_constants.h"
@@ -108,6 +109,12 @@ void Layer::ConfigureDraw(PresentPushConstants* out_push_constants,
         crop_rect = {0, 0, 1, 1};
     }
 
+    if (cas) {
+        source_image_view = cas->Draw(scheduler, image_index, source_image, source_image_view,
+                                      render_extent, crop_rect);
+        crop_rect = {0, 0, 1, 1};
+    }
+
     SetMatrixData(*out_push_constants, layout);
     SetVertexData(*out_push_constants, layout, crop_rect);
 
@@ -155,6 +162,11 @@ void Layer::CreateRawImages(const Tegra::FramebufferConfig& framebuffer) {
 
 void Layer::CreateFSR(VkExtent2D output_size) {
     fsr = std::make_unique<FSR>(device, memory_allocator, image_count, output_size);
+}
+
+void Layer::CreateCAS(VkExtent2D output_size) {
+    cas = std::make_unique<CAS>(device, memory_allocator, image_count, output_size);
+    // cas = std::make_unique<CAS>(device, scheduler, memory_manager);
 }
 
 void Layer::RefreshResources(const Tegra::FramebufferConfig& framebuffer) {
