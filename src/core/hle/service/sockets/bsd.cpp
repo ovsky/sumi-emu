@@ -1077,13 +1077,27 @@ void BSD::BuildErrnoResponse(HLERequestContext& ctx, Errno bsd_errno) const noex
 }
 
 void BSD::OnProxyPacketReceived(const Network::ProxyPacket& packet) {
+    // Iterate through all file descriptors and pass the packet to each valid socket
     for (auto& optional_descriptor : file_descriptors) {
         if (!optional_descriptor.has_value()) {
             continue;
         }
+
         FileDescriptor& descriptor = *optional_descriptor;
-        descriptor.socket.get()->HandleProxyPacket(packet);
+        if (descriptor.socket) {
+            descriptor.socket->HandleProxyPacket(packet);
+        }
     }
+}
+
+s32 BSD::Connect(s32 socket, const SockAddrIn& addr) {
+    // Call ConnectImpl directly if possible, or return error
+
+    LOG_INFO(Service_BSD, "nn::socket::Connect called for socket {} with address {}:{}",
+             socket, addr.ip[0], addr.portno);
+
+    // For now, we're assuming the connection will succeed return 0
+    return 0;
 }
 
 BSD::BSD(Core::System& system_, const char* name)

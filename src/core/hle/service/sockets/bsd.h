@@ -38,6 +38,9 @@ public:
     Errno CloseImpl(s32 fd);
     std::optional<std::shared_ptr<Network::SocketBase>> GetSocket(s32 fd);
 
+    // Static function that can be called from nn::socket::Connect
+    static s32 Connect(s32 socket, const SockAddrIn& addr);
+
 private:
     /// Maximum number of file descriptors
     static constexpr size_t MAX_FD = 128;
