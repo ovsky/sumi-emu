@@ -124,7 +124,7 @@ abstract class SettingsItem(
                     titleId = R.string.frame_limit_slider,
                     descriptionId = R.string.frame_limit_slider_description,
                     min = 1,
-                    max = 400,
+                    max = 500,
                     units = "%"
                 )
             )
