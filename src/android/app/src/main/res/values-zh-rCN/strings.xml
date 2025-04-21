@@ -563,6 +563,7 @@
     <string name="scaling_filter_gaussian">高斯模糊</string>
     <string name="scaling_filter_scale_force">强制缩放</string>
     <string name="scaling_filter_fsr">AMD FidelityFX™️ 超级分辨率锐画技术 (FSR)</string>
+    <string name="scaling_filter_fsr">AMD FidelityFX™️ CAS</string>
 
     <!-- Anti-Aliasing -->
     <string name="anti_aliasing_none">无</string>

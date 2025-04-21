@@ -7,6 +7,7 @@
 #include "common/settings.h"
 #include "video_core/framebuffer_config.h"
 #include "video_core/renderer_vulkan/present/fsr.h"
+#include "video_core/renderer_vulkan/present/cas.h"
 #include "video_core/renderer_vulkan/present/fxaa.h"
 #include "video_core/renderer_vulkan/present/layer.h"
 #include "video_core/renderer_vulkan/present/present_push_constants.h"
@@ -56,6 +57,9 @@ Layer::Layer(const Device& device_, MemoryAllocator& memory_allocator_, Schedule
     CreateDescriptorSets(layout);
     if (filters.get_scaling_filter() == Settings::ScalingFilter::Fsr) {
         CreateFSR(output_size);
+    }
+    if (filters.get_scaling_filter() == Settings::ScalingFilter::Cas) {
+        CreateCAS(output_size);
     }
 }
 
@@ -108,6 +112,12 @@ void Layer::ConfigureDraw(PresentPushConstants* out_push_constants,
         crop_rect = {0, 0, 1, 1};
     }
 
+    if (cas || cas_enabled) {
+        source_image_view = cas->Draw(source_image, source_image_view,
+                                      render_extent);
+        crop_rect = {0, 0, 1, 1};
+    }
+
     SetMatrixData(*out_push_constants, layout);
     SetVertexData(*out_push_constants, layout, crop_rect);
 
@@ -153,9 +163,48 @@ void Layer::CreateRawImages(const Tegra::FramebufferConfig& framebuffer) {
     }
 }
 
-void Layer::CreateFSR(VkExtent2D output_size) {
-    fsr = std::make_unique<FSR>(device, memory_allocator, image_count, output_size);
+void Layer::UpdateFilter() {
+    fsr_enabled = false;
+    cas_enabled = false;
+
+    switch (Settings::values.scaling_filter) {
+    case Settings::ScalingFilter::Fsr:
+        fsr = true;
+        fsr_enabled = true;
+        fsr_filter->SetExtent(GetScaledExtent());
+        break;
+    case Settings::ScalingFilter::Cas:
+        cas = true;
+        cas_enabled = true;
+        cas_filter->SetExtent(GetScaledExtent());
+        cas_filter->SetSharpness(Settings::values.cas_sharpness);
+        break;
+    default:
+        break;
+    }
 }
+
+void Layer::ReloadFilters() {
+    fsr_filter.reset();
+    cas_filter.reset();
+    fsr_filter = std::make_unique<FSR>(device, allocator, scheduler, descriptor_pool);
+    cas_filter = std::make_unique<CAS>(device, allocator, scheduler, descriptor_pool);
+    UpdateFilter();
+}
+
+void Layer::CreateFSR(VkExtent2D output_size) {
+    cas_pass = std::make_unique<CASPass>(device, allocator, scheduler, descriptor_pool);
+}
+
+void Layer::CreateCAS(VkExtent2D output_size) {
+    cas = std::make_unique<CAS>(device, allocator, scheduler, descriptor_pool);
+    // cas = std::make_unique<CAS>(device, memory_allocator, image_count, output_size);
+}
+
+// void Layer::CreateCAS(VkExtent2D output_size) {
+//     cas = std::make_unique<CAS>(device, memory_allocator, image_count, output_size);
+//     // cas = std::make_unique<CAS>(device, scheduler, memory_manager);
+// }
 
 void Layer::RefreshResources(const Tegra::FramebufferConfig& framebuffer) {
     if (framebuffer.width == raw_width && framebuffer.height == raw_height &&

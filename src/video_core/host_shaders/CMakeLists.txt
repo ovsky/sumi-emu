@@ -7,6 +7,7 @@ set(FIDELITYFX_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/externals/FidelityFX-FSR/ffx-fsr)
 set(FIDELITYFX_FILES
     ${FIDELITYFX_INCLUDE_DIR}/ffx_a.h
     ${FIDELITYFX_INCLUDE_DIR}/ffx_fsr1.h
+    ${CMAKE_SOURCE_DIR}src/video_core/renderer_vulkan/filters/cas.h
 )
 
 set(GLSL_INCLUDES
@@ -78,6 +79,8 @@ set(SHADER_FILES
     convert_rgba16f_to_rgba8.frag
     dither_temporal.frag
     dynamic_resolution_scale.comp
+    ${CMAKE_SOURCE_DIR}src/video_core/renderer_vulkan/filters\cas.frag
+    ${CMAKE_SOURCE_DIR}src/video_core/renderer_vulkan/filters\cas.vert
 )
 
 find_program(GLSLANGVALIDATOR "glslangValidator")

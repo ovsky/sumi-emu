@@ -30,6 +30,7 @@ namespace Vulkan {
 class AntiAliasPass;
 class Device;
 class FSR;
+class CAS;
 class MemoryAllocator;
 struct PresentPushConstants;
 class RasterizerVulkan;
@@ -90,7 +91,11 @@ private:
     std::unique_ptr<AntiAliasPass> anti_alias{};
 
     std::unique_ptr<FSR> fsr{};
+    std::unique_ptr<CAS> cas{};
     std::vector<u64> resource_ticks{};
+
+    bool cas_enabled = false;
+    bool fsr_enabled = false;
 };
 
 } // namespace Vulkan

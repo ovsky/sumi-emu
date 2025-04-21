@@ -227,6 +227,7 @@
 
     <string name="scaling_filter_bilinear">Bilineární</string>
     <string name="scaling_filter_fsr">AMD FidelityFX™ Super Resolution</string>
+    <string name="scaling_filter_cas">AMD FidelityFX™ CAS</string>
 
     <!-- Anti-Aliasing -->
     <string name="anti_aliasing_none">Žádné</string>

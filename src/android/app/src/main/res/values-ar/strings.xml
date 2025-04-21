@@ -430,6 +430,7 @@
     <string name="scaling_filter_gaussian">Gaussian</string>
     <string name="scaling_filter_scale_force">ScaleForce</string>
     <string name="scaling_filter_fsr">AMD FidelityFX™ Super Resolution</string>
+    <string name="scaling_filter_cas">AMD FidelityFX™ CAS</string>
 
     <!-- Anti-Aliasing -->
     <string name="anti_aliasing_none">لا شيء</string>
@@ -502,4 +503,5 @@
     <!-- Licenses screen strings -->
     <string name="licenses">التراخيص</string>
     <string name="license_fidelityfx_fsr_description">AMD ترقية عالية الجودة من</string>
+    <string name="license_fidelityfx_cas_description">AMD ترقية عالية الجودة من</string>
 </resources>

@@ -364,6 +364,7 @@
     <string name="scaling_filter_gaussian">گاوسی</string>
     <string name="scaling_filter_scale_force">پێوەرهێز</string>
     <string name="scaling_filter_fsr">AMD FidelityFX™ سوپەر ووردبینی</string>
+    <string name="scaling_filter_cas">AMD FidelityFX™ CAS</string>
 
     <!-- Anti-Aliasing -->
     <string name="anti_aliasing_none">هیچ</string>
