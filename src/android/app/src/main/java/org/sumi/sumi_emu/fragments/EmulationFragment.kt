@@ -519,18 +519,18 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
                     val cpuBackend = NativeLibrary.getCpuBackend()
                     val gpuDriver = NativeLibrary.getGpuDriver()
                     if (_binding != null) {
-                        // Calculate color based on FPS (red at 0, green at 60)
+                        // Calculate color based on FPS (red at 0, green at 30)
                         val fps = perfStats[FPS].toFloat()
-                        val normalizedFps = (fps / 60f).coerceIn(0f, 1f)
+                        val normalizedFps = (fps / 30f).coerceIn(0f, 1f)
 
                         // Interpolate between red (0xFFFF0000) and green (0xFF00FF00)
                         val red = ((1f - normalizedFps) * 255).toInt()
-                        val green = (normalizedFps * 255).toInt()
-                        val color = android.graphics.Color.rgb(red, green, 0)
+                        val white = (normalizedFps * 255).toInt()
+                        val color = android.graphics.Color.rgb(red, white, 0)
 
                         binding.showFpsText.setTextColor(color)
                         binding.showFpsText.text =
-                            String.format("FPS: %.1f\n%s/%s", fps, cpuBackend, gpuDriver)
+                            String.format("Sumi | FPS: %.1f\n%s/%s", fps, cpuBackend, gpuDriver)
                     }
                     perfStatsUpdateHandler.postDelayed(perfStatsUpdater!!, 1000)
                 }
