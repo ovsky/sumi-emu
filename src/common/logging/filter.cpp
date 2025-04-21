@@ -174,6 +174,8 @@ const char* GetLogClassName(Class log_class) {
         ALL_LOG_CLASSES()
 #undef CLS
 #undef SUB
+    case Class::Service_BSD:                                                                       \
+        return "Service.BSD";
     case Class::Count:
         break;
     }
