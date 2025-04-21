@@ -734,6 +734,11 @@
   <string name="scaling_filter_scale_force">ScaleForce</string>
   <string name="scaling_filter_fsr">AMD FidelityFX™ Super Resolution</string>
 
+  <!-- CAS Settings -->
+  <string name="cas_sharpness">CAS Sharpness</string>
+  <string name="cas_sharpness_description">Adjusts the sharpness level for CAS. Higher values
+    produce sharper images.</string>
+
   <!-- Anti-Aliasing -->
   <string name="anti_aliasing_none">None</string>
   <string name="anti_aliasing_fxaa">FXAA</string>

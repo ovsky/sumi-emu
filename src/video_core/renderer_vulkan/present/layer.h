@@ -49,7 +49,11 @@ public:
                        const Tegra::FramebufferConfig& framebuffer,
                        const Layout::FramebufferLayout& layout);
 
+    bool Initialize(); // Declare the Initialize method
+    bool CreateCASResources(); // Declare the CreateCASResources method
+
 private:
+
     void CreateDescriptorPool();
     void CreateDescriptorSets(VkDescriptorSetLayout layout);
     void CreateStagingBuffer(const Tegra::FramebufferConfig& framebuffer);
@@ -68,6 +72,12 @@ private:
                        const Common::Rectangle<f32>& crop) const;
     void UpdateDescriptorSet(VkImageView image_view, VkSampler sampler, size_t image_index);
     void UpdateRawImage(const Tegra::FramebufferConfig& framebuffer, size_t image_index);
+
+    // CAS methods
+    // bool CreateCASResources();
+    void DestroyCASResources();
+    void ApplyCAS(vk::CommandBuffer cmdbuf);
+    void UpdateCASDescriptorSet(vk::ImageView input_view, vk::ImageView output_view);
 
 private:
     const Device& device;
@@ -91,6 +101,16 @@ private:
 
     std::unique_ptr<FSR> fsr{};
     std::vector<u64> resource_ticks{};
+
+    // CAS resources
+    vk::ShaderModule cas_shader_module;
+    vk::Pipeline cas_pipeline;
+    vk::PipelineLayout cas_pipeline_layout;
+    vk::DescriptorSetLayout cas_descriptor_set_layout;
+    vk::DescriptorPool cas_descriptor_pool;
+    VkDescriptorSet cas_descriptor_set;
+    // vk::DescriptorSet cas_descriptor_set;
+
 };
 
 } // namespace Vulkan
