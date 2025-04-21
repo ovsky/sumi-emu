@@ -10,6 +10,7 @@
 #include "core/hle/service/sockets/ethc.h"
 #include "core/hle/service/sockets/nsd.h"
 #include "core/hle/service/sockets/sfdnsres.h"
+#include "core/hle/service/sockets/socket_utils.h"
 #include "core/hle/service/sockets/sockets.h"
 
 namespace Service::Sockets {

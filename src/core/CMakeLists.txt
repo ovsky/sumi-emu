@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2018 yuzu Emulator Project
+# SPDX-FileCopyrightText: 2025 sumi Emulator Project
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 add_library(core STATIC
@@ -776,8 +777,12 @@ add_library(core STATIC
     hle/service/ngc/ngc.h
     hle/service/nifm/nifm.cpp
     hle/service/nifm/nifm.h
+    hle/service/nifm/nifm_utils.cpp
+    hle/service/nifm/nifm_utils.h
     hle/service/nim/nim.cpp
     hle/service/nim/nim.h
+    hle/service/nim/nim_utils.cpp
+    hle/service/nim/nim_utils.h
     hle/service/npns/npns.cpp
     hle/service/npns/npns.h
     hle/service/ns/account_proxy_interface.cpp
@@ -1061,6 +1066,8 @@ add_library(core STATIC
     hle/service/sockets/sockets.h
     hle/service/sockets/sockets_translate.cpp
     hle/service/sockets/sockets_translate.h
+    hle/service/sockets/socket_utils.cpp
+    hle/service/sockets/socket_utils.h
     hle/service/spl/csrng.cpp
     hle/service/spl/csrng.h
     hle/service/spl/spl.cpp

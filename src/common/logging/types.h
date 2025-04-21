@@ -1,4 +1,5 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
+// SPDX-FileCopyrightText: Copyright 2025 sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #pragma once
@@ -57,6 +58,7 @@ enum class Class : u8 {
     Service_BPC,        ///< The BPC service
     Service_BTDRV,      ///< The Bluetooth driver service
     Service_BTM,        ///< The BTM service
+    Service_BSD,        ///< The BSD sockets service
     Service_Capture,    ///< The capture service
     Service_ERPT,       ///< The error reporting service
     Service_ETicket,    ///< The ETicket service
