@@ -203,7 +203,7 @@ struct Values {
     SwitchableSetting<bool> use_speed_limit{
         linkage, true, "use_speed_limit", Category::Core, Specialization::Paired, false, true};
     SwitchableSetting<u16, true> speed_limit{linkage,
-                                             100,
+                                             200,
                                              0,
                                              9999,
                                              "speed_limit",
@@ -216,7 +216,7 @@ struct Values {
 
     // Memory
     SwitchableSetting<bool> use_gpu_memory_manager{linkage, false, "Use GPU Memory Manager", Category::Core};
-    SwitchableSetting<bool> enable_memory_snapshots{linkage, false, "Enable Memory Snapshots", Category::Core};
+    SwitchableSetting<bool> enable_memory_snapshots{linkage, true, "Enable Memory Snapshots", Category::Core};
 
     // Cpu
     SwitchableSetting<CpuBackend, true> cpu_backend{linkage,

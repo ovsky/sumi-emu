@@ -65,6 +65,7 @@ import org.sumi.sumi_emu.overlay.model.OverlayLayout
 import org.sumi.sumi_emu.utils.*
 import org.sumi.sumi_emu.utils.ViewUtils.setVisible
 import java.lang.NullPointerException
+import org.sumi.sumi_emu.thermal.ThermalMonitor
 
 class EmulationFragment : Fragment(), SurfaceHolder.Callback {
     private lateinit var emulationState: EmulationState
@@ -150,6 +151,8 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
         emulationState = EmulationState(game.path) {
             return@EmulationState driverViewModel.isInteractionAllowed.value
         }
+
+        // ThermalMonitor.StartThermalMonitor(requireContext())
     }
 
     /**
@@ -590,7 +593,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
             val color = android.graphics.Color.rgb(red, green, 0)
 
             binding.showThermalsText.setTextColor(color)
-            binding.showThermalsText.text = String.format("%.1f°C • %.1f°F", temperature, fahrenheit)
+            binding.showThermalsText.text = String.format("%.1f°C\n%.1f°F", temperature, fahrenheit)
         }
     }
 
