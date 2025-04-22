@@ -14,6 +14,7 @@ enum class IntSetting(override val key: String) : AbstractIntSetting {
     RENDERER_ACCURACY("gpu_accuracy"),
     RENDERER_RESOLUTION("resolution_setup"),
     RENDERER_VSYNC("use_vsync"),
+    INTELLIGENT_PERFORMANCE("use_intelligent_performance"),
     RENDERER_SCALING_FILTER("scaling_filter"),
     RENDERER_ANTI_ALIASING("anti_aliasing"),
     RENDERER_SCREEN_LAYOUT("screen_layout"),

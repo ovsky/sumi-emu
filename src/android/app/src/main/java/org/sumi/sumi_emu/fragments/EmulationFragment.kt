@@ -90,6 +90,8 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
 
     private val ramStatsUpdateHandler = Handler(Looper.myLooper()!!)
 
+     private lateinit var thermalMonitor: ThermalMonitor
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is EmulationActivity) {
@@ -151,7 +153,8 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
         emulationState = EmulationState(game.path) {
             return@EmulationState driverViewModel.isInteractionAllowed.value
         }
-
+        thermalMonitor = ThermalMonitor(requireContext())
+        thermalMonitor.StartThermalMonitor()
         // ThermalMonitor.StartThermalMonitor(requireContext())
     }
 
@@ -978,6 +981,15 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
         IntSetting.OVERLAY_OPACITY.setInt(opacity)
         binding.surfaceInputOverlay.refreshControls()
     }
+
+    // companion object {
+    //     @JvmStatic
+    //     public fun SetGpuSpeedLimit(value: Int) {
+    //         ShortSetting.RENDERER_SPEED_LIMIT.setShort(value.toShort())
+    //         BooleanSetting.RENDERER_USE_SPEED_LIMIT.setBoolean(value != 0)
+    //         // emulationState.updateSurface()
+    //     }
+    // }
 
     private fun setInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(

@@ -6,22 +6,21 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
 import kotlin.math.roundToInt
-import kotlin.math.max
-import android.util.Log
-import org.sumi.sumi_emu.NativeLibrary
+import org.sumi.sumi_emu.features.settings.model.ShortSetting
+import org.sumi.sumi_emu.features.settings.model.BooleanSetting
 import android.os.Process
 import android.os.SystemClock
-//import androidx.appcompat.app.AlertDialog
+import android.os.Handler
+import android.os.Looper
 import androidx.fragment.app.FragmentActivity
-import androidx.core.content.ContextCompat
-import kotlinx.coroutines.currentCoroutineContext
 import kotlin.concurrent.thread
-import kotlin.contracts.contract
 import android.util.Log as AndroidLog
 import android.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import org.sumi.sumi_emu.utils.NativeConfig
 
-// class ThermalMonitor(private val context: Context) : Fragment(), SurfaceHolder.Callback {
-public class ThermalMonitor(private val context: Context) {
+
+public class ThermalMonitor(private val context: Context) : AppCompatActivity() {
 
     private var currentTemperature = 0
 
@@ -33,211 +32,272 @@ public class ThermalMonitor(private val context: Context) {
     // Throttle state flags
     private var throttleAlertShown = false
     private var criticalAlertShown = false
-    private val thermalCheckInterval = 5000L // 5 second
+    private val thermalCheckInterval = 1000L // 1 second
 
     // CPU state flags
     private var processorBasicState = Process.THREAD_PRIORITY_FOREGROUND
     private var processorThrottleState = Process.THREAD_PRIORITY_BACKGROUND
 
-    // CPU performance limits
     private val cpuThrottleLimitPercent = 10 // CPU limit percentage
-    // @Volatile
-companion object {
-    @Volatile
-    @JvmStatic
+
     public var isThrottling = false
+    public var isRunning = true
 
-    @JvmStatic
-    public fun StartThermalMonitor(context: Context)
+    public fun StartThermalMonitor()
     {
-        AndroidLog.d("ThermalMonitor", "Starting thermal monitor...")
-
         val thermalMonitor = ThermalMonitor(context)
         thermalMonitor.setInitialProcessorState()
-        thermalMonitor.startMonitoring(context)
+        thermalMonitor.startThermalMonitoring()
     }
-}
-@Volatile
-public var isRunning = true
 
     public fun setInitialProcessorState() {
-        setThreadsPriority(Process.THREAD_PRIORITY_FOREGROUND, true)
-        setThreadsLimiter(cpuLimitPercent = 100, updateMainThread = true)
+        //setMainThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        //setMainThreadLimiter(10050);
+
+        //setThreadsPriority(Process.THREAD_PRIORITY_BACKGROUND, true)
+        //setThreadsLimiter(cpuLimitPercent = 100, updateMainThread = true)
         AndroidLog.d("ThermalMonitor", "Setting initial processor state to foreground")
+
+        //coolDownAllThreads();
+        //startFrameLimiter(30) // Start frame limiter at 30 FPS
     }
 
-    public fun startMonitoring(context : Context) {
+    private fun startFrameLimiter(targetFps: Int) {
+        val frameIntervalMs = 1000 / targetFps
 
-        AndroidLog.d("ThermalMonitor", "Cooler + Starting thermal monitor...")
+        thread(start = true) {
+            while (isRunning && isThrottling) {
+                val frameStart = SystemClock.uptimeMillis()
 
-        isRunning = true
+                // Replace with your rendering code
+                AndroidLog.d("ThermalMonitor" , "Rendering frame...")
 
-        val handler = android.os.Handler(android.os.Looper.getMainLooper())
-        val runnable = object : Runnable
+                val elapsed = SystemClock.uptimeMillis() - frameStart
+                val sleep = frameIntervalMs - elapsed
+                if (sleep > 0) Thread.sleep(sleep)
+            }
+        }
+    }
+
+    private fun slowDownAllThreads() {
+        val rootGroup = getRootThreadGroup()
+        val threads = enumerateAllThreads(rootGroup)
+
+        while (isThrottling)
         {
-            override fun run() {
-
-                val temperature = getBatteryTemperature(context)
-                val fahrenheit = (temperature * 9f / 5f) + 32f
-
-                currentTemperature = temperature.roundToInt()
-
-                if (fahrenheit >= criticalThreshold) {
-                    if (!criticalAlertShown)
-                    {
-                        showCriticalTemperatureAlert(context)
-                        criticalAlertShown = true
+            for (t in threads) {
+                try {
+    //                if (t != null && t.isAlive && t != Thread.currentThread()) {
+                    if (t != null && t.isAlive) {
+                        // Skip system threads (filter by name or group as needed)
+    //                    if (!t.name.startsWith("Finalizer") && !t.name.startsWith("GC") && !t.name.startsWith("main")) {
+                        if (!t.name.startsWith("Finalizer") && !t.name.startsWith("GC")) {                        // Log.debug("Cooler + Setting thread '${t.name}' to background priority")
+                            // android.os.Process.setThreadPriority(t.id.toInt(), Process.THREAD_PRIORITY_BACKGROUND)
+                            Thread.sleep(30) // Wait for 30 milliseconds before processing the next thread
+                        }
                     }
+                } catch (e: Exception) {
+                    AndroidLog.d("ThermalMonitor",  "Failed to adjust thread '${t.name}': ${e.message}")
                 }
-                else if (fahrenheit >= warningThreshold)
-                {
-                    if (!throttleAlertShown)
-                    {
-                        showStartThrottlingAlert(context)
-
-                        setThreadsPriority(Process.THREAD_PRIORITY_BACKGROUND, true)
-                        setThreadsLimiter(cpuLimitPercent = cpuThrottleLimitPercent, updateMainThread = true)
-
-                        throttleAlertShown = true
-                        isThrottling = true
-                    }
-                }
-                else if (fahrenheit <= restoreThreshold)
-                {
-                    if (throttleAlertShown)
-                    {
-                        setThreadsPriority(Process.THREAD_PRIORITY_FOREGROUND, true)
-                        setThreadsLimiter(cpuLimitPercent = 100, updateMainThread = true)
-                        isThrottling = false
-                        throttleAlertShown = false
-                    }
-                }
-                handler.postDelayed(this, thermalCheckInterval)
             }
-        }
-
-        handler.post(runnable)
         }
     }
 
-    private fun setThreadsPriority(threadPriotity: Int = Process.THREAD_PRIORITY_BACKGROUND, updateMainThread: Boolean = false) {
-
+    private fun coolDownAllThreads(threadPriority: Int = Process.THREAD_PRIORITY_BACKGROUND) {
         val rootGroup = getRootThreadGroup()
         val threads = enumerateAllThreads(rootGroup)
 
         AndroidLog.d("ThermalMonitor", "Found ${threads.size} threads")
 
         for (t in threads) {
-            if (t.isAlive && (t != Thread.currentThread() || updateMainThread))
-            {
-                AndroidLog.d("ThermalMonitor", "Setting thread '${t.name}' to background priority")
-                android.os.Process.setThreadPriority(t.id.toInt(), Process.THREAD_PRIORITY_BACKGROUND)
+            try {
+                // if (t != null && t.isAlive && t != Thread.currentThread()) {
+                if (t != null && t.isAlive) {
+                    // Skip system threads (filter by name or group as needed)
+                    // if (!t.name.startsWith("Finalizer") && !t.name.startsWith("GC") && !t.name.startsWith("main")) {
+                    if (!t.name.startsWith("Finalizer") && !t.name.startsWith("GC")) {
+                        AndroidLog.d("Cooler", "Setting thread ${t.name} to background priority")
+                        android.os.Process.setThreadPriority(t.id.toInt(), Process.THREAD_PRIORITY_BACKGROUND)
+                    }
+                }
+            } catch (e: Exception) {
+                AndroidLog.d("Cooler", "Failed to adjust thread '${t.name}': ${e.message}")
             }
         }
     }
 
-    private fun setThreadsLimiter(cpuLimitPercent: Int = 30, updateMainThread: Boolean = false) {
+    private fun startThermalMonitoring() {
 
-        val rootGroup = getRootThreadGroup()
-        val threads = enumerateAllThreads(rootGroup)
+    Handler(Looper.getMainLooper()).postDelayed(object : Runnable {
+        override fun run() {
 
-        AndroidLog.d("ThermalMonitor", "Found ${threads.size} threads")
-        AndroidLog.d("ThermalMonitor", "Setting CPU limit to $cpuLimitPercent%")
+            val temperature = getBatteryTemperature(context)
+            val fahrenheit = (temperature * 9f / 5f) + 32f
 
+            currentTemperature = temperature.roundToInt()
 
-        for (t in threads) {
-            if (ThermalMonitor.isThrottling && t.isAlive && (t != Thread.currentThread() || updateMainThread))
+            if (fahrenheit >= criticalThreshold) {
+                if (!criticalAlertShown)
+                {
+                    showCriticalTemperatureAlert(context)
+                    criticalAlertShown = true
+                }
+            }
+            else if (fahrenheit >= warningThreshold)
             {
-                AndroidLog.d("ThermalMonitor", "Setting thread '${t.name}' to  $cpuLimitPercent% CPU limit")
+                ThrottleGpuSpeedLimit();
 
-                // if (!t.name.startsWith("Finalizer") && !t.name.startsWith("GC") && !t.name.startsWith("main")) {
-                //     AndroidLog.d("Cooler", "Setting thread '${t.name}' to background priority")
-                //     android.os.Process.setThreadPriority(t.id.toInt(), Process.THREAD_PRIORITY_BACKGROUND)
-                // }
+                if (!throttleAlertShown)
+                {
+                    showStartThrottlingAlert()
 
-                val cycleMs = 100L
-                val workMs = (cycleMs * cpuLimitPercent) / 100
-                val sleepMs = cycleMs - workMs
+                    slowDownAllThreads()
+//                    startFrameLimiter(targetFps = 2) // Start frame limiter at 10 FPS
+                    coolDownAllThreads()
 
-                while (t.isAlive) {
-                    val start = SystemClock.uptimeMillis()
-
-                    // Simulate work with easy task to keep CPU busy
-                    while (SystemClock.uptimeMillis() - start < workMs) {
-                        Math.round(123456.789f)
-                    }
-
-                    try {
-                        Thread.sleep(sleepMs)
-                    } catch (e: InterruptedException) {
-                        break
-                    }
+                    throttleAlertShown = true
+                    isThrottling = true
+                }
+            }
+            else if (fahrenheit >= restoreThreshold)
+            {
+                if (throttleAlertShown)
+                {
+                    ResetGpuSpeedLimit()
+                    showCriticalTemperatureAlert()
+                    // setThreadsPriority(Process.THREAD_PRIORITY_FOREGROUND, true)
+                    // setThreadsLimiter(cpuLimitPercent = 100, updateMainThread = true)
+                    isThrottling = false
+                    throttleAlertShown = false
                 }
             }
         }
-    }
+    }, thermalCheckInterval)
+}
 
-    private fun getRootThreadGroup(): ThreadGroup {
-        var rootGroup = Thread.currentThread().threadGroup
-        var parent: ThreadGroup?
-        while (rootGroup?.parent.also { parent = it } != null) {
-            rootGroup = parent
-        }
-        return rootGroup!!
-    }
-
-    private fun enumerateAllThreads(group: ThreadGroup): List<Thread> {
-        var groupThreads = arrayOfNulls<Thread>(group.activeCount() * 2)
-        val count = group.enumerate(groupThreads, true)
-        return groupThreads.filterNotNull().take(count)
-    }
-
-    private fun setMainThreadPriority(threadPriority: Int) {
-        try {
-            AndroidLog.d("ThermalMonitor", "Setting main thread priority to $threadPriority")
-            Process.setThreadPriority(Process.myTid(), threadPriority)
-        } catch (e: Exception) {
-            AndroidLog.e("ThermalMonitor", "Failed to set main thread priority: ${e.message}")
-        }
-    }
-
-    fun onDestroy() {
-        ThermalMonitor.isThrottling = false
-    }
-
-    private fun showStartThrottlingAlert(context: Context) {
-        // (context as? FragmentActivity)?.runOnUiThread {
+    private fun showStartThrottlingAlert() {
+        (context as? Activity)?.runOnUiThread {
             AlertDialog.Builder(context)
                 .setTitle("Thermal Throttling")
                 .setMessage("Device is getting hot!\nEmulation will be throttled to prevent overheating.")
-                // .setPositiveButton("OK") { _, _ -> ThermalMonitor.throttleAlertShown = true }
-                // .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
-                .setPositiveButton("OK") { _, _ -> (context as? Activity)?.finish() }
+                .setPositiveButton("OK") { _, _ -> throttleAlertShown = true }
                 .setCancelable(false)
                 .show()
-        // }
+        }
     }
 
-    private fun showCriticalTemperatureAlert(context: Context) {
-        // context.runOnUiThread {
+    private fun showCriticalTemperatureAlert()
+    {
+        (context as? Activity)?.runOnUiThread {
             AlertDialog.Builder(context)
                 .setTitle("Critical Temperature")
                 .setMessage("Device is way too hot!\nEmulation stopped for your safety. Try another CPU/GPU settings.")
                 .setPositiveButton("OK") { _, _ -> (context as? Activity)?.finish() }
                 .setCancelable(false)
                 .show()
-        // }
+            }
+        }
+
+        override fun onDestroy() {
+            isThrottling = false
+            isRunning = false
+
+            ResetGpuSpeedLimit()
+
+            super.onDestroy()
+        }
+
+        private fun getRootThreadGroup(): ThreadGroup {
+            var rootGroup = Thread.currentThread().threadGroup
+            var parent: ThreadGroup?
+            while (rootGroup?.parent.also { parent = it } != null) {
+                rootGroup = parent
+            }
+            return rootGroup!!
+        }
+
+        private fun enumerateAllThreads(group: ThreadGroup): List<Thread> {
+            var groupThreads = arrayOfNulls<Thread>(group.activeCount() * 2)
+            val count = group.enumerate(groupThreads, true)
+            return groupThreads.filterNotNull().take(count)
+        }
+
+        private fun showStartThrottlingAlert(context: Context) {
+             (context as? FragmentActivity)?.runOnUiThread {
+                AlertDialog.Builder(context)
+                    .setTitle("Thermal Throttling")
+                    .setMessage("Device is getting hot!\nEmulation will be throttled to prevent overheating.")
+                    .setPositiveButton("OK") { _, _ -> (context as? Activity)?.finish() }
+                    .setCancelable(false)
+                    .show()
+             }
+        }
+
+        private fun showCriticalTemperatureAlert(context: Context) {
+            (context as? FragmentActivity)?.runOnUiThread {
+                AlertDialog.Builder(context)
+                    .setTitle("Critical Temperature")
+                    .setMessage("Device is way too hot!\nEmulation stopped for your safety. Try another CPU/GPU settings.")
+                    .setPositiveButton("OK") { _, _ -> (context as? Activity)?.finish() }
+                    .setCancelable(false)
+                    .show()
+             }
+        }
+
+        private fun getBatteryTemperature(context: Context): Float {
+        try {
+            val batteryIntent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+            // Temperature in tenths of a degree Celsius
+            val temperature = batteryIntent?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) ?: 0
+            // Convert to degrees Celsius
+            return temperature / 10.0f
+        } catch (e: Exception) {
+            // Log.error("[ThermalMonitor] Failed to get battery temperature: ${e.message}")
+            return 0.0f
+        }
     }
 
-    private fun getBatteryTemperature(context: Context): Float {
-    try {
-        val batteryIntent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-        // Temperature in tenths of a degree Celsius
-        val temperature = batteryIntent?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) ?: 0
-        // Convert to degrees Celsius
-        return temperature / 10.0f
-    } catch (e: Exception) {
-        // Log.error("[ThermalMonitor] Failed to get battery temperature: ${e.message}")
-        return 0.0f
+    companion object {
+        @JvmStatic
+
+        var originalGpuSpeedLimit = 0;
+        var originalGpuSpeedLimitUsage = false;
+
+        public fun SetGpuSpeedLimit(value: Int, useLimiter : Boolean = true) {
+
+            if (originalGpuSpeedLimit == 0)
+            {
+                originalGpuSpeedLimitUsage = BooleanSetting.RENDERER_USE_SPEED_LIMIT.getBoolean()
+                originalGpuSpeedLimit = ShortSetting.RENDERER_SPEED_LIMIT.getShort().toInt()
+            }
+
+            ShortSetting.RENDERER_SPEED_LIMIT.setShort(value.toShort())
+            BooleanSetting.RENDERER_USE_SPEED_LIMIT.setBoolean(useLimiter)
+            NativeConfig.setBoolean("use_speed_limit", useLimiter)
+            NativeConfig.setShort("speed_limit", value.toShort())
+            NativeConfig.saveGlobalConfig()
+        }
+
+        public fun ThrottleGpuSpeedLimit() {
+            val throttleGpuMaxLimit = 120;
+            val throttleGpuMinLimit = 50;
+            val throttleGpuStep = 20;
+
+            var currentGpuSpeedLimit = ShortSetting.RENDERER_SPEED_LIMIT
+                .getShort()
+                .toInt()
+                .coerceIn(throttleGpuMinLimit, throttleGpuMaxLimit)
+
+            if (currentGpuSpeedLimit >= throttleGpuMinLimit + throttleGpuStep) {
+                currentGpuSpeedLimit -= throttleGpuStep;
+            }
+
+            SetGpuSpeedLimit(currentGpuSpeedLimit);
+        }
+
+        public fun ResetGpuSpeedLimit()
+        {
+            SetGpuSpeedLimit(originalGpuSpeedLimit, originalGpuSpeedLimitUsage)
+        }
     }
 }
