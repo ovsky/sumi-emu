@@ -77,6 +77,7 @@ SWITCHABLE(ScalingFilter, false);
 SWITCHABLE(ShaderBackend, true);
 SWITCHABLE(TimeZone, true);
 SETTING(VSyncMode, true);
+SETTING(IntelligentPerformanceMode, true);
 SWITCHABLE(bool, false);
 SWITCHABLE(int, false);
 SWITCHABLE(int, true);
@@ -301,6 +302,12 @@ struct Values {
         linkage,     VSyncMode::Fifo,    VSyncMode::Immediate,        VSyncMode::FifoRelaxed,
         "use_vsync", Category::Renderer, Specialization::RuntimeList, true,
         true};
+
+    SwitchableSetting<IntelligentPerformanceMode, true> intelligent_performance{
+        linkage,     IntelligentPerformanceMode::Performance,    IntelligentPerformanceMode::Moderate,        IntelligentPerformanceMode::Relaxed,
+        "use_intelligent_performance", Category::Renderer, Specialization::RuntimeList, true,
+        true};
+
     SwitchableSetting<NvdecEmulation> nvdec_emulation{linkage, NvdecEmulation::Gpu,
                                                       "nvdec_emulation", Category::Renderer};
     // *nix platforms may have issues with the borderless windowed fullscreen mode.

@@ -100,6 +100,18 @@ static constexpr const char* TranslateVSyncMode(Settings::VSyncMode mode) {
     return "Unknown";
 }
 
+static constexpr const char* TranslateIntelligentPerformanceMode(Settings::IntelligentPerformanceMode mode) {
+    switch (mode) {
+    case Settings::IntelligentPerformanceMode::Performance:
+        return "Performance";
+    case Settings::IntelligentPerformanceMode::Moderate:
+        return "Moderate";
+    case Settings::IntelligentPerformanceMode::Relaxed:
+        return "Relaxed";
+    }
+    return "Unknown";
+}
+
 static constexpr const char* TranslateASTCDecodeMode(Settings::AstcDecodeMode mode) {
     switch (mode) {
     case Settings::AstcDecodeMode::Cpu:
@@ -272,6 +284,8 @@ void TelemetrySession::AddInitialInfo(Loader::AppLoader& app_loader,
              TranslateASTCDecodeMode(Settings::values.accelerate_astc.GetValue()));
     AddField(field_type, "Renderer_UseVsync",
              TranslateVSyncMode(Settings::values.vsync_mode.GetValue()));
+        AddField(field_type, "System_IntelligentPerformanceMode",
+            TranslateIntelligentPerformanceMode(Settings::values.intelligent_performance.GetValue()));
     AddField(field_type, "Renderer_ShaderBackend",
              static_cast<u32>(Settings::values.shader_backend.GetValue()));
     AddField(field_type, "Renderer_UseAsynchronousShaders",
