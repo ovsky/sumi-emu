@@ -40,6 +40,18 @@ object NativeLibrary {
         }
     }
 
+    // Set the throttle factor for the CPU backend.
+    // This is used to limit the CPU usage of the emulator.
+    external fun setThrottleFactor(factor: Float)
+
+    @Volatile private var throttleFactor = 1.0f
+
+    @JvmStatic
+    fun updateThrottleFactor(factor: Float) {
+        throttleFactor = factor.coerceIn(0.1f, 1.0f)
+        setThrottleFactor(factor)
+    }
+
     @Keep
     @JvmStatic
     fun openContentUri(path: String?, openmode: String?): Int {

@@ -52,6 +52,9 @@
 #include "hid_core/hid_core.h"
 #include "sumi/multiplayer/state.h"
 #include "sumi/util/controller_navigation.h"
+#include "thermal/thermal.h"
+
+
 
 // These are wrappers to avoid the calls to CreateDirectory and CreateFile because of the Windows
 // defines.
@@ -163,6 +166,7 @@ static FileSys::VirtualFile VfsDirectoryCreateFileWrapper(const FileSys::Virtual
 #include "sumi/uisettings.h"
 #include "sumi/util/clickable_label.h"
 #include "sumi/vk_device_info.h"
+#include "thermal/ThermalManager.h"
 
 #ifdef SUMI_CRASH_DUMPS
 #include "sumi/breakpad.h"
@@ -192,6 +196,8 @@ constexpr int default_mouse_hide_timeout = 2500;
 constexpr int default_input_update_timeout = 1;
 
 constexpr size_t CopyBufferSize = 1_MiB;
+
+// ThermalManager g_thermalManager;
 
 /**
  * "Callouts" are one-time instructional messages shown to the user. In the config settings, there
@@ -410,6 +416,25 @@ GMainWindow::GMainWindow(std::unique_ptr<QtConfig> config_, bool has_broken_vulk
     system->RegisterContentProvider(FileSys::ContentProviderUnionSlot::FrontendManual,
                                     provider.get());
     system->GetFileSystemController().CreateFactories(*vfs);
+
+    // Old thermal manager functionality
+    // g_thermalManager.Update();
+
+    // if (g_thermalManager.IsThrottled()) {
+    //     // Optionally sleep/yield or reduce workload
+    // }
+
+
+    // Thermal throttling chech
+    // Apply new thermal throttling logic
+    if (Core::GetThrottleFactor() < 1.0f) {
+        std::this_thread::sleep_for(
+            std::chrono::milliseconds(
+                static_cast<int>((1.0f - Core::
+                    ()) * 16) // 16ms ~60fps
+            )
+        );
+    }
 
     // Remove cached contents generated during the previous session
     RemoveCachedContents();

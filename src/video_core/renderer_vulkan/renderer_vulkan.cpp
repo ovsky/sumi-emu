@@ -111,7 +111,7 @@ RendererVulkan::RendererVulkan(Core::TelemetrySession& telemetry_session_,
       instance(CreateInstance(*library, dld, VK_API_VERSION_1_1, render_window.GetWindowInfo().type,
                               Settings::values.renderer_debug.GetValue())),
       debug_messenger(Settings::values.renderer_debug ? CreateDebugUtilsCallback(instance)
-                                                      : vk::DebugUtilsMessenger{}),
+                                                       : vk::DebugUtilsMessenger{}),
       surface(CreateSurface(instance, render_window.GetWindowInfo())),
       device(CreateDevice(instance, dld, *surface)), memory_allocator(device), state_tracker(),
       scheduler(device, state_tracker),

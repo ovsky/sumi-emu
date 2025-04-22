@@ -21,6 +21,8 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Rational
 import android.view.InputDevice
 import android.view.KeyEvent
@@ -58,9 +60,13 @@ import org.sumi.sumi_emu.utils.ThemeHelper
 import org.sumi.sumi_emu.utils.LicenseVerifier
 import java.text.NumberFormat
 import kotlin.math.roundToInt
+// import org.sumi.sumi_emu.thermal.ThermalMonitor
 
 class EmulationActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var binding: ActivityEmulationBinding
+
+    // private lateinit var thermalMonitor: ThermalMonitor
+    // private val thermalCheckInterval = 5000L // Check thermal status every 5 seconds
 
     var isActivityRecreated = false
     private lateinit var nfcReader: NfcReader
@@ -76,6 +82,10 @@ class EmulationActivity : AppCompatActivity(), SensorEventListener {
     private val actionUnmute = "ACTION_EMULATOR_UNMUTE"
 
     private val emulationViewModel: EmulationViewModel by viewModels()
+
+    // public fun getThermalMonitor(): ThermalMonitor {
+    //     return thermalMonitor
+    // }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.gameLaunched = true
@@ -164,7 +174,62 @@ class EmulationActivity : AppCompatActivity(), SensorEventListener {
                     .apply()
             }
         }
+
+        // thermalMonitor = ThermalMonitor(this)
+        // startThermalMonitoring()
     }
+
+    // var throttleStartAlertShown = false
+
+    // private fun startThermalMonitoring() {
+
+    //     // return // Disable thermal monitoring for now
+    //     // Uncomment this to enable thermal monitoring
+
+    //     Handler(Looper.getMainLooper()).postDelayed(object : Runnable {
+    //         override fun run() {
+    //             val throttle = thermalMonitor.update()
+    //             NativeLibrary.updateThrottleFactor(throttle)
+
+    //             if (throttle <= 0.1f) {
+    //                 showCriticalTemperatureAlert()
+    //             } else {
+    //                 if (throttle <= 0.95f && !throttleStartAlertShown) {
+    //                     showStartThrottlingAlert()
+    //                     throttleStartAlertShown = true;
+    //                 }
+    //                 Handler(Looper.getMainLooper()).postDelayed(this, thermalCheckInterval)
+    //             }
+    //         }
+    //     }, thermalCheckInterval)
+    // }
+
+    // private fun showStartThrottlingAlert() {
+    //     runOnUiThread {
+    //         AlertDialog.Builder(this)
+    //             .setTitle("Thermal Throttling")
+    //             .setMessage("Device is getting hot!\nEmulation will be throttled to prevent overheating.")
+    //             .setPositiveButton("OK") { _, _ -> throttleStartAlertShown = true }
+    //             .setCancelable(false)
+    //             .show()
+    //     }
+    // }
+
+    // private fun showCriticalTemperatureAlert() {
+    //     runOnUiThread {
+    //         AlertDialog.Builder(this)
+    //             .setTitle("Critical Temperature")
+    //             .setMessage("Device is way too hot!\nEmulation stopped for your safety. Try another CPU/GPU settings.")
+    //             .setPositiveButton("OK") { _, _ -> finish() }
+    //             .setCancelable(false)
+    //             .show()
+    //     }
+    // }
+
+    // override fun onDestroy() {
+    //     super.onDestroy()
+    //     NativeLibrary.updateThrottleFactor(1.0f) // Reset on exit
+    // }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (event.action == KeyEvent.ACTION_DOWN) {

@@ -17,9 +17,8 @@ import android.net.Uri
 import android.os.BatteryManager
 import android.os.Bundle
 import android.os.Debug
-import android.os.Handler
-import android.os.Looper
 import android.os.PowerManager
+import android.os.Process
 import android.os.SystemClock
 import android.util.Rational
 import android.view.*
@@ -65,8 +64,15 @@ import org.sumi.sumi_emu.overlay.model.OverlayLayout
 import org.sumi.sumi_emu.utils.*
 import org.sumi.sumi_emu.utils.ViewUtils.setVisible
 import java.lang.NullPointerException
+import org.sumi.sumi_emu.thermal.ThermalMonitor
+import android.os.Handler
+import android.os.Looper
+import kotlin.concurrent.thread
 
 class EmulationFragment : Fragment(), SurfaceHolder.Callback {
+    private lateinit var thermalMonitor: ThermalMonitor
+    private val thermalCheckInterval = 5000L // Check thermal status every 5 seconds
+
     private lateinit var emulationState: EmulationState
     private var emulationActivity: EmulationActivity? = null
     private var perfStatsUpdater: (() -> Unit)? = null
@@ -86,6 +92,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
     private var isInFoldableLayout = false
 
     private lateinit var powerManager: PowerManager
+    // private lateinit var thermalMonitor: ThermalMonitor
 
     private val ramStatsUpdateHandler = Handler(Looper.myLooper()!!)
 
@@ -150,6 +157,8 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
         emulationState = EmulationState(game.path) {
             return@EmulationState driverViewModel.isInteractionAllowed.value
         }
+
+        thermalMonitor = ThermalMonitor(requireContext())
     }
 
     /**
@@ -528,9 +537,12 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
                         val white = (normalizedFps * 255).toInt()
                         val color = android.graphics.Color.rgb(red, white, 0)
 
+                        // var thermalValue = emulationActivity?.getThermalMonitor()?.lastCheckedTemperature ?: 0f;
+                        var thermalValue = 0;
+
                         binding.showFpsText.setTextColor(color)
                         binding.showFpsText.text =
-                            String.format("Sumi | FPS: %.1f\n%s/%s", fps, cpuBackend, gpuDriver)
+                            String.format("Sumi | FPS: %.1f\n%s/%s\n%s + %s", fps, cpuBackend, gpuDriver, thermalValue, 0f)
                     }
                     perfStatsUpdateHandler.postDelayed(perfStatsUpdater!!, 1000)
                 }
@@ -590,7 +602,148 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
             val color = android.graphics.Color.rgb(red, green, 0)
 
             binding.showThermalsText.setTextColor(color)
-            binding.showThermalsText.text = String.format("%.1f°C • %.1f°F", temperature, fahrenheit)
+            // binding.showThermalsText.text = String.format("%.1f°C • %.1f°F", temperature, fahrenheit)
+            binding.showThermalsText.text = String.format("%.1f°C\n%.1f°F", temperature, fahrenheit)
+
+            thermalMonitoring(fahrenheit)
+        }
+    }
+
+    var throttleStartAlertShown = false
+    var criticalAlertShown = false
+
+    private fun thermalMonitoring(temperature : Float) {
+
+        // val throttle = thermalMonitor.update()
+        // NativeLibrary.updateThrottleFactor(throttle)
+
+        if (temperature >= 120f && !criticalAlertShown) {
+            showCriticalTemperatureAlert()
+        } else if (!throttleStartAlertShown)
+        {
+            if (temperature >= 95f) {
+
+                 // Start throttled worker
+                startCoolerWorker(cpuLimitPercent = 5)
+
+                // Optional: limit frame rate (GPU load)
+                startFrameLimiter(targetFps = 10)
+
+                Process.setThreadPriority(Process.myTid(), Process.THREAD_PRIORITY_BACKGROUND)
+                // NativeLibrary.setThrottleFactor(0.5f)
+
+                coolDownAllThreads()
+                showStartThrottlingAlert()
+                throttleStartAlertShown = true;
+            }
+           // Handler(Looper.getMainLooper()).postDelayed(this, thermalCheckInterval)
+        }
+    }
+
+    var isRunning = true
+
+    private fun coolDownAllThreads() {
+        val rootGroup = getRootThreadGroup()
+        val threads = enumerateAllThreads(rootGroup)
+
+        Log.debug("Cooler + Found ${threads.size} threads")
+
+        for (t in threads) {
+            try {
+                if (t != null && t.isAlive && t != Thread.currentThread()) {
+                    // Skip system threads (filter by name or group as needed)
+                    if (!t.name.startsWith("Finalizer") && !t.name.startsWith("GC") && !t.name.startsWith("main")) {
+                        Log.debug("Cooler + Setting thread '${t.name}' to background priority")
+                        android.os.Process.setThreadPriority(t.id.toInt(), Process.THREAD_PRIORITY_BACKGROUND)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.warning("Cooler + Failed to adjust thread '${t.name}': ${e.message}")
+            }
+        }
+    }
+
+    private fun getRootThreadGroup(): ThreadGroup {
+        var rootGroup = Thread.currentThread().threadGroup
+        var parent: ThreadGroup?
+        while (rootGroup?.parent.also { parent = it } != null) {
+            rootGroup = parent
+        }
+        return rootGroup!!
+    }
+
+    private fun enumerateAllThreads(group: ThreadGroup): List<Thread> {
+        var groupThreads = arrayOfNulls<Thread>(group.activeCount() * 2)
+        val count = group.enumerate(groupThreads, true)
+        return groupThreads.filterNotNull().take(count)
+    }
+
+    private fun startCoolerWorker(cpuLimitPercent: Int) {
+        thread(start = true) {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND)
+
+            val cycleMs = 100L
+            val workMs = (cycleMs * cpuLimitPercent) / 100
+            val sleepMs = cycleMs - workMs
+
+            while (isRunning) {
+                val start = SystemClock.uptimeMillis()
+
+                // Simulate work — replace with your real task
+                while (SystemClock.uptimeMillis() - start < workMs) {
+                    Math.sqrt(123456.789)
+                }
+
+                try {
+                    Thread.sleep(sleepMs)
+                } catch (e: InterruptedException) {
+                    break
+                }
+            }
+        }
+    }
+
+    private fun startFrameLimiter(targetFps: Int) {
+        val frameIntervalMs = 1000 / targetFps
+
+        thread(start = true) {
+            while (isRunning) {
+                val frameStart = SystemClock.uptimeMillis()
+
+                // Replace with your rendering code
+                Log.debug("CoolMode | Rendering frame...")
+
+                val elapsed = SystemClock.uptimeMillis() - frameStart
+                val sleep = frameIntervalMs - elapsed
+                if (sleep > 0) Thread.sleep(sleep)
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        isRunning = false
+    }
+
+    private fun showStartThrottlingAlert() {
+        requireActivity().runOnUiThread {
+            AlertDialog.Builder(context)
+                .setTitle("Thermal Throttling")
+                .setMessage("Device is getting hot!\nEmulation will be throttled to prevent overheating.")
+                .setPositiveButton("OK") { _, _ -> throttleStartAlertShown = true }
+                .setCancelable(false)
+                .show()
+        }
+    }
+
+    private fun showCriticalTemperatureAlert() {
+        requireActivity().runOnUiThread {
+            AlertDialog.Builder(context)
+                .setTitle("Critical Temperature")
+                .setMessage("Device is way too hot!\nEmulation stopped for your safety. Try another CPU/GPU settings.")
+                .setPositiveButton("OK") { _, _ -> requireActivity().finish() }
+                .setCancelable(false)
+                .show()
         }
     }
 
