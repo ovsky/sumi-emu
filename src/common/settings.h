@@ -77,6 +77,7 @@ SWITCHABLE(ScalingFilter, false);
 SWITCHABLE(ShaderBackend, true);
 SWITCHABLE(TimeZone, true);
 SETTING(VSyncMode, true);
+SETTING(IntelligentPerformanceMode, true);
 SWITCHABLE(bool, false);
 SWITCHABLE(int, false);
 SWITCHABLE(int, true);
@@ -203,7 +204,7 @@ struct Values {
     SwitchableSetting<bool> use_speed_limit{
         linkage, true, "use_speed_limit", Category::Core, Specialization::Paired, false, true};
     SwitchableSetting<u16, true> speed_limit{linkage,
-                                             100,
+                                             200,
                                              0,
                                              9999,
                                              "speed_limit",
@@ -216,7 +217,7 @@ struct Values {
 
     // Memory
     SwitchableSetting<bool> use_gpu_memory_manager{linkage, false, "Use GPU Memory Manager", Category::Core};
-    SwitchableSetting<bool> enable_memory_snapshots{linkage, false, "Enable Memory Snapshots", Category::Core};
+    SwitchableSetting<bool> enable_memory_snapshots{linkage, true, "Enable Memory Snapshots", Category::Core};
 
     // Cpu
     SwitchableSetting<CpuBackend, true> cpu_backend{linkage,
@@ -301,6 +302,12 @@ struct Values {
         linkage,     VSyncMode::Fifo,    VSyncMode::Immediate,        VSyncMode::FifoRelaxed,
         "use_vsync", Category::Renderer, Specialization::RuntimeList, true,
         true};
+
+    SwitchableSetting<IntelligentPerformanceMode, true> intelligent_performance{
+        linkage,     IntelligentPerformanceMode::Performance,    IntelligentPerformanceMode::Moderate,        IntelligentPerformanceMode::Relaxed,
+        "use_intelligent_performance", Category::Renderer, Specialization::RuntimeList, true,
+        true};
+
     SwitchableSetting<NvdecEmulation> nvdec_emulation{linkage, NvdecEmulation::Gpu,
                                                       "nvdec_emulation", Category::Renderer};
     // *nix platforms may have issues with the borderless windowed fullscreen mode.

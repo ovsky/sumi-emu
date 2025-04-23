@@ -65,6 +65,7 @@ import org.sumi.sumi_emu.overlay.model.OverlayLayout
 import org.sumi.sumi_emu.utils.*
 import org.sumi.sumi_emu.utils.ViewUtils.setVisible
 import java.lang.NullPointerException
+import org.sumi.sumi_emu.thermal.ThermalMonitor
 
 class EmulationFragment : Fragment(), SurfaceHolder.Callback {
     private lateinit var emulationState: EmulationState
@@ -88,6 +89,8 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
     private lateinit var powerManager: PowerManager
 
     private val ramStatsUpdateHandler = Handler(Looper.myLooper()!!)
+
+     private lateinit var thermalMonitor: ThermalMonitor
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -150,6 +153,9 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
         emulationState = EmulationState(game.path) {
             return@EmulationState driverViewModel.isInteractionAllowed.value
         }
+        thermalMonitor = ThermalMonitor(requireContext())
+        thermalMonitor.StartThermalMonitor()
+        // ThermalMonitor.StartThermalMonitor(requireContext())
     }
 
     /**
@@ -590,7 +596,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
             val color = android.graphics.Color.rgb(red, green, 0)
 
             binding.showThermalsText.setTextColor(color)
-            binding.showThermalsText.text = String.format("%.1f°C • %.1f°F", temperature, fahrenheit)
+            binding.showThermalsText.text = String.format("%.1f°C\n%.1f°F", temperature, fahrenheit)
         }
     }
 
@@ -975,6 +981,15 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
         IntSetting.OVERLAY_OPACITY.setInt(opacity)
         binding.surfaceInputOverlay.refreshControls()
     }
+
+    // companion object {
+    //     @JvmStatic
+    //     public fun SetGpuSpeedLimit(value: Int) {
+    //         ShortSetting.RENDERER_SPEED_LIMIT.setShort(value.toShort())
+    //         BooleanSetting.RENDERER_USE_SPEED_LIMIT.setBoolean(value != 0)
+    //         // emulationState.updateSurface()
+    //     }
+    // }
 
     private fun setInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(

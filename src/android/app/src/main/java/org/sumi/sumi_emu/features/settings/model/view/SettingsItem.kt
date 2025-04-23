@@ -123,7 +123,7 @@ abstract class SettingsItem(
                     ShortSetting.RENDERER_SPEED_LIMIT,
                     titleId = R.string.frame_limit_slider,
                     descriptionId = R.string.frame_limit_slider_description,
-                    min = 1,
+                    min = 10,
                     max = 500,
                     units = "%"
                 )
@@ -218,6 +218,14 @@ abstract class SettingsItem(
                     titleId = R.string.renderer_resolution,
                     choicesId = R.array.rendererResolutionNames,
                     valuesId = R.array.rendererResolutionValues
+                )
+            )
+            put(
+                SingleChoiceSetting(
+                    IntSetting.INTELLIGENT_PERFORMANCE,
+                    titleId = R.string.intelligent_performance,
+                    choicesId = R.array.intelligentPerformanceNames,
+                    valuesId = R.array.intelligentPerformanceValues
                 )
             )
             put(

@@ -281,6 +281,14 @@
     your current system time.</string>
   <string name="set_custom_rtc">Set custom RTC</string>
 
+  <!-- Intelligent Performance Strings -->
+  <string name="intelligent_performance">Intelligent Performance Mode</string>
+
+  <!-- Intelligent Performance Mode Strings -->
+  <string name="intelligent_performance_performance">Performance</string>
+  <string name="intelligent_performance_moderate">Moderate</string>
+  <string name="intelligent_performance_relaxed">Relaxed</string>
+
   <!-- Graphics settings strings -->
   <string name="renderer_accuracy">Accuracy Level</string>
   <string name="renderer_resolution">Resolution (Handheld/Docked)</string>

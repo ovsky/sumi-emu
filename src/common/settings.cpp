@@ -55,6 +55,7 @@ SWITCHABLE(ScalingFilter, false);
 SWITCHABLE(ShaderBackend, true);
 SWITCHABLE(TimeZone, true);
 SETTING(VSyncMode, true);
+SETTING(IntelligentPerformanceMode, true);
 SWITCHABLE(bool, false);
 SWITCHABLE(int, false);
 SWITCHABLE(int, true);

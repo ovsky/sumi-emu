@@ -102,6 +102,12 @@
         <item>@string/renderer_vsync_fifo_relaxed</item>
     </string-array>
 
+    <string-array name="intelligentPerformanceNames">
+        <item>@string/intelligent_performance_performance</item>
+        <item>@string/intelligent_performance_moderate</item>
+        <item>@string/intelligent_performance_relaxed</item>
+    </string-array>
+
     <integer-array name="rendererResolutionValues">
         <item>0</item>
         <item>1</item>
@@ -117,6 +123,12 @@
         <item>1</item>
         <item>2</item>
         <item>3</item>
+    </integer-array>
+
+    <integer-array name="intelligentPerformanceValues">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
     </integer-array>
 
     <string-array name="rendererScreenLayoutNames">
