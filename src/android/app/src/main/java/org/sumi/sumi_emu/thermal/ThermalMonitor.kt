@@ -64,6 +64,7 @@ public class ThermalMonitor(private val context: Context) : AppCompatActivity() 
 
         thermalMonitor.setInitialProcessorState()
         thermalMonitor.startThermalMonitoring()
+        setAllThreadsPriority(Process.THREAD_PRIORITY_FOREGROUND)
     }
 
     // Start the thermal monitoring loop process
@@ -320,6 +321,6 @@ public class ThermalMonitor(private val context: Context) : AppCompatActivity() 
         }
     }
 
-#endregion Companion Methods - GPU Speed Limit
+//endregion Companion Methods - GPU Speed Limit
 
 }
