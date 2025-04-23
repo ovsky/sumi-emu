@@ -28,6 +28,16 @@ Welcome to **Sumi**, a cutting-edge Nintendo Homebrew emulator designed to deliv
 
 ---
 
+## Downloads 📦
+
+Ready to experience **Sumi**? ☺️
+
+To get the latest version of **Sumi** emulator, reach our releases page:
+
+https://github.com/ovsky/sumi-emu/releases
+
+---
+
 ## Features ✨
 
 - **Latest Technologies**: Consistently updated tech stack.	
@@ -53,11 +63,6 @@ To achieve best performance, download the best driver for your device and apply 
 [GitHub Releases - K11MCH1/AdrenoToolsDrivers](https://github.com/K11MCH1/AdrenoToolsDrivers/releases)
 
 ---
-
-
-## Download 📦
-
-Ready to experience Sumi? [Download the latest version](https://git.sumi-emu.org/Sumi/Sumi/releases) and dive into your favorite Nintendo homebrew titles!
 
 ## Getting Started 💡
 
