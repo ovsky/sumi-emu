@@ -581,7 +581,7 @@ public:
 
     /// Returns the minimum supported version of SPIR-V.
     u32 SupportedSpirvVersion() const {
-        if (instance_version >= VK_API_VERSION_1_3) {
+        if (instance_version >= VK_API_VERSION_1_4) {
             return 0x00010600U;
         }
         if (extensions.spirv_1_4) {

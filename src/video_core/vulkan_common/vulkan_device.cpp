@@ -981,7 +981,7 @@ bool Device::GetSuitability(bool requires_swapchain) {
     if (instance_version < VK_API_VERSION_1_2) {
         FOR_EACH_VK_FEATURE_1_2(FEATURE_EXTENSION);
     }
-    if (instance_version < VK_API_VERSION_1_3) {
+    if (instance_version < VK_API_VERSION_1_4) {
         FOR_EACH_VK_FEATURE_1_3(FEATURE_EXTENSION);
     }
 
@@ -1040,7 +1040,7 @@ bool Device::GetSuitability(bool requires_swapchain) {
     } else {
         FOR_EACH_VK_FEATURE_1_2(EXT_FEATURE);
     }
-    if (instance_version >= VK_API_VERSION_1_3) {
+    if (instance_version >= VK_API_VERSION_1_4) {
         FOR_EACH_VK_FEATURE_1_3(FEATURE);
     } else {
         FOR_EACH_VK_FEATURE_1_3(EXT_FEATURE);
