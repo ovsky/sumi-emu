@@ -38,10 +38,10 @@ public class ThermalMonitor(private val context: Context) : AppCompatActivity() 
     private var currentTemperature = 0
 
     // Configurable thresholds (in °C)
-    private val warningThreshold = 105 // Begin throttling warning at this temperature
-    private val initialThreshold = 100 // Start throttling at this temperature
+    private val warningThreshold = 100 // Begin throttling warning at this temperature
+    private val initialThreshold = 105 // Start throttling at this temperature
     private val criticalThreshold = 130 // Stop emulation at this temperature
-    private val restoreThreshold = 98 // Restore normal operation at this temperature
+    private val restoreThreshold = 100 // Restore normal operation at this temperature
 
     // Throttle state flags
     private var throttleAlertShown = false
@@ -100,7 +100,7 @@ public class ThermalMonitor(private val context: Context) : AppCompatActivity() 
                     if (!isThrottling)
                     {
                         isThrottling = true
-                        setAllThreadsPriority()
+                        setAllThreadsPriority(Process.THREAD_PRIORITY_BACKGROUND)
                     }
                 }
                 else if (fahrenheit >= restoreThreshold && isThrottling)
