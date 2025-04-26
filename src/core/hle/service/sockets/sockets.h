@@ -1,5 +1,4 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
-// SPDX-FileCopyrightText: Copyright 2025 citron Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #pragma once
@@ -18,11 +17,9 @@ enum class Errno : u32 {
     BADF = 9,
     AGAIN = 11,
     NOMEM = 12,
-    BUSY = 16,
     INVAL = 22,
     MFILE = 24,
     PIPE = 32,
-    NOTSOCK = 88,
     MSGSIZE = 90,
     CONNABORTED = 103,
     CONNRESET = 104,
