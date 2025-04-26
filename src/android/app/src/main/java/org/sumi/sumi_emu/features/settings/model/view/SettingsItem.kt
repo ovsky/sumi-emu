@@ -402,6 +402,13 @@ abstract class SettingsItem(
                     descriptionId = R.string.use_auto_stub_description
                 )
             )
+            put(
+                SwitchSetting(
+                    BooleanSetting.THERMAL_MONITOR_ENABLED,
+                    titleId = R.string.thermal_monitor,
+                    descriptionId = R.string.thermal_monitor_description
+                )
+            )
         }
     }
 }
