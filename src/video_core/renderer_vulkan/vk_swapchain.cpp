@@ -15,7 +15,7 @@
 #include "video_core/vulkan_common/vk_enum_string_helper.h"
 #include "video_core/vulkan_common/vulkan_device.h"
 #include "video_core/vulkan_common/vulkan_wrapper.h"
-#include "vulkan/vulkan_core.h"
+//#include "vulkan/vulkan_core.h"
 
 namespace Vulkan {
 
