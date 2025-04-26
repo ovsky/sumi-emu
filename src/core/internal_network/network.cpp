@@ -1,4 +1,5 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
+// SPDX-FileCopyrightText: Copyright 2025 citron Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <algorithm>
@@ -12,7 +13,7 @@
 #ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#elif SUMI_UNIX
+#elif CITRON_UNIX
 #include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -77,7 +78,7 @@ SOCKET GetInterruptSocket() {
 sockaddr TranslateFromSockAddrIn(SockAddrIn input) {
     sockaddr_in result;
 
-#if SUMI_UNIX
+#if CITRON_UNIX
     result.sin_len = sizeof(result);
 #endif
 
@@ -156,13 +157,17 @@ Errno TranslateNativeError(int e, CallType call_type = CallType::Other) {
         return Errno::TIMEDOUT;
     case WSAEINPROGRESS:
         return Errno::INPROGRESS;
+    case WSAENOTSOCK:
+        return Errno::NOTSOCK;
+    case WSAEBUSY:
+        return Errno::BUSY;
     default:
         UNIMPLEMENTED_MSG("Unimplemented errno={}", e);
         return Errno::OTHER;
     }
 }
 
-#elif SUMI_UNIX // ^ _WIN32 v SUMI_UNIX
+#elif CITRON_UNIX // ^ _WIN32 v CITRON_UNIX
 
 using SOCKET = int;
 using WSAPOLLFD = pollfd;
@@ -273,14 +278,14 @@ Errno TranslateNativeError(int e, CallType call_type = CallType::Other) {
         return Errno::MFILE;
     case EPIPE:
         return Errno::PIPE;
-    case ECONNABORTED:
-        return Errno::CONNABORTED;
     case ENOTCONN:
         return Errno::NOTCONN;
     case EAGAIN:
         return Errno::AGAIN;
     case ECONNREFUSED:
         return Errno::CONNREFUSED;
+    case ECONNABORTED:
+        return Errno::CONNABORTED;
     case ECONNRESET:
         return Errno::CONNRESET;
     case EHOSTUNREACH:
@@ -295,8 +300,14 @@ Errno TranslateNativeError(int e, CallType call_type = CallType::Other) {
         return Errno::TIMEDOUT;
     case EINPROGRESS:
         return Errno::INPROGRESS;
+    case ENOMEM:
+        return Errno::NOMEM;
+    case EBUSY:
+        return Errno::BUSY;
+    case ENOTSOCK:
+        return Errno::NOTSOCK;
     default:
-        UNIMPLEMENTED_MSG("Unimplemented errno={} ({})", e, strerror(e));
+        UNIMPLEMENTED_MSG("Unimplemented errno={}", e);
         return Errno::OTHER;
     }
 }
@@ -315,6 +326,14 @@ Errno GetAndLogLastError(CallType call_type = CallType::Other) {
         LOG_DEBUG(Network, "Socket operation error: {}", Common::NativeErrorToString(e));
         return err;
     }
+
+    if (err == Errno::NOTSOCK) {
+        // This is a common error when network functionality is not fully implemented
+        LOG_DEBUG(Network, "Socket operation error: An operation was attempted on something that is not a socket. "
+                   "This may indicate the game is using network features not fully supported. ");
+        return err;
+    }
+
     LOG_ERROR(Network, "Socket operation error: {}", Common::NativeErrorToString(e));
     return err;
 }
@@ -841,7 +860,7 @@ std::pair<s32, Errno> Socket::Send(std::span<const u8> message, int flags) {
     ASSERT(flags == 0);
 
     int native_flags = 0;
-#if SUMI_UNIX
+#if CITRON_UNIX
     native_flags |= MSG_NOSIGNAL; // do not send us SIGPIPE
 #endif
     const auto result = send(fd, reinterpret_cast<const char*>(message.data()),

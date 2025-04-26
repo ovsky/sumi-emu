@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
-// SPDX-FileCopyrightText: Copyright 2025 sumi Emulator Project
+// SPDX-FileCopyrightText: Copyright 2025 citron Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <optional>
@@ -381,7 +381,7 @@ void CollectStorageBuffers(IR::Block& block, IR::Inst& inst, StorageInfo& info) 
     static constexpr Bias nvn_bias{
         .index = 0,
         .offset_begin = 0x100,  // Expanded from 0x110 to catch more potential storage buffers
-        .offset_end = 0x800,    // Expanded from 0x610 to include a wider range
+        .offset_end = 0x1000,   // Substantially expanded to include all TOTK storage buffers
         .alignment = 32,        // Increased from 16 to optimize memory access patterns
     };
     // Track the low address of the instruction
@@ -402,8 +402,8 @@ void CollectStorageBuffers(IR::Block& block, IR::Inst& inst, StorageInfo& info) 
             LOG_WARNING(Shader, "Storage buffer failed to track, using global memory fallbacks");
             return;
         }
-        LOG_WARNING(Shader, "Storage buffer tracked without bias, index {} offset {}",
-                    storage_buffer->index, storage_buffer->offset);
+        LOG_DEBUG(Shader, "Storage buffer tracked without bias, index {} offset 0x{:X}",
+                 storage_buffer->index, storage_buffer->offset);
     }
     // Collect storage buffer and the instruction
     if (IsGlobalMemoryWrite(inst)) {

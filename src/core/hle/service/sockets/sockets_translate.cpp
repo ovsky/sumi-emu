@@ -1,4 +1,5 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
+// SPDX-FileCopyrightText: Copyright 2025 citron Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <utility>
@@ -39,6 +40,10 @@ Errno Translate(Network::Errno value) {
         return Errno::INPROGRESS;
     case Network::Errno::NOMEM:
         return Errno::NOMEM;
+    case Network::Errno::BUSY:
+        return Errno::BUSY;
+    case Network::Errno::NOTSOCK:
+        return Errno::NOTSOCK;
     default:
         UNIMPLEMENTED_MSG("Unimplemented errno={}", value);
         return Errno::SUCCESS;
