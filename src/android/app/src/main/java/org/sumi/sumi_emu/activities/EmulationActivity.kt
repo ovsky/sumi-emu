@@ -75,7 +75,11 @@ class EmulationActivity : AppCompatActivity(), SensorEventListener {
     private val actionMute = "ACTION_EMULATOR_MUTE"
     private val actionUnmute = "ACTION_EMULATOR_UNMUTE"
 
+
     private val emulationViewModel: EmulationViewModel by viewModels()
+
+    // Add ThermalManager
+    private var thermalManager: org.sumi.sumi_emu.thermal.ThermalManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.gameLaunched = true
@@ -164,6 +168,8 @@ class EmulationActivity : AppCompatActivity(), SensorEventListener {
                     .apply()
             }
         }
+
+        //thermalManager = org.sumi.sumi_emu.thermal.ThermalManager(this, game)
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
@@ -488,6 +494,7 @@ class EmulationActivity : AppCompatActivity(), SensorEventListener {
 
     fun onEmulationStarted() {
         emulationViewModel.setEmulationStarted(true)
+        thermalManager?.startThermalMonitoring()
     }
 
     fun onEmulationStopped(status: Int) {
@@ -495,6 +502,7 @@ class EmulationActivity : AppCompatActivity(), SensorEventListener {
             finish()
         }
         emulationViewModel.setEmulationStopped(true)
+        thermalManager?.stopThermalMonitoring()
     }
 
     fun onProgramChanged(programIndex: Int) {
