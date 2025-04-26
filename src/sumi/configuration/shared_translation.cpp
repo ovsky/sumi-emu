@@ -182,6 +182,12 @@ std::unique_ptr<TranslationMap> InitializeTranslations(QWidget* parent) {
            "a slow down.\nMailbox can have lower latency than FIFO and does not tear but may drop "
            "frames.\nImmediate (no synchronization) just presents whatever is available and can "
            "exhibit tearing."));
+    INSERT(
+    Settings, intelligent_performance, tr("Intelligent Performance Mode:"),
+    tr("This option allows the emulator to automatically adjust the performance level based on "
+       "the current game and system load.\nIt can help improve performance in some cases, but may "
+       "also cause stuttering or other issues."));
+       
     INSERT(Settings, bg_red, QStringLiteral(), QStringLiteral());
     INSERT(Settings, bg_green, QStringLiteral(), QStringLiteral());
     INSERT(Settings, bg_blue, QStringLiteral(), QStringLiteral());
