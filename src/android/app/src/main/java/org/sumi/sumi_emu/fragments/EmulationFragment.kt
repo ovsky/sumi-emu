@@ -65,7 +65,7 @@ import org.sumi.sumi_emu.overlay.model.OverlayLayout
 import org.sumi.sumi_emu.utils.*
 import org.sumi.sumi_emu.utils.ViewUtils.setVisible
 import java.lang.NullPointerException
-import org.sumi.sumi_emu.thermal.ThermalMonitor
+import org.sumi.sumi_emu.thermal.ThermalManager
 
 class EmulationFragment : Fragment(), SurfaceHolder.Callback {
     private lateinit var emulationState: EmulationState
@@ -80,6 +80,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
     private val args by navArgs<EmulationFragmentArgs>()
 
     private lateinit var game: Game
+    private lateinit var thermalManager: ThermalManager
 
     private val emulationViewModel: EmulationViewModel by activityViewModels()
     private val driverViewModel: DriverViewModel by activityViewModels()
@@ -89,8 +90,6 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
     private lateinit var powerManager: PowerManager
 
     private val ramStatsUpdateHandler = Handler(Looper.myLooper()!!)
-
-     private lateinit var thermalMonitor: ThermalMonitor
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -153,8 +152,6 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
         emulationState = EmulationState(game.path) {
             return@EmulationState driverViewModel.isInteractionAllowed.value
         }
-        thermalMonitor = ThermalMonitor(requireContext())
-        thermalMonitor.StartThermalMonitor()
         // ThermalMonitor.StartThermalMonitor(requireContext())
     }
 
@@ -438,6 +435,11 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
         driverViewModel.isInteractionAllowed.collect(viewLifecycleOwner) {
             if (it) startEmulation()
         }
+
+        // Start the new fragment-aware ThermalManager
+        thermalManager = ThermalManager(requireContext(), this, game)
+        thermalManager.startThermalMonitoring()
+        //thermalManager.start()
     }
 
     private fun startEmulation(programIndex: Int = 0) {
@@ -492,6 +494,9 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
         super.onDestroyView()
         if (ramStatsUpdater != null) {
             ramStatsUpdateHandler.removeCallbacks(ramStatsUpdater!!)
+        }
+        if (thermalManager?.isThrottling == true) {
+            thermalManager.stopThermalMonitoring()
         }
         _binding = null
     }
