@@ -270,7 +270,8 @@ size_t GetTotalPipelineWorkers() {
     // Calculate optimal number of workers based on available CPU cores
     size_t optimal_workers;
 
-#ifdef ANDROID
+#ifdef ANDROID || __ANDROID__ || defined(__ANDROID_API__)
+    // Android devices have limited CPU resources and should use fewer threads
     // Mobile devices need more conservative threading to avoid thermal issues
     // Leave more cores free on Android for system processes and other apps
     constexpr size_t min_free_cores = 3ULL;
