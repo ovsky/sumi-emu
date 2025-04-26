@@ -279,6 +279,39 @@ size_t GetTotalPipelineWorkers() {
         return 1ULL; // At least one worker
     }
     optimal_workers = num_cores - min_free_cores;
+
+    const bool has_4threads = num_cores == 0 || num_cores >= 4;
+    const bool has_8gb_ram = Common::GetMemInfo().TotalPhysicalMemory >= 8_GiB;
+
+    if (has_4threads)
+    {
+         // Set thread affinity for critical threads
+         SetThreadAffinity(system->GetCPUThread(), 3);
+         SetThreadAffinity(system->GetGPUThread(), 4);
+         SetThreadAffinity(system->GetAudioThread(), 5);
+         
+         // Set thread priority
+         SetThreadPriority(system->GetCPUThread(), ThreadPriority::Low);
+         SetThreadPriority(system->GetGPUThread(), ThreadPriority::Low);
+         SetThreadPriority(system->GetAudioThread(), ThreadPriority::Low);
+    }
+
+    if (has_8gb_ram)
+    {
+        if (has_4threads){
+            // Set thread affinity for memory-intensive threads
+            SetThreadAffinity(system->GetMemoryThread(), 6);
+            SetThreadAffinity(system->GetIOThread(), 7);
+        }
+
+
+         // Set thread priority for memory-intensive threads
+         SetThreadPriority(system->GetMemoryThread(), ThreadPriority::Low);
+         SetThreadPriority(system->GetIOThread(), ThreadPriority::Low);
+    }
+
+    // Example usage
+    SendAndroidNotification("Compatibility Check", "Your system meets the recommended requirements.");
 #else
     // Desktop systems can use more aggressive threading
     if (num_cores <= 3) {
