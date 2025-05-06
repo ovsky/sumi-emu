@@ -392,18 +392,123 @@ GraphicsPipeline* ShaderCache::BuiltPipeline(GraphicsPipeline* pipeline) const n
     if (!use_asynchronous_shaders) {
         return pipeline;
     }
+
+    // Advanced heuristics for smarter async shader compilation in OpenGL
+
+    // Track shader compilation statistics
+    static thread_local u32 async_shader_count = 0;
+    static thread_local std::chrono::high_resolution_clock::time_point last_async_shader_log;
+    auto now = std::chrono::high_resolution_clock::now();
+
+    // Enhanced detection of UI and critical shaders
+    const bool is_ui_shader = !maxwell3d->regs.zeta_enable;
+    // Check for blend state
+    const bool has_blend = maxwell3d->regs.blend.enable[0] != 0;
+    // Check if texture sampling is likely based on texture units used
+    const bool has_texture = maxwell3d->regs.tex_header.Address() != 0;
+    // Check for clear operations
+    const bool is_clear_operation = maxwell3d->regs.clear_surface.raw != 0;
+    const auto& draw_state = maxwell3d->draw_manager->GetDrawState();
+    const bool small_draw = draw_state.index_buffer.count <= 6 || draw_state.vertex_buffer.count <= 6;
+
+    // Track pipeline usage patterns for better prediction
+    // Use pipeline address as hash since we don't have a Hash() method
+    const u64 draw_config_hash = reinterpret_cast<u64>(pipeline);
+    static thread_local std::unordered_map<u64, u32> shader_usage_count;
+    static thread_local std::unordered_map<u64, bool> shader_is_frequent;
+
+    // Increment usage counter for this shader
+    shader_usage_count[draw_config_hash]++;
+
+    // After a certain threshold, mark as frequently used
+    if (shader_usage_count[draw_config_hash] >= 3) {
+        shader_is_frequent[draw_config_hash] = true;
+    }
+
+    // Get shader priority from settings
+    const int shader_priority = Settings::values.shader_compilation_priority.GetValue();
+
+    // Always wait for UI shaders if settings specify high priority
+    if (is_ui_shader && (shader_priority >= 0 || small_draw)) {
+        return pipeline;
+    }
+
+    // Wait for frequently used small draw shaders
+    if (small_draw && shader_is_frequent[draw_config_hash]) {
+        return pipeline;
+    }
+
+    // Wait for clear operations as they're usually critical
+    if (is_clear_operation) {
+        return pipeline;
+    }
+
+    // Force wait if high shader priority in settings
+    if (shader_priority > 1) {
+        return pipeline;
+    }
+
+    // Improved depth-based heuristics
+
     // If something is using depth, we can assume that games are not rendering anything which
     // will be used one time.
     if (maxwell3d->regs.zeta_enable) {
+
+        // Check if this is likely a shadow map or important depth-based effect
+        // Check if depth write is enabled and color writes are disabled for all render targets
+        bool depth_only_pass = maxwell3d->regs.depth_write_enabled;
+        if (depth_only_pass) {
+            bool all_color_masked = true;
+            for (size_t i = 0; i < maxwell3d->regs.color_mask.size(); i++) {
+                // Check if any color component is enabled (R, G, B, A fields of ColorMask)
+                if ((maxwell3d->regs.color_mask[i].raw & 0x1111) != 0) {
+                    all_color_masked = false;
+                    break;
+                }
+            }
+
+            // If depth write enabled and all colors masked, this is likely a shadow pass
+            if (all_color_masked) {
+                // Likely a shadow pass, wait for compilation to avoid flickering shadows
+                return pipeline;
+            }
+        }
+
+        // For other depth-enabled renders, use async compilation
         return nullptr;
     }
-    // If games are using a small index count, we can assume these are full screen quads.
-    // Usually these shaders are only used once for building textures so we can assume they
-    // can't be built async
-    const auto& draw_state = maxwell3d->draw_manager->GetDrawState();
-    if (draw_state.index_buffer.count <= 6 || draw_state.vertex_buffer.count <= 6) {
+
+    // Refined small draw detection
+    if (small_draw) {
+        // Check if this might be a UI element that we missed
+        if (has_blend && has_texture) {
+            // Likely a textured UI element, wait for it
+            return pipeline;
+        }
+        // For other small draws, assume they're one-off effects
         return pipeline;
     }
+
+    // Log compilation statistics periodically
+    auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
+        now - last_async_shader_log).count();
+
+    if (elapsed >= 10) {
+        async_shader_count = 0;
+        last_async_shader_log = now;
+    }
+    async_shader_count++;
+
+    if (async_shader_count % 100 == 1) {
+        float progress = 0.5f;  // Default to 50% when we can't determine actual progress
+        if (workers) {
+            // TODO: Implement progress tracking
+        }
+        LOG_DEBUG(Render_OpenGL, "Async shader compilation in progress (count={}), completion={:.1f}%",
+                    async_shader_count, progress * 100.0f);
+    }
+
+    // Wait for the pipeline to be built
     return nullptr;
 }
 

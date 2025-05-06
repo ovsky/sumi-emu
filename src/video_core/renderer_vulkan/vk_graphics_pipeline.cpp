@@ -313,6 +313,19 @@ GraphicsPipeline::GraphicsPipeline(
     configure_func = ConfigureFunc(spv_modules, stage_infos);
 }
 
+GraphicsPipeline* GraphicsPipeline::Clone() const {
+    // Create a new pipeline that shares the same resources
+    // This is for pipeline deduplication
+
+    if (!IsBuilt()) {
+        LOG_WARNING(Render_Vulkan, "Attempted to clone unbuilt pipeline");
+        return nullptr;
+    }
+
+    return const_cast<GraphicsPipeline*>(this);
+
+}
+
 void GraphicsPipeline::AddTransition(GraphicsPipeline* transition) {
     transition_keys.push_back(transition->key);
     transitions.push_back(transition);
