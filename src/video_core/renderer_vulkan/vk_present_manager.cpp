@@ -1,7 +1,9 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
+// SPDX-FileCopyrightText: Copyright 2025 sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "common/microprofile.h"
+#include "common/logging/log.h"
 #include "common/settings.h"
 #include "common/thread.h"
 #include "core/frontend/emu_window.h"
@@ -10,6 +12,7 @@
 #include "video_core/renderer_vulkan/vk_swapchain.h"
 #include "video_core/vulkan_common/vulkan_device.h"
 #include "video_core/vulkan_common/vulkan_surface.h"
+#include "video_core/vulkan_common/vulkan_wrapper.h"
 
 namespace Vulkan {
 
@@ -21,6 +24,56 @@ namespace {
 bool CanBlitToSwapchain(const vk::PhysicalDevice& physical_device, VkFormat format) {
     const VkFormatProperties props{physical_device.GetFormatProperties(format)};
     return (props.optimalTilingFeatures & VK_FORMAT_FEATURE_BLIT_DST_BIT);
+}
+
+// Add a helper function to convert VkResult to string
+const char* VkResultToString(VkResult result) {
+    switch (result) {
+    case VK_SUCCESS:
+        return "VK_SUCCESS";
+    case VK_NOT_READY:
+        return "VK_NOT_READY";
+    case VK_TIMEOUT:
+        return "VK_TIMEOUT";
+    case VK_EVENT_SET:
+        return "VK_EVENT_SET";
+    case VK_EVENT_RESET:
+        return "VK_EVENT_RESET";
+    case VK_INCOMPLETE:
+        return "VK_INCOMPLETE";
+    case VK_ERROR_OUT_OF_HOST_MEMORY:
+        return "VK_ERROR_OUT_OF_HOST_MEMORY";
+    case VK_ERROR_OUT_OF_DEVICE_MEMORY:
+        return "VK_ERROR_OUT_OF_DEVICE_MEMORY";
+    case VK_ERROR_INITIALIZATION_FAILED:
+        return "VK_ERROR_INITIALIZATION_FAILED";
+    case VK_ERROR_DEVICE_LOST:
+        return "VK_ERROR_DEVICE_LOST";
+    case VK_ERROR_MEMORY_MAP_FAILED:
+        return "VK_ERROR_MEMORY_MAP_FAILED";
+    case VK_ERROR_LAYER_NOT_PRESENT:
+        return "VK_ERROR_LAYER_NOT_PRESENT";
+    case VK_ERROR_EXTENSION_NOT_PRESENT:
+        return "VK_ERROR_EXTENSION_NOT_PRESENT";
+    case VK_ERROR_FEATURE_NOT_PRESENT:
+        return "VK_ERROR_FEATURE_NOT_PRESENT";
+    case VK_ERROR_INCOMPATIBLE_DRIVER:
+        return "VK_ERROR_INCOMPATIBLE_DRIVER";
+    case VK_ERROR_TOO_MANY_OBJECTS:
+        return "VK_ERROR_TOO_MANY_OBJECTS";
+    case VK_ERROR_FORMAT_NOT_SUPPORTED:
+        return "VK_ERROR_FORMAT_NOT_SUPPORTED";
+    case VK_ERROR_FRAGMENTED_POOL:
+        return "VK_ERROR_FRAGMENTED_POOL";
+    case VK_ERROR_SURFACE_LOST_KHR:
+        return "VK_ERROR_SURFACE_LOST_KHR";
+    case VK_ERROR_OUT_OF_DATE_KHR:
+        return "VK_ERROR_OUT_OF_DATE_KHR";
+    case VK_SUBOPTIMAL_KHR:
+        return "VK_SUBOPTIMAL_KHR";
+    default:
+        return "Unknown VkResult";
+    }
 }
 
 [[nodiscard]] VkImageSubresourceLayers MakeImageSubresourceLayers() {
@@ -103,6 +156,10 @@ PresentManager::PresentManager(const vk::Instance& instance_,
       surface{surface_}, blit_supported{CanBlitToSwapchain(device.GetPhysical(),
                                                            swapchain.GetImageViewFormat())},
       use_present_thread{Settings::values.async_presentation.GetValue()} {
+
+    LOG_INFO(Render_Vulkan, "Initializing present manager. Async presentation: {}, Blit supported: {}",
+             use_present_thread, blit_supported);
+
     SetImageCount();
 
     auto& dld = device.GetLogical();
@@ -132,18 +189,36 @@ PresentManager::PresentManager(const vk::Instance& instance_,
         free_queue.push(&frame);
     }
 
+    // Only create the present thread if async presentation is enabled and the device supports it
     if (use_present_thread) {
-        present_thread = std::jthread([this](std::stop_token token) { PresentThread(token); });
+        try {
+            present_thread = std::jthread([this](std::stop_token token) { PresentThread(token); });
+            LOG_INFO(Render_Vulkan, "Presentation thread started successfully");
+        } catch (const std::exception& e) {
+            LOG_ERROR(Render_Vulkan, "Failed to start presentation thread: {}", e.what());
+            use_present_thread = false;
+        }
     }
 }
 
-PresentManager::~PresentManager() = default;
+PresentManager::~PresentManager() {
+    // Ensure the present queue is empty before destroying it
+    if (use_present_thread) {
+        try {
+            WaitPresent();
+            // The thread will be automatically joined by std::jthread's destructor
+            LOG_INFO(Render_Vulkan, "Presentation thread stopping");
+        } catch (const std::exception& e) {
+            LOG_ERROR(Render_Vulkan, "Error during present thread cleanup: {}", e.what());
+        }
+    }
+}
 
 Frame* PresentManager::GetRenderFrame() {
     MICROPROFILE_SCOPE(Vulkan_WaitPresent);
 
     // Wait for free presentation frames
-    std::unique_lock lock{free_mutex};
+    std::unique_lock<std::timed_mutex> lock{free_mutex};
     free_cv.wait(lock, [this] { return !free_queue.empty(); });
 
     // Take the frame from the queue
@@ -157,31 +232,37 @@ Frame* PresentManager::GetRenderFrame() {
     return frame;
 }
 
-// Encapsulates the copy to swapchain in a command buffer and submits it to the queue.
-void PresentManager::ReleaseFrame(Frame* frame) {
-    std::scoped_lock lock{free_mutex};
-    free_queue.push(frame);
-    free_cv.notify_one();
-}
-
 void PresentManager::Present(Frame* frame) {
     if (!use_present_thread) {
         scheduler.WaitWorker();
-        CopyToSwapchain(frame);
-        ReleaseFrame(frame);
+        try {
+            CopyToSwapchain(frame);
+        } catch (const std::exception& e) {
+            LOG_ERROR(Render_Vulkan, "Error during sync presentation: {}", e.what());
+        }
+        free_queue.push(frame);
         return;
     }
 
-    scheduler.Record([this, &frame](vk::CommandBuffer) {
-        std::unique_lock lock(queue_mutex);
-        frame_cv.wait(lock, [&] { return !present_queue.empty(); });
+    // For asynchronous presentation, queue the frame and notify the present thread
+    scheduler.Record([this, frame](vk::CommandBuffer) {
+        // Try to acquire the queue mutex
+        std::unique_lock<std::timed_mutex> lock{queue_mutex, std::defer_lock};
+        if (!lock.try_lock()) {
+            LOG_WARNING(Render_Vulkan, "Failed to acquire queue mutex in Present");
+            // Push the frame back to the free queue if we can
+            try {
+                std::unique_lock<std::timed_mutex> free_lock{free_mutex, std::defer_lock};
+                if (free_lock.try_lock()) {
+                    free_queue.push(frame);
+                    free_cv.notify_one();
+                }
+            } catch (...) {}
+            return;
+        }
 
-        frame = present_queue.front();
-        present_queue.pop();
-
-        // std::unique_lock lock{queue_mutex};
-        // present_queue.push(frame);
-        // frame_cv.notify_one();
+        present_queue.push(frame);
+        frame_cv.notify_one();
     });
 }
 
@@ -208,7 +289,7 @@ void PresentManager::RecreateFrame(Frame* frame, u32 width, u32 height, VkFormat
         .arrayLayers = 1,
         .samples = VK_SAMPLE_COUNT_1_BIT,
         .tiling = VK_IMAGE_TILING_OPTIMAL,
-        .usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+        .usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
         .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
         .queueFamilyIndexCount = 0,
         .pQueueFamilyIndices = nullptr,
@@ -258,44 +339,95 @@ void PresentManager::WaitPresent() {
         return;
     }
 
-    // Wait for the present queue to be empty
-    {
+    // Wait for the present queue to be empty with a timeout
+    try {
         std::unique_lock queue_lock{queue_mutex};
-        frame_cv.wait(queue_lock, [this] { return present_queue.empty(); });
-    }
+        constexpr auto timeout = std::chrono::seconds(5);
+        if (!frame_cv.wait_for(queue_lock, timeout, [this] { return present_queue.empty(); })) {
+            LOG_WARNING(Render_Vulkan, "Timeout waiting for present queue to empty");
+            return;
+        }
 
-    // The above condition will be satisfied when the last frame is taken from the queue.
-    // To ensure that frame has been presented as well take hold of the swapchain
-    // mutex.
-    std::scoped_lock swapchain_lock{swapchain_mutex};
+        // The above condition will be satisfied when the last frame is taken from the queue.
+        // To ensure that frame has been presented as well take hold of the swapchain
+        // mutex with a timeout.
+        if (!swapchain_mutex.try_lock()) {
+            LOG_WARNING(Render_Vulkan, "Failed to acquire swapchain mutex");
+            return;
+        }
+        swapchain_mutex.unlock();
+    } catch (const std::exception& e) {
+        LOG_ERROR(Render_Vulkan, "Exception during WaitPresent: {}", e.what());
+    }
 }
 
 void PresentManager::PresentThread(std::stop_token token) {
     Common::SetCurrentThreadName("VulkanPresent");
     while (!token.stop_requested()) {
-        std::unique_lock lock{queue_mutex};
+        try {
+            std::unique_lock lock{queue_mutex};
 
-        // Wait for presentation frames
-        Common::CondvarWait(frame_cv, lock, token, [this] { return !present_queue.empty(); });
-        if (token.stop_requested()) {
-            return;
+            // Wait for presentation frames with a timeout to prevent hanging indefinitely
+            constexpr auto timeout = std::chrono::milliseconds(500);
+            bool has_frame = false;
+
+            // Use wait_for with predicate instead of CondvarWait with timeout
+            if (token.stop_requested()) {
+                return;
+            }
+
+            has_frame = frame_cv.wait_for(lock, timeout, [this] {
+                return !present_queue.empty();
+            });
+
+            if (token.stop_requested()) {
+                return;
+            }
+
+            if (!has_frame) {
+                // Timeout occurred, continue the loop
+                continue;
+            }
+
+            if (present_queue.empty()) {
+                // This shouldn't happen but handle it just in case
+                continue;
+            }
+
+            // Take the frame and notify anyone waiting
+            Frame* frame = present_queue.front();
+            present_queue.pop();
+            frame_cv.notify_one();
+
+            // By exchanging the lock ownership we take the swapchain lock
+            // before the queue lock goes out of scope. This way the swapchain
+            // lock in WaitPresent is guaranteed to occur after here.
+            std::unique_lock<std::mutex> swapchain_lock{swapchain_mutex, std::defer_lock};
+            if (!swapchain_lock.try_lock()) {
+                LOG_WARNING(Render_Vulkan, "Failed to acquire swapchain lock, skipping presentation");
+                // Return the frame to the free queue even if we couldn't present it
+                std::scoped_lock fl{free_mutex};
+                free_queue.push(frame);
+                free_cv.notify_one();
+                continue;
+            }
+
+            lock.unlock(); // Release queue lock after acquiring swapchain lock
+
+            try {
+                CopyToSwapchain(frame);
+            } catch (const std::exception& e) {
+                LOG_ERROR(Render_Vulkan, "Error during presentation: {}", e.what());
+            }
+
+            // Free the frame for reuse
+            std::scoped_lock fl{free_mutex};
+            free_queue.push(frame);
+            free_cv.notify_one();
+        } catch (const std::exception& e) {
+            LOG_ERROR(Render_Vulkan, "Exception in present thread: {}", e.what());
+            // Continue the loop instead of letting the thread die
         }
-
-        // Take the frame and notify anyone waiting
-        Frame* frame = present_queue.front();
-        present_queue.pop();
-        frame_cv.notify_one();
-
-        // By exchanging the lock ownership we take the swapchain lock
-        // before the queue lock goes out of scope. This way the swapchain
-        // lock in WaitPresent is guaranteed to occur after here.
-        std::exchange(lock, std::unique_lock{swapchain_mutex});
-
-        CopyToSwapchain(frame);
-
-        // Free the frame for reuse
-        std::scoped_lock fl{free_mutex};
-        ReleaseFrame(frame);
     }
 }
 
@@ -313,25 +445,40 @@ void PresentManager::SetImageCount() {
 
 void PresentManager::CopyToSwapchain(Frame* frame) {
     bool requires_recreation = false;
+    u32 recreation_attempts = 0;
+    const u32 max_recreation_attempts = 3;
 
-    while (true) {
+    while (recreation_attempts < max_recreation_attempts) {
         try {
             // Recreate surface and swapchain if needed.
             if (requires_recreation) {
+                LOG_INFO(Render_Vulkan, "Recreating swapchain (attempt {}/{})",
+                         recreation_attempts + 1, max_recreation_attempts);
                 surface = CreateSurface(instance, render_window.GetWindowInfo());
                 RecreateSwapchain(frame);
+                recreation_attempts++;
             }
 
             // Draw to swapchain.
             return CopyToSwapchainImpl(frame);
         } catch (const vk::Exception& except) {
-            if (except.GetResult() != VK_ERROR_SURFACE_LOST_KHR) {
+            const VkResult result = except.GetResult();
+            if (result != VK_ERROR_SURFACE_LOST_KHR &&
+                result != VK_ERROR_OUT_OF_DATE_KHR &&
+                result != VK_SUBOPTIMAL_KHR) {
+                LOG_ERROR(Render_Vulkan, "Swapchain presentation failed with error {}: {}",
+                          result, VkResultToString(result));
                 throw;
             }
 
+            LOG_WARNING(Render_Vulkan, "Swapchain lost or outdated with error {}: {}, recreating",
+                        result, VkResultToString(result));
             requires_recreation = true;
+            recreation_attempts++;
         }
     }
+
+    LOG_ERROR(Render_Vulkan, "Failed to present after {} recreation attempts", max_recreation_attempts);
 }
 
 void PresentManager::CopyToSwapchainImpl(Frame* frame) {
@@ -339,12 +486,10 @@ void PresentManager::CopyToSwapchainImpl(Frame* frame) {
 
     // If the size of the incoming frames has changed, recreate the swapchain
     // to account for that.
-    //    const bool is_suboptimal = swapchain.NeedsRecreation();
-
-        // Remove redundant checks
-    if (swapchain.NeedsRecreation() ||
-        swapchain.GetWidth() != frame->width ||
-        swapchain.GetHeight() != frame->height) {
+    const bool is_suboptimal = swapchain.NeedsRecreation();
+    const bool size_changed =
+        swapchain.GetWidth() != frame->width || swapchain.GetHeight() != frame->height;
+    if (is_suboptimal || size_changed) {
         RecreateSwapchain(frame);
     }
 
@@ -353,7 +498,7 @@ void PresentManager::CopyToSwapchainImpl(Frame* frame) {
     }
 
     const vk::CommandBuffer cmdbuf{frame->cmdbuf};
-    frame->cmdbuf.Begin({
+    cmdbuf.Begin({
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
         .pNext = nullptr,
         .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
