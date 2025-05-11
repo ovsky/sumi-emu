@@ -10,7 +10,7 @@
 #ifdef SUMI_USE_FP16
 
 #extension GL_AMD_gpu_shader_half_float : enable
-#extension GL_EXT_shader_explicit_arithmetic_types_float16 : require
+#extension GL_NV_gpu_shader5 : enable
 
 #define lfloat float16_t
 #define lvec2 f16vec2

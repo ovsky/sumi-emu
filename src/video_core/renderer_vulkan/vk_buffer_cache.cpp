@@ -525,14 +525,6 @@ void BufferCacheRuntime::BindQuadIndexBuffer(PrimitiveTopology topology, u32 fir
         return;
     }
 
-    // if (count == 0) {
-    //     ReserveNullBuffer();
-    //     scheduler.EnqueueCommand([this](vk::CommandBuffer cmdbuf) {
-    //         cmdbuf.BindIndexBuffer(*null_buffer, 0, VK_INDEX_TYPE_UINT32);
-    //     });
-    //     return;
-    // }
-
     if (topology == PrimitiveTopology::Quads) {
         quad_array_index_buffer->UpdateBuffer(first + count);
         quad_array_index_buffer->BindBuffer(first);

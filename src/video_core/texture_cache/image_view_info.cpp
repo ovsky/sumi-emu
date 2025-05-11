@@ -1,5 +1,4 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
-// SPDX-FileCopyrightText: Copyright 2025 sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <limits>
@@ -86,13 +85,6 @@ ImageViewInfo::ImageViewInfo(ImageViewType type_, PixelFormat format_,
 bool ImageViewInfo::IsRenderTarget() const noexcept {
     return x_source == RENDER_TARGET_SWIZZLE && y_source == RENDER_TARGET_SWIZZLE &&
            z_source == RENDER_TARGET_SWIZZLE && w_source == RENDER_TARGET_SWIZZLE;
-}
-
-bool ImageViewInfo::operator==(const ImageViewInfo& rhs) const noexcept {
-    return std::tie(this->type, this->format, this->range,
-                    this->x_source, this->y_source, this->z_source, this->w_source) ==
-           std::tie(rhs.type, rhs.format, rhs.range,
-                    rhs.x_source, rhs.y_source, rhs.z_source, rhs.w_source);
 }
 
 } // namespace VideoCommon

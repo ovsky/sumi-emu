@@ -227,7 +227,7 @@ struct fmt::formatter<VideoCore::Surface::PixelFormat> : fmt::formatter<fmt::str
             }
             return "Invalid";
         }();
-        return fmt::formatter<string_view>::format(name, ctx);
+        return formatter<string_view>::format(name, ctx);
     }
 };
 
@@ -251,7 +251,7 @@ struct fmt::formatter<VideoCommon::ImageType> : fmt::formatter<fmt::string_view>
             }
             return "Invalid";
         }();
-        return fmt::formatter<string_view>::format(name, ctx);
+        return formatter<string_view>::format(name, ctx);
     }
 };
 

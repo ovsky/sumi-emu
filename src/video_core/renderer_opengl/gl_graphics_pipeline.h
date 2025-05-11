@@ -1,5 +1,4 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
-// SPDX-FileCopyrightText: Copyright 2025 Sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #pragma once
@@ -103,7 +102,7 @@ public:
         return uses_local_memory;
     }
 
-    [[nodiscard]] bool IsBuilt() const noexcept;
+    [[nodiscard]] bool IsBuilt() noexcept;
 
     template <typename Spec>
     static auto MakeConfigureSpecFunc() {

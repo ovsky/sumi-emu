@@ -43,6 +43,8 @@ public:
                            u64 big_page_bits_ = 16, u64 page_bits_ = 12);
     ~MemoryManager();
 
+    static constexpr bool HAS_FLUSH_INVALIDATION = true;
+
     size_t GetID() const {
         return unique_identifier;
     }

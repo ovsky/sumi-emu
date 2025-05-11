@@ -1,5 +1,4 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
-// SPDX-FileCopyrightText: Copyright 2025 sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #pragma once
@@ -43,8 +42,6 @@ struct ImageInfo {
     bool forced_flushed = false;
     bool dma_downloaded = false;
     bool is_sparse = false;
-
-    bool operator==(const ImageInfo& rhs) const noexcept;
 };
 
 } // namespace VideoCommon

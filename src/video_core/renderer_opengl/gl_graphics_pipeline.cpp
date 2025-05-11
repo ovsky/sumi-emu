@@ -1,13 +1,10 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
-// SPDX-FileCopyrightText: Copyright 2025 Sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <algorithm>
 #include <array>
 #include <string>
 #include <vector>
-#include <chrono>
-#include <functional>
 
 #include "common/settings.h" // for enum class Settings::ShaderBackend
 #include "common/thread_worker.h"
@@ -237,68 +234,26 @@ GraphicsPipeline::GraphicsPipeline(const Device& device, TextureCache& texture_c
     auto func{[this, sources_ = std::move(sources), sources_spirv_ = std::move(sources_spirv),
                shader_notify, backend, in_parallel,
                force_context_flush](ShaderContext::Context*) mutable {
-        // Track time for shader compilation for possible performance tuning
-        const auto start_time = std::chrono::high_resolution_clock::now();
-
-        // Prepare compilation steps for all shader stages
-        std::vector<std::function<void()>> compilation_steps;
-        compilation_steps.reserve(5); // Maximum number of shader stages
-
-        // Prepare all compilation steps first to better distribute work
         for (size_t stage = 0; stage < 5; ++stage) {
             switch (backend) {
             case Settings::ShaderBackend::Glsl:
                 if (!sources_[stage].empty()) {
-                    compilation_steps.emplace_back([this, stage, source = sources_[stage]]() {
-                        source_programs[stage] = CreateProgram(source, Stage(stage));
-                    });
+                    source_programs[stage] = CreateProgram(sources_[stage], Stage(stage));
                 }
                 break;
             case Settings::ShaderBackend::Glasm:
                 if (!sources_[stage].empty()) {
-                    compilation_steps.emplace_back([this, stage, source = sources_[stage]]() {
-                        assembly_programs[stage] = CompileProgram(source, AssemblyStage(stage));
-                    });
+                    assembly_programs[stage] =
+                        CompileProgram(sources_[stage], AssemblyStage(stage));
                 }
                 break;
             case Settings::ShaderBackend::SpirV:
                 if (!sources_spirv_[stage].empty()) {
-                    compilation_steps.emplace_back([this, stage, source = sources_spirv_[stage]]() {
-                        source_programs[stage] = CreateProgram(source, Stage(stage));
-                    });
+                    source_programs[stage] = CreateProgram(sources_spirv_[stage], Stage(stage));
                 }
                 break;
             }
         }
-
-        // If we're running in parallel, use high-priority execution for vertex and fragment shaders
-        // as these are typically needed first by the renderer
-        if (in_parallel && compilation_steps.size() > 1) {
-            // Execute vertex (0) and fragment (4) shaders first if they exist
-            for (size_t priority_stage : {0, 4}) {
-                for (size_t i = 0; i < compilation_steps.size(); ++i) {
-                    if ((i == priority_stage || (priority_stage == 0 && i <= 1)) && i < compilation_steps.size()) {
-                        compilation_steps[i]();
-                        compilation_steps[i] = [](){}; // Mark as executed
-                    }
-                }
-            }
-        }
-
-        // Execute all remaining compilation steps
-        for (auto& step : compilation_steps) {
-            step(); // Will do nothing for already executed steps
-        }
-
-        // Performance measurement for possible logging or optimization
-        const auto end_time = std::chrono::high_resolution_clock::now();
-        const auto compilation_time = std::chrono::duration_cast<std::chrono::milliseconds>(
-            end_time - start_time).count();
-
-        if (compilation_time > 50) { // Only log slow compilations
-            LOG_DEBUG(Render_OpenGL, "Shader compilation took {}ms", compilation_time);
-        }
-
         if (force_context_flush || in_parallel) {
             std::scoped_lock lock{built_mutex};
             built_fence.Create();
@@ -668,41 +623,15 @@ void GraphicsPipeline::WaitForBuild() {
     is_built = true;
 }
 
-bool GraphicsPipeline::IsBuilt() const noexcept {
+bool GraphicsPipeline::IsBuilt() noexcept {
     if (is_built) {
         return true;
     }
-    if (!built_fence.handle) {
+    if (built_fence.handle == 0) {
         return false;
     }
-
-    // Check if the async build has finished by polling the fence
-    const GLsync sync = built_fence.handle;
-    const GLuint result = glClientWaitSync(sync, 0, 0);
-    if (result == GL_ALREADY_SIGNALED || result == GL_CONDITION_SATISFIED) {
-        // Mark this as mutable even though we're in a const method - this is
-        // essentially a cached value update which is acceptable
-        const_cast<GraphicsPipeline*>(this)->is_built = true;
-        return true;
-    }
-
-    // For better performance tracking, capture time spent waiting for shaders
-    static thread_local std::chrono::high_resolution_clock::time_point last_shader_wait_log;
-    static thread_local u32 shader_wait_count = 0;
-
-    auto now = std::chrono::high_resolution_clock::now();
-    auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
-        now - last_shader_wait_log).count();
-
-    // Log shader compilation status periodically to help diagnose performance issues
-    if (elapsed >= 5) { // Log every 5 seconds
-        shader_wait_count++;
-        LOG_DEBUG(Render_OpenGL, "Waiting for async shader compilation... (count={})",
-                 shader_wait_count);
-        last_shader_wait_log = now;
-    }
-
-    return false;
+    is_built = built_fence.IsSignaled();
+    return is_built;
 }
 
 } // namespace OpenGL

@@ -1,5 +1,4 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
-// SPDX-FileCopyrightText: Copyright 2025 sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #pragma once
@@ -44,8 +43,6 @@ struct ImageViewInfo {
     u8 y_source = static_cast<u8>(SwizzleSource::G);
     u8 z_source = static_cast<u8>(SwizzleSource::B);
     u8 w_source = static_cast<u8>(SwizzleSource::A);
-
-    bool operator==(const ImageViewInfo& rhs) const noexcept;
 };
 static_assert(std::has_unique_object_representations_v<ImageViewInfo>);
 

@@ -1,5 +1,4 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
-// SPDX-FileCopyrightText: Copyright 2025 sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #pragma once
@@ -12,6 +11,8 @@
 #include "common/polyfill_thread.h"
 #include "video_core/vulkan_common/vulkan_memory_allocator.h"
 #include "video_core/vulkan_common/vulkan_wrapper.h"
+
+struct VkSurfaceKHR_T;
 
 namespace Core::Frontend {
 class EmuWindow;
@@ -38,7 +39,7 @@ class PresentManager {
 public:
     PresentManager(const vk::Instance& instance, Core::Frontend::EmuWindow& render_window,
                    const Device& device, MemoryAllocator& memory_allocator, Scheduler& scheduler,
-                   Swapchain& swapchain, vk::SurfaceKHR& surface);
+                   Swapchain& swapchain, VkSurfaceKHR_T* surface_handle);
     ~PresentManager();
 
     /// Returns the last used presentation frame
@@ -50,8 +51,6 @@ public:
     /// Recreates the present frame to match the provided parameters
     void RecreateFrame(Frame* frame, u32 width, u32 height, VkFormat image_view_format,
                        VkRenderPass rd);
-
-    void ReleaseFrame(Frame* frame);
 
     /// Waits for the present thread to finish presenting all queued frames.
     void WaitPresent();
@@ -74,16 +73,16 @@ private:
     MemoryAllocator& memory_allocator;
     Scheduler& scheduler;
     Swapchain& swapchain;
-    vk::SurfaceKHR& surface;
+    VkSurfaceKHR_T* surface_handle;
     vk::CommandPool cmdpool;
     std::vector<Frame> frames;
     std::queue<Frame*> present_queue;
     std::queue<Frame*> free_queue;
     std::condition_variable_any frame_cv;
-    std::condition_variable_any free_cv;
+    std::condition_variable free_cv;
     std::mutex swapchain_mutex;
-    std::timed_mutex queue_mutex;
-    std::timed_mutex free_mutex;
+    std::mutex queue_mutex;
+    std::mutex free_mutex;
     std::jthread present_thread;
     bool blit_supported;
     bool use_present_thread;

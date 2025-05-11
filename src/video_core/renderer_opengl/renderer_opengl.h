@@ -34,8 +34,7 @@ class BlitScreen;
 
 class RendererOpenGL final : public VideoCore::RendererBase {
 public:
-    explicit RendererOpenGL(Core::TelemetrySession& telemetry_session_,
-                            Core::Frontend::EmuWindow& emu_window_,
+    explicit RendererOpenGL(Core::Frontend::EmuWindow& emu_window_,
                             Tegra::MaxwellDeviceMemoryManager& device_memory_, Tegra::GPU& gpu_,
                             std::unique_ptr<Core::Frontend::GraphicsContext> context_);
     ~RendererOpenGL() override;
@@ -60,7 +59,6 @@ private:
     void RenderScreenshot(std::span<const Tegra::FramebufferConfig> framebuffers);
     void RenderAppletCaptureLayer(std::span<const Tegra::FramebufferConfig> framebuffers);
 
-    Core::TelemetrySession& telemetry_session;
     Core::Frontend::EmuWindow& emu_window;
     Tegra::MaxwellDeviceMemoryManager& device_memory;
     Tegra::GPU& gpu;

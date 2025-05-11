@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
-// SPDX-FileCopyrightText: Copyright 2025 Sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <algorithm>
+#include <iostream>
 #include <span>
 
 #include <boost/container/small_vector.hpp>
@@ -235,6 +235,7 @@ ConfigureFuncPtr ConfigureFunc(const std::array<vk::ShaderModule, NUM_STAGES>& m
 }
 } // Anonymous namespace
 
+// TODO(crueter): This is the worst-formatted code I have EVER seen
 GraphicsPipeline::GraphicsPipeline(
     Scheduler& scheduler_, BufferCache& buffer_cache_, TextureCache& texture_cache_,
     vk::PipelineCache& pipeline_cache_, VideoCore::ShaderNotify* shader_notify,
@@ -259,22 +260,15 @@ GraphicsPipeline::GraphicsPipeline(
         std::ranges::copy(info->constant_buffer_used_sizes, uniform_buffer_sizes[stage].begin());
         num_textures += Shader::NumDescriptors(info->texture_descriptors);
     }
-
-    // Track compilation start time for performance metrics
-    const auto start_time = std::chrono::high_resolution_clock::now();
-
-    auto func{[this, shader_notify, &render_pass_cache, &descriptor_pool, pipeline_statistics, start_time] {
-        // Use enhanced shader compilation if enabled in settings
-        if (Settings::values.use_enhanced_shader_building.GetValue()) {
-            Common::SetCurrentThreadPriority(Common::ThreadPriority::High);
-        }
-
+    auto func{[this, shader_notify, &render_pass_cache, &descriptor_pool, pipeline_statistics] {
         DescriptorLayoutBuilder builder{MakeBuilder(device, stage_infos)};
         uses_push_descriptor = builder.CanUsePushDescriptor();
         descriptor_set_layout = builder.CreateDescriptorSetLayout(uses_push_descriptor);
+
         if (!uses_push_descriptor) {
             descriptor_allocator = descriptor_pool.Allocator(*descriptor_set_layout, stage_infos);
         }
+
         const VkDescriptorSetLayout set_layout{*descriptor_set_layout};
         pipeline_layout = builder.CreatePipelineLayout(set_layout);
         descriptor_update_template =
@@ -283,17 +277,6 @@ GraphicsPipeline::GraphicsPipeline(
         const VkRenderPass render_pass{render_pass_cache.Get(MakeRenderPassKey(key.state))};
         Validate();
         MakePipeline(render_pass);
-
-        // Performance measurement
-        const auto end_time = std::chrono::high_resolution_clock::now();
-        const auto compilation_time = std::chrono::duration_cast<std::chrono::milliseconds>(
-            end_time - start_time).count();
-
-        // Log shader compilation time for slow shaders to help diagnose performance issues
-        if (compilation_time > 100) { // Only log very slow compilations
-            LOG_DEBUG(Render_Vulkan, "Compiled graphics pipeline in {}ms", compilation_time);
-        }
-
         if (pipeline_statistics) {
             pipeline_statistics->Collect(*pipeline);
         }
@@ -311,19 +294,6 @@ GraphicsPipeline::GraphicsPipeline(
         func();
     }
     configure_func = ConfigureFunc(spv_modules, stage_infos);
-}
-
-GraphicsPipeline* GraphicsPipeline::Clone() const {
-    // Create a new pipeline that shares the same resources
-    // This is for pipeline deduplication
-
-    if (!IsBuilt()) {
-        LOG_WARNING(Render_Vulkan, "Attempted to clone unbuilt pipeline");
-        return nullptr;
-    }
-
-    return const_cast<GraphicsPipeline*>(this);
-
 }
 
 void GraphicsPipeline::AddTransition(GraphicsPipeline* transition) {
@@ -345,9 +315,6 @@ void GraphicsPipeline::ConfigureImpl(bool is_indexed) {
     const auto& regs{maxwell3d->regs};
     const bool via_header_index{regs.sampler_binding == Maxwell::SamplerBinding::ViaHeaderBinding};
     const auto config_stage{[&](size_t stage) LAMBDA_FORCEINLINE {
-        // Get the constant buffer information from Maxwell's state
-        const auto& cbufs = maxwell3d->state.shader_stages[stage].const_buffers;
-
         const Shader::Info& info{stage_infos[stage]};
         buffer_cache.UnbindGraphicsStorageBuffers(stage);
         if constexpr (Spec::has_storage_buffers) {
@@ -359,7 +326,7 @@ void GraphicsPipeline::ConfigureImpl(bool is_indexed) {
                 ++ssbo_index;
             }
         }
-
+        const auto& cbufs{maxwell3d->state.shader_stages[stage].const_buffers};
         const auto read_handle{[&](const auto& desc, u32 index) {
             ASSERT(cbufs[desc.cbuf_index].enabled);
             const u32 index_offset{index << desc.size_shift};
@@ -381,14 +348,13 @@ void GraphicsPipeline::ConfigureImpl(bool is_indexed) {
             }
             return TexturePair(gpu_memory->Read<u32>(addr), via_header_index);
         }};
-
         const auto add_image{[&](const auto& desc, bool blacklist) LAMBDA_FORCEINLINE {
             for (u32 index = 0; index < desc.count; ++index) {
                 const auto handle{read_handle(desc, index)};
                 views[view_index++] = {
                     .index = handle.first,
                     .blacklist = blacklist,
-                    .id = {},
+                    .id = {}
                 };
             }
         }};
@@ -663,14 +629,14 @@ void GraphicsPipeline::MakePipeline(VkRenderPass render_pass) {
         .flags = 0,
         .topology = input_assembly_topology,
         .primitiveRestartEnable =
-            dynamic.primitive_restart_enable != 0 &&
-                    ((input_assembly_topology != VK_PRIMITIVE_TOPOLOGY_PATCH_LIST &&
-                      device.IsTopologyListPrimitiveRestartSupported()) ||
-                     SupportsPrimitiveRestart(input_assembly_topology) ||
-                     (input_assembly_topology == VK_PRIMITIVE_TOPOLOGY_PATCH_LIST &&
-                      device.IsPatchListPrimitiveRestartSupported()))
-                ? VK_TRUE
-                : VK_FALSE,
+        dynamic.primitive_restart_enable != 0 &&
+                ((input_assembly_topology != VK_PRIMITIVE_TOPOLOGY_PATCH_LIST &&
+                  device.IsTopologyListPrimitiveRestartSupported()) ||
+                 SupportsPrimitiveRestart(input_assembly_topology) ||
+                 (input_assembly_topology == VK_PRIMITIVE_TOPOLOGY_PATCH_LIST &&
+                  device.IsPatchListPrimitiveRestartSupported()))
+            ? VK_TRUE
+            : VK_FALSE,
     };
     const VkPipelineTessellationStateCreateInfo tessellation_ci{
         .sType = VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO,
@@ -713,11 +679,11 @@ void GraphicsPipeline::MakePipeline(VkRenderPass render_pass) {
         .pNext = nullptr,
         .flags = 0,
         .depthClampEnable =
-            static_cast<VkBool32>(dynamic.depth_clamp_disabled == 0 ? VK_TRUE : VK_FALSE),
+        static_cast<VkBool32>(dynamic.depth_clamp_disabled == 0 ? VK_TRUE : VK_FALSE),
         .rasterizerDiscardEnable =
-            static_cast<VkBool32>(dynamic.rasterize_enable == 0 ? VK_TRUE : VK_FALSE),
+        static_cast<VkBool32>(dynamic.rasterize_enable == 0 ? VK_TRUE : VK_FALSE),
         .polygonMode =
-            MaxwellToVK::PolygonMode(FixedPipelineState::UnpackPolygonMode(key.state.polygon_mode)),
+        MaxwellToVK::PolygonMode(FixedPipelineState::UnpackPolygonMode(key.state.polygon_mode)),
         .cullMode = static_cast<VkCullModeFlags>(
             dynamic.cull_enable ? MaxwellToVK::CullFace(dynamic.CullFace()) : VK_CULL_MODE_NONE),
         .frontFace = MaxwellToVK::FrontFace(dynamic.FrontFace()),
@@ -753,13 +719,15 @@ void GraphicsPipeline::MakePipeline(VkRenderPass render_pass) {
                                    ? VK_PROVOKING_VERTEX_MODE_LAST_VERTEX_EXT
                                    : VK_PROVOKING_VERTEX_MODE_FIRST_VERTEX_EXT,
     };
+
     if (IsLine(input_assembly_topology) && device.IsExtLineRasterizationSupported()) {
         line_state.pNext = std::exchange(rasterization_ci.pNext, &line_state);
     }
     if (device.IsExtConservativeRasterizationSupported()) {
         conservative_raster.pNext = std::exchange(rasterization_ci.pNext, &conservative_raster);
     }
-    if (device.IsExtProvokingVertexSupported()) {
+    //if (device.IsExtProvokingVertexSupported() {
+    if (true) {
         provoking_vertex.pNext = std::exchange(rasterization_ci.pNext, &provoking_vertex);
     }
 
@@ -827,20 +795,20 @@ void GraphicsPipeline::MakePipeline(VkRenderPass render_pass) {
         .logicOp = static_cast<VkLogicOp>(dynamic.logic_op.Value()),
         .attachmentCount = static_cast<u32>(cb_attachments.size()),
         .pAttachments = cb_attachments.data(),
-        .blendConstants = {},
+        .blendConstants = {}
     };
-    static_vector<VkDynamicState, 28> dynamic_states{
+    static_vector<VkDynamicState, 38> dynamic_states{
         VK_DYNAMIC_STATE_VIEWPORT,           VK_DYNAMIC_STATE_SCISSOR,
         VK_DYNAMIC_STATE_DEPTH_BIAS,         VK_DYNAMIC_STATE_BLEND_CONSTANTS,
         VK_DYNAMIC_STATE_DEPTH_BOUNDS,       VK_DYNAMIC_STATE_STENCIL_COMPARE_MASK,
         VK_DYNAMIC_STATE_STENCIL_WRITE_MASK, VK_DYNAMIC_STATE_STENCIL_REFERENCE,
-        VK_DYNAMIC_STATE_LINE_WIDTH,
+        VK_DYNAMIC_STATE_LINE_WIDTH,         VK_DYNAMIC_STATE_LINE_STIPPLE,
     };
     if (key.state.extended_dynamic_state) {
         static constexpr std::array extended{
             VK_DYNAMIC_STATE_CULL_MODE_EXT,
             VK_DYNAMIC_STATE_FRONT_FACE_EXT,
-            VK_DYNAMIC_STATE_VERTEX_INPUT_BINDING_STRIDE_EXT,
+          //VK_DYNAMIC_STATE_VERTEX_INPUT_BINDING_STRIDE_EXT, //Disabled for VK_EXT_VERTEX_INPUT_DYNAMIC_STATE_EXTENSION_NAME
             VK_DYNAMIC_STATE_DEPTH_TEST_ENABLE_EXT,
             VK_DYNAMIC_STATE_DEPTH_WRITE_ENABLE_EXT,
             VK_DYNAMIC_STATE_DEPTH_COMPARE_OP_EXT,
@@ -868,6 +836,8 @@ void GraphicsPipeline::MakePipeline(VkRenderPass render_pass) {
                 VK_DYNAMIC_STATE_COLOR_BLEND_ENABLE_EXT,
                 VK_DYNAMIC_STATE_COLOR_BLEND_EQUATION_EXT,
                 VK_DYNAMIC_STATE_COLOR_WRITE_MASK_EXT,
+
+                // VK_DYNAMIC_STATE_COLOR_BLEND_ADVANCED_EXT,
             };
             dynamic_states.insert(dynamic_states.end(), extended3.begin(), extended3.end());
         }
@@ -875,10 +845,26 @@ void GraphicsPipeline::MakePipeline(VkRenderPass render_pass) {
             static constexpr std::array extended3{
                 VK_DYNAMIC_STATE_DEPTH_CLAMP_ENABLE_EXT,
                 VK_DYNAMIC_STATE_LOGIC_OP_ENABLE_EXT,
+
+                // additional state3 extensions
+
+                // FIXME(crueter): conservative rasterization is totally broken
+                // VK_DYNAMIC_STATE_RASTERIZATION_SAMPLES_EXT,
+                VK_DYNAMIC_STATE_LINE_RASTERIZATION_MODE_EXT,
+
+                VK_DYNAMIC_STATE_CONSERVATIVE_RASTERIZATION_MODE_EXT,
+
+                VK_DYNAMIC_STATE_LINE_STIPPLE_ENABLE_EXT,
+                VK_DYNAMIC_STATE_ALPHA_TO_COVERAGE_ENABLE_EXT,
+                VK_DYNAMIC_STATE_ALPHA_TO_ONE_ENABLE_EXT,
+                VK_DYNAMIC_STATE_TESSELLATION_DOMAIN_ORIGIN_EXT,
+                VK_DYNAMIC_STATE_DEPTH_CLIP_ENABLE_EXT,
+                VK_DYNAMIC_STATE_PROVOKING_VERTEX_MODE_EXT,
             };
             dynamic_states.insert(dynamic_states.end(), extended3.begin(), extended3.end());
         }
     }
+
     const VkPipelineDynamicStateCreateInfo dynamic_state_ci{
         .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
         .pNext = nullptr,
@@ -916,6 +902,7 @@ void GraphicsPipeline::MakePipeline(VkRenderPass render_pass) {
     if (device.IsKhrPipelineExecutablePropertiesEnabled()) {
         flags |= VK_PIPELINE_CREATE_CAPTURE_STATISTICS_BIT_KHR;
     }
+
     pipeline = device.GetLogical().CreateGraphicsPipeline(
         {
             .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,

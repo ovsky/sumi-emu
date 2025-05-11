@@ -12,6 +12,7 @@
 #include "video_core/dma_pusher.h"
 #include "video_core/gpu.h"
 #include "video_core/gpu_thread.h"
+#include "video_core/host1x/host1x.h"
 #include "video_core/renderer_base.h"
 
 namespace VideoCommon::GPUThread {

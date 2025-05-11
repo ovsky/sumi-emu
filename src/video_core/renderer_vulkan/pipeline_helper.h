@@ -28,6 +28,7 @@ public:
                num_descriptors <= device->MaxPushDescriptors();
     }
 
+    // TODO(crueter): utilize layout binding flags
     vk::DescriptorSetLayout CreateDescriptorSetLayout(bool use_push_descriptor) const {
         if (bindings.empty()) {
             return nullptr;

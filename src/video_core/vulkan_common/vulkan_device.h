@@ -84,7 +84,8 @@ VK_DEFINE_HANDLE(VmaAllocator)
     EXTENSION(NV, DEVICE_DIAGNOSTICS_CONFIG, device_diagnostics_config)                            \
     EXTENSION(NV, GEOMETRY_SHADER_PASSTHROUGH, geometry_shader_passthrough)                        \
     EXTENSION(NV, VIEWPORT_ARRAY2, viewport_array2)                                                \
-    EXTENSION(NV, VIEWPORT_SWIZZLE, viewport_swizzle)
+    EXTENSION(NV, VIEWPORT_SWIZZLE, viewport_swizzle)                                              \
+    EXTENSION(EXT, DESCRIPTOR_INDEXING, descriptor_indexing)
 
 // Define extensions which must be supported.
 #define FOR_EACH_VK_MANDATORY_EXTENSION(EXTENSION_NAME)                                            \
@@ -404,6 +405,11 @@ public:
         return extensions.viewport_array2;
     }
 
+    /// Returns true if the device supporst VK_EXT_DESCRIPTOR_INDEXING
+    bool isExtDescriptorIndexingSupported() const {
+        return extensions.descriptor_indexing;
+    }
+
     /// Returns true if the device supports VK_NV_geometry_shader_passthrough.
     bool IsNvGeometryShaderPassthroughSupported() const {
         return extensions.geometry_shader_passthrough;
@@ -581,7 +587,7 @@ public:
 
     /// Returns the minimum supported version of SPIR-V.
     u32 SupportedSpirvVersion() const {
-        if (instance_version >= VK_API_VERSION_1_4) {
+        if (instance_version >= VK_API_VERSION_1_3) {
             return 0x00010600U;
         }
         if (extensions.spirv_1_4) {
@@ -592,7 +598,7 @@ public:
 
     /// Returns true when a known debugging tool is attached.
     bool HasDebuggingToolAttached() const {
-        return has_renderdoc || has_nsight_graphics;
+        return has_renderdoc || has_nsight_graphics || has_radeon_gpu_profiler;
     }
 
     /// @returns True if compute pipelines can cause crashing.
@@ -816,6 +822,7 @@ private:
     bool has_broken_parallel_compiling{};      ///< Has broken parallel shader compiling.
     bool has_renderdoc{};                      ///< Has RenderDoc attached
     bool has_nsight_graphics{};                ///< Has Nsight Graphics attached
+    bool has_radeon_gpu_profiler{};            ///< Has Radeon GPU Profiler attached.
     bool supports_d24_depth{};                 ///< Supports D24 depth buffers.
     bool cant_blit_msaa{};                     ///< Does not support MSAA<->MSAA blitting.
     bool must_emulate_scaled_formats{};        ///< Requires scaled vertex format emulation

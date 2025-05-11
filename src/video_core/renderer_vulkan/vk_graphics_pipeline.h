@@ -84,9 +84,6 @@ public:
     GraphicsPipeline& operator=(const GraphicsPipeline&) = delete;
     GraphicsPipeline(const GraphicsPipeline&) = delete;
 
-    // Create a deep copy of this pipeline for reuse
-    [[nodiscard]] GraphicsPipeline* Clone() const;
-
     void AddTransition(GraphicsPipeline* transition);
 
     void Configure(bool is_indexed) {
@@ -104,35 +101,6 @@ public:
 
     [[nodiscard]] bool IsBuilt() const noexcept {
         return is_built.load(std::memory_order::relaxed);
-    }
-
-     // Get hash for the current pipeline configuration
-     [[nodiscard]] u64 Hash() const noexcept {
-        return key.Hash();
-    }
-
-    // Get the last pipeline this transitioned from
-    [[nodiscard]] GraphicsPipeline* GetLastTransitionedPipeline() const noexcept {
-        // For predictive loading, return a related pipeline if available
-        if (!transitions.empty()) {
-            return transitions.front();
-        }
-        return nullptr;
-    }
-
-    // Get pipeline info string for prediction
-    [[nodiscard]] std::string GetPipelineInfo() const noexcept {
-        std::string result = fmt::format("pipeline_{:016x}", Hash());
-
-        // Include information about stages
-        for (size_t i = 0; i < NUM_STAGES; ++i) {
-            // Check if this stage is active by checking if any varying stores are enabled
-            if (!stage_infos[i].stores.mask.none()) {
-                result += fmt::format("_s{}", i);
-            }
-        }
-
-        return result;
     }
 
     template <typename Spec>

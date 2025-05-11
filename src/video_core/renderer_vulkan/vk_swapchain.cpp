@@ -15,7 +15,7 @@
 #include "video_core/vulkan_common/vk_enum_string_helper.h"
 #include "video_core/vulkan_common/vulkan_device.h"
 #include "video_core/vulkan_common/vulkan_wrapper.h"
-//#include "vulkan/vulkan_core.h"
+#include "vulkan/vulkan_core.h"
 
 namespace Vulkan {
 
@@ -105,23 +105,23 @@ VkCompositeAlphaFlagBitsKHR ChooseAlphaFlags(const VkSurfaceCapabilitiesKHR& cap
 
 } // Anonymous namespace
 
-Swapchain::Swapchain(VkSurfaceKHR surface_, const Device& device_, Scheduler& scheduler_,
+Swapchain::Swapchain(VkSurfaceKHR_T* surface_handle_, const Device& device_, Scheduler& scheduler_,
                      u32 width_, u32 height_)
-    : surface{surface_}, device{device_}, scheduler{scheduler_} {
-    Create(surface_, width_, height_);
+    : surface_handle{surface_handle_}, device{device_}, scheduler{scheduler_} {
+    Create(surface_handle, width_, height_);
 }
 
 Swapchain::~Swapchain() = default;
 
-void Swapchain::Create(VkSurfaceKHR surface_, u32 width_, u32 height_) {
+void Swapchain::Create(VkSurfaceKHR_T* surface_handle_, u32 width_, u32 height_) {
     is_outdated = false;
     is_suboptimal = false;
     width = width_;
     height = height_;
-    surface = surface_;
+    surface_handle = surface_handle_;
 
     const auto physical_device = device.GetPhysical();
-    const auto capabilities{physical_device.GetSurfaceCapabilitiesKHR(surface)};
+    const auto capabilities{physical_device.GetSurfaceCapabilitiesKHR(surface_handle)};
     if (capabilities.maxImageExtent.width == 0 || capabilities.maxImageExtent.height == 0) {
         return;
     }
@@ -199,8 +199,8 @@ void Swapchain::Present(VkSemaphore render_semaphore) {
 
 void Swapchain::CreateSwapchain(const VkSurfaceCapabilitiesKHR& capabilities) {
     const auto physical_device{device.GetPhysical()};
-    const auto formats{physical_device.GetSurfaceFormatsKHR(surface)};
-    const auto present_modes = physical_device.GetSurfacePresentModesKHR(surface);
+    const auto formats{physical_device.GetSurfaceFormatsKHR(surface_handle)};
+    const auto present_modes = physical_device.GetSurfacePresentModesKHR(surface_handle);
     has_mailbox = std::find(present_modes.begin(), present_modes.end(),
                             VK_PRESENT_MODE_MAILBOX_KHR) != present_modes.end();
     has_imm = std::find(present_modes.begin(), present_modes.end(),
@@ -228,7 +228,7 @@ void Swapchain::CreateSwapchain(const VkSurfaceCapabilitiesKHR& capabilities) {
         .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
         .pNext = nullptr,
         .flags = 0,
-        .surface = surface,
+        .surface = surface_handle,
         .minImageCount = requested_image_count,
         .imageFormat = surface_format.format,
         .imageColorSpace = surface_format.colorSpace,
@@ -269,7 +269,7 @@ void Swapchain::CreateSwapchain(const VkSurfaceCapabilitiesKHR& capabilities) {
         swapchain_ci.flags |= VK_SWAPCHAIN_CREATE_MUTABLE_FORMAT_BIT_KHR;
     }
     // Request the size again to reduce the possibility of a TOCTOU race condition.
-    const auto updated_capabilities = physical_device.GetSurfaceCapabilitiesKHR(surface);
+    const auto updated_capabilities = physical_device.GetSurfaceCapabilitiesKHR(surface_handle);
     swapchain_ci.imageExtent = ChooseSwapExtent(updated_capabilities, width, height);
     // Don't add code within this and the swapchain creation.
     swapchain = device.GetLogical().CreateSwapchainKHR(swapchain_ci);

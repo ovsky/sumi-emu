@@ -1,10 +1,8 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
-// SPDX-FileCopyrightText: Copyright 2025 Sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <algorithm>
 #include <vector>
-#include <chrono>
 
 #include <boost/container/small_vector.hpp>
 
@@ -39,23 +37,10 @@ ComputePipeline::ComputePipeline(const Device& device_, vk::PipelineCache& pipel
     if (shader_notify) {
         shader_notify->MarkShaderBuilding();
     }
-
-    // Track compilation start time for performance metrics
-    const auto start_time = std::chrono::high_resolution_clock::now();
-
     std::copy_n(info.constant_buffer_used_sizes.begin(), uniform_buffer_sizes.size(),
-               uniform_buffer_sizes.begin());
+                uniform_buffer_sizes.begin());
 
-    auto func{[this, &descriptor_pool, shader_notify, pipeline_statistics, start_time] {
-        // Simplify the high priority determination - we can't use workgroup_size
-        // because it doesn't exist, so use a simpler heuristic
-        const bool is_high_priority = false; // Default to false until we can find a better criterion
-
-        if (is_high_priority) {
-            // Increase thread priority for small compute shaders that are likely part of critical path
-            Common::SetCurrentThreadPriority(Common::ThreadPriority::High);
-        }
-
+    auto func{[this, &descriptor_pool, shader_notify, pipeline_statistics] {
         DescriptorLayoutBuilder builder{device};
         builder.Add(info, VK_SHADER_STAGE_COMPUTE_BIT);
 
@@ -64,11 +49,15 @@ ComputePipeline::ComputePipeline(const Device& device_, vk::PipelineCache& pipel
         descriptor_update_template =
             builder.CreateTemplate(*descriptor_set_layout, *pipeline_layout, false);
         descriptor_allocator = descriptor_pool.Allocator(*descriptor_set_layout, info);
+        const VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT subgroup_size_ci{
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_REQUIRED_SUBGROUP_SIZE_CREATE_INFO_EXT,
+            .pNext = nullptr,
+            .requiredSubgroupSize = GuestWarpSize,
+        };
         VkPipelineCreateFlags flags{};
         if (device.IsKhrPipelineExecutablePropertiesEnabled()) {
             flags |= VK_PIPELINE_CREATE_CAPTURE_STATISTICS_BIT_KHR;
         }
-
         pipeline = device.GetLogical().CreateComputePipeline(
             {
                 .sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
@@ -76,7 +65,8 @@ ComputePipeline::ComputePipeline(const Device& device_, vk::PipelineCache& pipel
                 .flags = flags,
                 .stage{
                     .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-                    .pNext = nullptr,
+                    .pNext =
+                        device.IsExtSubgroupSizeControlSupported() ? &subgroup_size_ci : nullptr,
                     .flags = 0,
                     .stage = VK_SHADER_STAGE_COMPUTE_BIT,
                     .module = *spv_module,
@@ -88,15 +78,6 @@ ComputePipeline::ComputePipeline(const Device& device_, vk::PipelineCache& pipel
                 .basePipelineIndex = 0,
             },
             *pipeline_cache);
-
-        // Performance measurement
-        const auto end_time = std::chrono::high_resolution_clock::now();
-        const auto compilation_time = std::chrono::duration_cast<std::chrono::milliseconds>(
-            end_time - start_time).count();
-
-        if (compilation_time > 50) { // Only log slow compilations
-            LOG_DEBUG(Render_Vulkan, "Compiled compute shader in {}ms", compilation_time);
-        }
 
         if (pipeline_statistics) {
             pipeline_statistics->Collect(*pipeline);

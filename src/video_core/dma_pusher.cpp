@@ -14,7 +14,13 @@
 namespace Tegra {
 
 constexpr u32 MacroRegistersStart = 0xE00;
-// constexpr u32 ComputeInline = 0x6D;
+constexpr u32 ComputeInline = 0x6D;
+//start on PR#76 of Sumi this is a unused variable in android (need to investigate)
+
+// Dummy function that uses ComputeInline
+constexpr void UseComputeInline() {
+    static_cast<void>(ComputeInline); // Suppress unused variable error
+}
 
 DmaPusher::DmaPusher(Core::System& system_, GPU& gpu_, MemoryManager& memory_manager_,
                      Control::ChannelState& channel_state_)

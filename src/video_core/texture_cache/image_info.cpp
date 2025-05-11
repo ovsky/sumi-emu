@@ -1,5 +1,4 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
-// SPDX-FileCopyrightText: Copyright 2025 sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <fmt/ranges.h>
@@ -283,17 +282,6 @@ ImageInfo::ImageInfo(const Tegra::DMA::ImageOperand& config) noexcept {
     maybe_unaligned_layer_stride = CalculateLayerSize(*this);
     rescaleable = block.depth == 0 && size.height > RescaleHeightThreshold;
     downscaleable = size.height > DownscaleHeightThreshold;
-}
-
-bool ImageInfo::operator==(const ImageInfo& rhs) const noexcept {
-    return std::tie(this->format, this->num_samples, this->resources, this->type,
-                    this->pitch, this->block, this->size, this->tile_width_spacing,
-                    this->is_sparse, this->rescaleable, this->downscaleable,
-                    this->forced_flushed, this->dma_downloaded) ==
-           std::tie(rhs.format, rhs.num_samples, rhs.resources, rhs.type,
-                    rhs.pitch, rhs.block, rhs.size, rhs.tile_width_spacing,
-                    rhs.is_sparse, rhs.rescaleable, rhs.downscaleable,
-                    rhs.forced_flushed, rhs.dma_downloaded);
 }
 
 } // namespace VideoCommon

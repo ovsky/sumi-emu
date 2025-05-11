@@ -1,14 +1,9 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
-// SPDX-FileCopyrightText: Copyright 2025 sumi Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #pragma once
 
 #include <span>
-#include <mutex>
-#include <atomic>
-#include <string>
-#include <unordered_map>
 
 #include "video_core/texture_cache/texture_cache_base.h"
 
@@ -29,7 +24,6 @@ using Common::SlotVector;
 using VideoCommon::ImageId;
 using VideoCommon::NUM_RT;
 using VideoCommon::Region2D;
-using VideoCommon::RenderTargets;
 using VideoCore::Surface::PixelFormat;
 
 class BlitImageHelper;
@@ -41,22 +35,6 @@ class Framebuffer;
 class RenderPassCache;
 class StagingBufferPool;
 class Scheduler;
-
-// Enhanced texture management for better error handling and thread safety
-class TextureCacheManager {
-public:
-    explicit TextureCacheManager();
-    ~TextureCacheManager();
-
-    VkImage GetTextureFromCache(const std::string& texture_path);
-    void ReloadTexture(const std::string& texture_path);
-    bool IsTextureLoadedCorrectly(VkImage texture);
-    void HandleTextureCache();
-
-private:
-    std::mutex texture_mutex;
-    std::unordered_map<std::string, VkImage> texture_cache;
-};
 
 class TextureCacheRuntime {
 public:
@@ -138,10 +116,6 @@ public:
 
     VkFormat GetSupportedFormat(VkFormat requested_format, VkFormatFeatureFlags required_features) const;
 
-    // Enhanced texture error handling
-    bool IsTextureLoadedCorrectly(VkImage texture);
-    void HandleTextureError(const std::string& texture_path);
-
     const Device& device;
     Scheduler& scheduler;
     MemoryAllocator& memory_allocator;
@@ -152,9 +126,6 @@ public:
     std::unique_ptr<MSAACopyPass> msaa_copy_pass;
     const Settings::ResolutionScalingInfo& resolution;
     std::array<std::vector<VkFormat>, VideoCore::Surface::MaxPixelFormat> view_formats;
-
-    // Enhanced texture management
-    TextureCacheManager texture_cache_manager;
 
     static constexpr size_t indexing_slots = 8 * sizeof(size_t);
     std::array<vk::Buffer, indexing_slots> buffers{};
@@ -190,11 +161,15 @@ public:
                         std::span<const VideoCommon::BufferImageCopy> copies);
 
     [[nodiscard]] VkImage Handle() const noexcept {
-        return current_image;
+        return *(this->*current_image);
     }
 
     [[nodiscard]] VkImageAspectFlags AspectMask() const noexcept {
         return aspect_mask;
+    }
+
+    [[nodiscard]] VkImageUsageFlags UsageFlags() const noexcept {
+        return (this->*current_image).UsageFlags();
     }
 
     /// Returns true when the image is already initialized and mark it as initialized
@@ -219,11 +194,15 @@ private:
     TextureCacheRuntime* runtime{};
 
     vk::Image original_image;
+    vk::Image scaled_image;
+
+    // Use a pointer to field because it is relative, so that the object can be
+    // moved without breaking the reference.
+    vk::Image Image::*current_image{};
+
     std::vector<vk::ImageView> storage_image_views;
     VkImageAspectFlags aspect_mask = 0;
     bool initialized = false;
-    vk::Image scaled_image{};
-    VkImage current_image{};
 
     std::unique_ptr<Framebuffer> scale_framebuffer;
     std::unique_ptr<ImageView> scale_view;
