@@ -1,4 +1,5 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
+// SPDX-FileCopyrightText: Copyright 2025 sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #pragma once
@@ -79,10 +80,10 @@ private:
     std::queue<Frame*> present_queue;
     std::queue<Frame*> free_queue;
     std::condition_variable_any frame_cv;
-    std::condition_variable free_cv;
+    std::condition_variable_any free_cv;
     std::mutex swapchain_mutex;
-    std::mutex queue_mutex;
-    std::mutex free_mutex;
+    std::timed_mutex queue_mutex;
+    std::timed_mutex free_mutex;
     std::jthread present_thread;
     bool blit_supported;
     bool use_present_thread;
