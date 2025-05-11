@@ -264,7 +264,7 @@ class BooleanSetting {
 
 void RendererVulkan::Composite(std::span<const Tegra::FramebufferConfig> framebuffers) {
 
-    #if defined(ANDROID || __ANDROID__)
+    #ifdef ANDROID || __ANDROID__ || defined(ANDROID)
 
     // FRAMERATE = FRAME SKIPPING + FRAME INTERPOLATION
     static int frame_counter = 0;
@@ -286,9 +286,9 @@ void RendererVulkan::Composite(std::span<const Tegra::FramebufferConfig> framebu
     if (frame_skipping) {
         // int current_buffer = framebuffers[0].GetFrameRate(); // Count of frames in the buffer at the moment
         // frame_skip_threshold = (current_framerate >= target_fps) ? 1 : 0;
-        // frame_skip_threshold = (target_fps == 30) ? 2 : 2;
+        // frame_skip_threshold = (target_fps == 30) ? static_cast<int>(std::floor(2.0)) : static_cast<int>(std::floor(2.0));
 
-        double framerate = system.GetCurrentFrameRate();
+        int framerate = static_cast<int>(system.GetCurrentFrameRate());
         frame_skip_threshold = framerate >= target_fps ? (framerate/1.333f/target_fps) : 0;
     }
 
