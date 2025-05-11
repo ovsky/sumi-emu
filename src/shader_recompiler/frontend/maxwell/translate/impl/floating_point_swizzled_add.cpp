@@ -32,14 +32,7 @@ void TranslatorVisitor::FSWZADD(u64 insn) {
         .fmz_mode = (fswzadd.ftz != 0 ? IR::FmzMode::FTZ : IR::FmzMode::None),
     };
 
-    IR::F32 result;
-    if (fswzadd.ndv != 0) {
-        const IR::F32 neg_recip = ir.FPNeg(ir.FPRecip(src_b));
-        result = ir.FSwizzleAdd(src_a, neg_recip, swizzle, fp_control);
-    } else {
-        result = ir.FSwizzleAdd(src_a, src_b, swizzle, fp_control);
-    }
-
+    const IR::F32 result{ir.FSwizzleAdd(src_a, src_b, swizzle, fp_control)};
     F(fswzadd.dest_reg, result);
 
     if (fswzadd.cc != 0) {

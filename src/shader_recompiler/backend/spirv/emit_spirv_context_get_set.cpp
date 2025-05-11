@@ -1,5 +1,4 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
-// SPDX-FileCopyrightText: Copyright 2025 sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <bit>
@@ -54,6 +53,7 @@ std::optional<OutAttr> OutputAttrPointer(EmitContext& ctx, IR::Attribute attr) {
             return OutputAccessChain(ctx, ctx.output_f32, info.id, index_id);
         }
     }
+
     switch (attr) {
     case IR::Attribute::PointSize:
         return ctx.output_point_size;
@@ -422,6 +422,14 @@ void EmitSetAttribute(EmitContext& ctx, IR::Attribute attr, Id value, [[maybe_un
     if (Sirit::ValidId(output->type)) {
         value = ctx.OpBitcast(output->type, value);
     }
+
+    static constexpr IR::Attribute cd0 = IR::Attribute::ClipDistance0;
+    static constexpr IR::Attribute cd7 = IR::Attribute::ClipDistance7;
+
+    if (attr >= cd0 && attr <= cd7) {
+        const u32 idx = (u32) attr - (u32) cd0;
+        clip_distance_written.set(idx);
+    }
     ctx.OpStore(output->pointer, value);
 }
 
@@ -548,53 +556,11 @@ Id EmitInvocationInfo(EmitContext& ctx) {
     switch (ctx.stage) {
     case Stage::TessellationControl:
     case Stage::TessellationEval:
-        return ctx.OpShiftLeftLogical(ctx.U32[1], ctx.OpLoad(ctx.U32[1], ctx.patch_vertices_in),
-                                      ctx.Const(16u));
-    case Stage::Fragment:
-        // Return sample mask in upper 16 bits
-        return ctx.OpShiftLeftLogical(ctx.U32[1], ctx.OpLoad(ctx.U32[1], ctx.sample_mask),
-                                      ctx.Const(16u));
-    case Stage::Geometry: {
-        // Return vertex count in upper 16 bits based on input topology
-        // Using a lookup table approach for vertex counts
-        const std::array<u32, 5> vertex_counts = {
-            1, // Points
-            2, // Lines
-            4, // LinesAdjacency
-            3, // Triangles
-            6  // TrianglesAdjacency
-        };
-
-        // Map the input topology to an index in our lookup table
-        u32 topology_index = 0;
-        switch (ctx.runtime_info.input_topology) {
-        case InputTopology::Lines:
-            topology_index = 1;
-            break;
-        case InputTopology::LinesAdjacency:
-            topology_index = 2;
-            break;
-        case InputTopology::Triangles:
-            topology_index = 3;
-            break;
-        case InputTopology::TrianglesAdjacency:
-            topology_index = 4;
-            break;
-        case InputTopology::Points:
-        default:
-            topology_index = 0;
-            break;
-        }
-
-        // Get the vertex count from the lookup table and shift it
-        const u32 vertex_count = vertex_counts[topology_index];
-        return ctx.OpShiftLeftLogical(ctx.U32[1], ctx.Const(vertex_count), ctx.Const(16u));
-    }
-    case Stage::Compute:
-        // For compute shaders, return standard format since we can't access workgroup size directly
-        return ctx.Const(0x00ff0000u);
+        return ctx.OpShiftLeftLogical(ctx.U32[1], ctx.OpLoad(ctx.U32[1], ctx.patch_vertices_in), ctx.Const(16u));
+    case Stage::Geometry:
+        return ctx.OpShiftLeftLogical(ctx.U32[1], ctx.Const(InputTopologyVertices::vertices(ctx.runtime_info.input_topology)), ctx.Const(16u));
     default:
-        // For other stages, return the standard invocation info format
+        LOG_WARNING(Shader, "(STUBBED) called");
         return ctx.Const(0x00ff0000u);
     }
 }
@@ -605,6 +571,16 @@ Id EmitSampleId(EmitContext& ctx) {
 
 Id EmitIsHelperInvocation(EmitContext& ctx) {
     return ctx.OpLoad(ctx.U1, ctx.is_helper_invocation);
+}
+
+Id EmitSR_WScaleFactorXY(EmitContext& ctx) {
+    LOG_WARNING(Shader, "(STUBBED) called");
+    return ctx.Const(0x00ff0000u);
+}
+
+Id EmitSR_WScaleFactorZ(EmitContext& ctx) {
+    LOG_WARNING(Shader, "(STUBBED) called");
+    return ctx.Const(0x00ff0000u);
 }
 
 Id EmitYDirection(EmitContext& ctx) {

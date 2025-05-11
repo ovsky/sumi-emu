@@ -1,5 +1,4 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
-// SPDX-FileCopyrightText: Copyright 2025 sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <string_view>
@@ -7,8 +6,8 @@
 #include "shader_recompiler/backend/glasm/emit_glasm_instructions.h"
 #include "shader_recompiler/backend/glasm/glasm_emit_context.h"
 #include "shader_recompiler/frontend/ir/value.h"
-#include "shader_recompiler/profile.h"
 #include "shader_recompiler/runtime_info.h"
+#include "shader_recompiler/profile.h"
 #include "shader_recompiler/shader_info.h"
 
 namespace Shader::Backend::GLASM {
@@ -405,60 +404,16 @@ void EmitInvocationId(EmitContext& ctx, IR::Inst& inst) {
 void EmitInvocationInfo(EmitContext& ctx, IR::Inst& inst) {
     switch (ctx.stage) {
     case Stage::TessellationControl:
-        ctx.Add("SHL.U {}.x,primitive.vertexcount,16;", inst);
-        break;
     case Stage::TessellationEval:
         ctx.Add("SHL.U {}.x,primitive.vertexcount,16;", inst);
         break;
-    case Stage::Fragment:
-        // Return sample mask in upper 16 bits
-        ctx.Add("SHL.U {}.x,fragment.samplemask,16;", inst);
-        break;
-    case Stage::Geometry: {
-        // Return vertex count in upper 16 bits based on input topology
-        // Using a lookup table approach for vertex counts
-        const std::array<u32, 5> vertex_counts = {
-            1, // Points
-            2, // Lines
-            4, // LinesAdjacency
-            3, // Triangles
-            6  // TrianglesAdjacency
-        };
-
-        // Map the input topology to an index in our lookup table
-        u32 topology_index = 0;
-        switch (ctx.runtime_info.input_topology) {
-        case Shader::InputTopology::Lines:
-            topology_index = 1;
-            break;
-        case Shader::InputTopology::LinesAdjacency:
-            topology_index = 2;
-            break;
-        case Shader::InputTopology::Triangles:
-            topology_index = 3;
-            break;
-        case Shader::InputTopology::TrianglesAdjacency:
-            topology_index = 4;
-            break;
-        case Shader::InputTopology::Points:
-        default:
-            topology_index = 0;
-            break;
-        }
-
-        // Get the vertex count from the lookup table and shift it
-        const u32 result = vertex_counts[topology_index] << 16;
-        ctx.Add("MOV.S {}.x,0x{:x};", inst, result);
-        break;
-    }
-    case Stage::Compute:
-        // Return standard format (0x00ff0000)
-        ctx.Add("MOV.S {}.x,0x00ff0000;", inst);
+    case Stage::Geometry:
+        ctx.Add("SHL.U {}.x,{},16;", inst,
+                InputTopologyVertices::vertices(ctx.runtime_info.input_topology));
         break;
     default:
-        // Return standard format (0x00ff0000)
+        LOG_WARNING(Shader, "(STUBBED) called");
         ctx.Add("MOV.S {}.x,0x00ff0000;", inst);
-        break;
     }
 }
 
@@ -468,6 +423,14 @@ void EmitSampleId(EmitContext& ctx, IR::Inst& inst) {
 
 void EmitIsHelperInvocation(EmitContext& ctx, IR::Inst& inst) {
     ctx.Add("MOV.S {}.x,fragment.helperthread.x;", inst);
+}
+
+void EmitSR_WScaleFactorXY(EmitContext& ctx, IR::Inst& inst) {
+    LOG_WARNING(Shader, "(STUBBED) called");
+}
+
+void EmitSR_WScaleFactorZ(EmitContext& ctx, IR::Inst& inst) {
+    LOG_WARNING(Shader, "(STUBBED) called");
 }
 
 void EmitYDirection(EmitContext& ctx, IR::Inst& inst) {

@@ -75,6 +75,8 @@ Id EmitInvocationId(EmitContext& ctx);
 Id EmitInvocationInfo(EmitContext& ctx);
 Id EmitSampleId(EmitContext& ctx);
 Id EmitIsHelperInvocation(EmitContext& ctx);
+Id EmitSR_WScaleFactorXY(EmitContext& ctx);
+Id EmitSR_WScaleFactorZ(EmitContext& ctx);
 Id EmitYDirection(EmitContext& ctx);
 Id EmitResolutionDownFactor(EmitContext& ctx);
 Id EmitRenderArea(EmitContext& ctx);

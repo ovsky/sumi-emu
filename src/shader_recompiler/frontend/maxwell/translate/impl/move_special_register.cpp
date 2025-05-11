@@ -139,10 +139,10 @@ enum class SpecialRegister : u64 {
         return ir.WorkgroupIdZ();
     case SpecialRegister::SR_WSCALEFACTOR_XY:
         LOG_WARNING(Shader, "(STUBBED) SR_WSCALEFACTOR_XY");
-        return ir.Imm32(Common::BitCast<u32>(1.0f));
+        return ir.SR_WScaleFactorXY();
     case SpecialRegister::SR_WSCALEFACTOR_Z:
         LOG_WARNING(Shader, "(STUBBED) SR_WSCALEFACTOR_Z");
-        return ir.Imm32(Common::BitCast<u32>(1.0f));
+        return ir.SR_WScaleFactorZ();
     case SpecialRegister::SR_LANEID:
         return ir.LaneId();
     case SpecialRegister::SR_EQMASK:

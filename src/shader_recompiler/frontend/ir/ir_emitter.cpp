@@ -264,20 +264,10 @@ static U1 GetFlowTest(IREmitter& ir, FlowTest flow_test) {
         LOG_WARNING(Shader, "(STUBBED) FCSM_TR");
         return ir.Imm1(false);
     case FlowTest::CSM_TA:
-        LOG_WARNING(Shader, "(STUBBED) CSM_TA");
-        return ir.Imm1(false);
     case FlowTest::CSM_TR:
-        LOG_WARNING(Shader, "(STUBBED) CSM_TR");
-        return ir.Imm1(false);
     case FlowTest::CSM_MX:
-        LOG_WARNING(Shader, "(STUBBED) CSM_MX");
-        return ir.Imm1(false);
     case FlowTest::FCSM_TA:
-        LOG_WARNING(Shader, "(STUBBED) FCSM_TA");
-        return ir.Imm1(false);
     case FlowTest::FCSM_MX:
-        LOG_WARNING(Shader, "(STUBBED) FCSM_MX");
-        return ir.Imm1(false);
     default:
         throw NotImplementedException("Flow test {}", flow_test);
     }
@@ -390,6 +380,14 @@ U32 IREmitter::SampleId() {
 
 U1 IREmitter::IsHelperInvocation() {
     return Inst<U1>(Opcode::IsHelperInvocation);
+}
+
+U32 IREmitter::SR_WScaleFactorXY() {
+    return Inst<U32>(Opcode::SR_WScaleFactorXY);
+}
+
+U32 IREmitter::SR_WScaleFactorZ() {
+    return Inst<U32>(Opcode::SR_WScaleFactorZ);
 }
 
 F32 IREmitter::YDirection() {

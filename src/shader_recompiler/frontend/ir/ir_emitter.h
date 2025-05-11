@@ -102,6 +102,8 @@ public:
     [[nodiscard]] U32 InvocationInfo();
     [[nodiscard]] U32 SampleId();
     [[nodiscard]] U1 IsHelperInvocation();
+    [[nodiscard]] U32 SR_WScaleFactorXY();
+    [[nodiscard]] U32 SR_WScaleFactorZ();
     [[nodiscard]] F32 YDirection();
 
     [[nodiscard]] F32 ResolutionDownFactor();

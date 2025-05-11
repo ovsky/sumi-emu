@@ -1,5 +1,4 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
-// SPDX-FileCopyrightText: Copyright 2025 sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <optional>
@@ -275,15 +274,8 @@ IR::Opcode GlobalToStorage(IR::Opcode opcode) {
 
 /// Returns true when a storage buffer address satisfies a bias
 bool MeetsBias(const StorageBufferAddr& storage_buffer, const Bias& bias) noexcept {
-    // For performance, strongly prefer addresses that meet the bias criteria
-    // and have optimal alignment
-    if (storage_buffer.index == bias.index &&
-        storage_buffer.offset >= bias.offset_begin &&
-        storage_buffer.offset < bias.offset_end) {
-        return true;
-    }
-    // Only fall back to other addresses if absolutely necessary
-    return false;
+    return storage_buffer.index == bias.index && storage_buffer.offset >= bias.offset_begin &&
+           storage_buffer.offset < bias.offset_end;
 }
 
 struct LowAddrInfo {
@@ -359,7 +351,7 @@ std::optional<StorageBufferAddr> Track(const IR::Value& value, const Bias* bias)
             .index = index.U32(),
             .offset = offset.U32(),
         };
-        const u32 alignment{bias ? bias->alignment : 16U};
+        const u32 alignment{bias ? bias->alignment : 8U};
         if (!Common::IsAligned(storage_buffer.offset, alignment)) {
             // The SSBO pointer has to be aligned
             return std::nullopt;
@@ -380,9 +372,9 @@ void CollectStorageBuffers(IR::Block& block, IR::Inst& inst, StorageInfo& info) 
     // avoid getting false positives
     static constexpr Bias nvn_bias{
         .index = 0,
-        .offset_begin = 0x100,  // Expanded from 0x110 to catch more potential storage buffers
-        .offset_end = 0x1000,   // Substantially expanded to include all TOTK storage buffers
-        .alignment = 32,        // Increased from 16 to optimize memory access patterns
+        .offset_begin = 0x100,
+        .offset_end = 0x700,
+        .alignment = 16,
     };
     // Track the low address of the instruction
     const std::optional<LowAddrInfo> low_addr_info{TrackLowAddress(&inst)};
@@ -394,16 +386,15 @@ void CollectStorageBuffers(IR::Block& block, IR::Inst& inst, StorageInfo& info) 
     const IR::U32 low_addr{low_addr_info->value};
     std::optional<StorageBufferAddr> storage_buffer{Track(low_addr, &nvn_bias)};
     if (!storage_buffer) {
-        // If it fails, track without a bias but with higher alignment requirements
-        // for better performance
+        // If it fails, track without a bias
         storage_buffer = Track(low_addr, nullptr);
         if (!storage_buffer) {
             // If that also fails, use NVN fallbacks
             LOG_WARNING(Shader, "Storage buffer failed to track, using global memory fallbacks");
             return;
         }
-        LOG_DEBUG(Shader, "Storage buffer tracked without bias, index {} offset 0x{:X}",
-                 storage_buffer->index, storage_buffer->offset);
+        LOG_WARNING(Shader, "Storage buffer tracked without bias, index {} offset {}",
+                    storage_buffer->index, storage_buffer->offset);
     }
     // Collect storage buffer and the instruction
     if (IsGlobalMemoryWrite(inst)) {
@@ -434,12 +425,8 @@ IR::U32 StorageOffset(IR::Block& block, IR::Inst& inst, StorageBufferAddr buffer
     IR::U32 low_cbuf{ir.GetCbuf(ir.Imm32(buffer.index), ir.Imm32(buffer.offset))};
 
     // Align the offset base to match the host alignment requirements
-    // Use a more aggressive alignment mask for better performance
     low_cbuf = ir.BitwiseAnd(low_cbuf, ir.Imm32(~(alignment - 1U)));
-
-    // Also align the resulting offset for optimal memory access
-    IR::U32 result = ir.ISub(offset, low_cbuf);
-    return result;
+    return ir.ISub(offset, low_cbuf);
 }
 
 /// Replace a global memory load instruction with its storage buffer equivalent
