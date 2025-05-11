@@ -263,33 +263,22 @@ class BooleanSetting {
 #endif
 
 void RendererVulkan::Composite(std::span<const Tegra::FramebufferConfig> framebuffers) {
-
-    #ifdef ANDROID || __ANDROID__ || defined(ANDROID)
-
-    // FRAMERATE = FRAME SKIPPING + FRAME INTERPOLATION
+    #ifdef __ANDROID__
     static int frame_counter = 0;
-    static int target_fps = 30; // Target FPS (30 or 60)
+    static int target_fps = 60; // Target FPS (30 or 60)
     int frame_skip_threshold = 1;
 
-    // bool frame_skipping = BooleanSetting::FRAME_SKIPPING.getBoolean();
-    // bool frame_interpolation = BooleanSetting::FRAME_INTERPOLATION.getBoolean();
+    bool frame_skipping = BooleanSetting::FRAME_SKIPPING.getBoolean();
+    bool frame_interpolation = BooleanSetting::FRAME_INTERPOLATION.getBoolean();
+    #endif
 
-
-
-    bool frame_skipping = true;
-    bool frame_interpolation = true;
-
-    if (framebuffers.empty() || frame_counter <= 1) {
+    if (framebuffers.empty()) {
         return;
     }
 
+    #ifdef __ANDROID__
     if (frame_skipping) {
-        // int current_buffer = framebuffers[0].GetFrameRate(); // Count of frames in the buffer at the moment
-        // frame_skip_threshold = (current_framerate >= target_fps) ? 1 : 0;
-        // frame_skip_threshold = (target_fps == 30) ? static_cast<int>(std::floor(2.0)) : static_cast<int>(std::floor(2.0));
-
-        int framerate = static_cast<int>(system.GetCurrentFrameRate());
-        frame_skip_threshold = framerate >= target_fps ? (framerate/1.333f/target_fps) : 0;
+        frame_skip_threshold = (target_fps == 30) ? 2 : 2;
     }
 
     frame_counter++;
