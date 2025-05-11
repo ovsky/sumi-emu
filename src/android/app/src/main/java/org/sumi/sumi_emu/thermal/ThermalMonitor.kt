@@ -60,6 +60,8 @@ public class ThermalMonitor(private val context: Context) : AppCompatActivity() 
     // Constructor
     public fun StartThermalMonitor()
     {
+        return; // Temporarily disabled
+
         val thermalMonitor = ThermalMonitor(context)
 
         thermalMonitor.setInitialProcessorState()
@@ -69,6 +71,8 @@ public class ThermalMonitor(private val context: Context) : AppCompatActivity() 
 
     // Start the thermal monitoring loop process
     private fun startThermalMonitoring() {
+
+        return; // Temporarily disabled
 
         Handler(Looper.getMainLooper()).postDelayed(object : Runnable {
             override fun run() {

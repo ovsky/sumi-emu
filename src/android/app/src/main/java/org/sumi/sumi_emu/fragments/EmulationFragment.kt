@@ -90,7 +90,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
 
     private val ramStatsUpdateHandler = Handler(Looper.myLooper()!!)
 
-     private lateinit var thermalMonitor: ThermalMonitor
+    private lateinit var thermalMonitor: ThermalMonitor // Temporarily disabled
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -153,9 +153,9 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
         emulationState = EmulationState(game.path) {
             return@EmulationState driverViewModel.isInteractionAllowed.value
         }
-        thermalMonitor = ThermalMonitor(requireContext())
-        thermalMonitor.StartThermalMonitor()
-        // ThermalMonitor.StartThermalMonitor(requireContext())
+
+        // thermalMonitor = ThermalMonitor(requireContext())
+        // thermalMonitor.StartThermalMonitor()
     }
 
     /**
