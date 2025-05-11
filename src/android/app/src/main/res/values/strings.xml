@@ -3,12 +3,13 @@
 
   <!-- Settings strings -->
   <string name="use_auto_stub">Use Auto Stub</string>
-  <string name="use_auto_stub_description">Automatically stub missing services and functions. This
+  <string name="use_auto_stub_description">Automatically stub missing services and functions. This may improve basic compatibility but may also cause
+    some serious issues with some games, like random crashes.</string>
   <string name="use_demo_setting">Use Demo Setting</string>
   <string name="use_demo_setting_description">Test new experimental experience.</string>
 
   <!-- General application strings -->
-  <string name="app_name" translatable="false">sumi</string>
+  <string name="app_name" translatable="false">Sumi</string>
   <string name="app_disclaimer">This software will run games for the Nintendo Switch game console.
     No game titles or keys are included.&lt;br /&gt;&lt;br /&gt;Before you begin, please locate your <![CDATA[<b> prod.keys </b>]]>
     file on your device storage.&lt;br /&gt;&lt;br /&gt;<![CDATA[<a href="https://sumi-emu.org/help/quickstart">Learn more</a>]]></string>
@@ -20,7 +21,7 @@
 
   <!-- Setup strings -->
   <string name="welcome">Welcome!</string>
-  <string name="welcome_description">Learn how to setup &lt;b>sumi&lt;/b> and jump into emulation.</string>
+  <string name="welcome_description">Learn how to setup &lt;b>Sumi&lt;/b> and jump into emulation.</string>
   <string name="get_started">Get started</string>
   <string name="disclaimer_title">Legal Disclaimer</string>
   <string name="disclaimer_description">Welcome to Sumi! This application is intended for homebrew
@@ -169,7 +170,7 @@
   <string name="share_save_file">Share save file</string>
   <string name="export_save_failed">Failed to export save</string>
   <string name="game_folders">Game folders</string>
-  <string name="deep_scan">Deep scan</string>
+  <string name="deep_scan">Deep Scan </string>
   <string name="add_game_folder">Add game folder</string>
   <string name="folder_already_added">This folder was already added!</string>
   <string name="game_folder_properties">Game folder properties</string>
@@ -291,19 +292,18 @@
   <string name="intelligent_performance_relaxed">Relaxed</string>
 
   <!-- Graphics settings strings -->
-  <string name="renderer_accuracy">Accuracy Level</string>
+  <string name="renderer_accuracy">Rendering Accuracy Level</string>
   <string name="renderer_resolution">Resolution (Handheld/Docked)</string>
-  <string name="renderer_vsync">VSync mode</string>
+  <string name="renderer_vsync">VSync Mode</string>
   <string name="renderer_screen_layout">Orientation</string>
-  <string name="renderer_aspect_ratio">Aspect ratio</string>
-  <string name="renderer_scaling_filter">Window adapting filter</string>
-  <string name="fsr_sharpness">FSR sharpness</string>
+  <string name="renderer_aspect_ratio">Aspect Ratio</string>
+  <string name="renderer_scaling_filter">Window Scaling Effect</string>
+  <string name="fsr_sharpness">FSR Sharpness</string>
   <string name="fsr_sharpness_description">Determines how sharpened the image will look while using
-    FSR\'s dynamic contrast</string>
+    AMD\'s FSR Dynamic Contrast/string>
   <string name="renderer_anti_aliasing">Anti-aliasing Method</string>
-  <string name="renderer_force_max_clock">Force maximum clocks (Adreno only)</string>
-  <string name="renderer_force_max_clock_description">Forces the GPU to run at the maximum possible
-    clocks (thermal constraints will still be applied).</string>
+  <string name="renderer_force_max_clock">Force Maximum Clocks (Adreno)</string>
+  <string name="renderer_force_max_clock_description">Force the GPU to operate at maximum clock speed. [Not recommended as it may lead to overheating, potentially causing reduced performance and long-term lasting effects.]</string>
   <string name="renderer_asynchronous_shaders">Use Asynchronous Shaders</string>
   <string name="renderer_asynchronous_shaders_description">Compiles shaders asynchronously, reducing
     stutter but may introduce glitches.</string>
@@ -422,15 +422,15 @@
 
   <!-- Miscellaneous -->
   <string name="slider_default">Default</string>
-  <string name="ini_saved">Saved settings</string>
-  <string name="gameid_saved">Saved settings for %1$s</string>
-  <string name="error_saving">Error saving %1$s.ini: %2$s</string>
+  <string name="ini_saved">Saved Settings</string>
+  <string name="gameid_saved">Saved Settings for %1$s</string>
+  <string name="error_saving">Error Saving %1$s.ini: %2$s</string>
   <string name="unimplemented_menu">Unimplemented Menu</string>
   <string name="loading">Loading…</string>
   <string name="shutting_down">Shutting down…</string>
   <string name="reset_setting_confirmation">Do you want to reset this setting back to its default
     value?</string>
-  <string name="reset_to_default">Reset to default</string>
+  <string name="reset_to_default">Reset to Default</string>
   <string name="reset_to_default_description">Resets all advanced settings</string>
   <string name="reset_all_settings">Reset all settings?</string>
   <string name="reset_all_settings_description">All advanced settings will be reset to their default
@@ -489,8 +489,11 @@
   <string name="preferences_player">Player %d</string>
   <string name="preferences_theme">Theme and color</string>
   <string name="preferences_debug">Debug</string>
-  <string name="preferences_debug_description">CPU/GPU debugging, graphics API, fastmem</string>
+  <string name="preferences_debug_description" translatable="false">CPU/GPU debugging, graphics API, fastmem</string>
 
+  <!-- Experimental / Emulation Settings -->
+  <string name="experimental_settings" translatable="false">Emulation</string>
+  <string name="experimental_settings_description">CPU and GPU Emulation Setup - accuracy and performance.</string>
 
   <!-- Multiplayer -->
   <string name="multiplayer">Multiplayer</string>
@@ -716,12 +719,12 @@
   <string name="renderer_none">None</string>
 
   <!-- Renderer Accuracy -->
-  <string name="renderer_accuracy_normal">Normal</string>
-  <string name="renderer_accuracy_high">High</string>
-  <string name="renderer_accuracy_extreme">Extreme (Slow)</string>
+  <string name="renderer_accuracy_normal">High</string>
+  <string name="renderer_accuracy_high">Equivalent</string>
+  <string name="renderer_accuracy_extreme">Maximum (Slow)</string>
 
   <!-- Resolutions -->
-  <string name="resolution_pico">0.25X (180p/270p)</string>
+  <string name="resolution_pico">0.25X (180p/270p) [PIXEL]</string>
   <string name="resolution_half">0.5X (360p/540p)</string>
   <string name="resolution_three_quarter">0.75X (540p/810p)</string>
   <string name="resolution_one">1X (720p/1080p)</string>
@@ -730,17 +733,17 @@
   <string name="resolution_four">4X (2880p/4320p) (Slow)</string>
 
   <!-- Renderer VSync -->
-  <string name="renderer_vsync_immediate">Immediate (Off)</string>
-  <string name="renderer_vsync_mailbox">Mailbox</string>
-  <string name="renderer_vsync_fifo">FIFO (On)</string>
-  <string name="renderer_vsync_fifo_relaxed">FIFO Relaxed</string>
+  <string name="renderer_vsync_immediate">Immediate [Off]</string>
+  <string name="renderer_vsync_mailbox">Mailbox [Unconventional]</string>
+  <string name="renderer_vsync_fifo">FIFO [On]</string>
+  <string name="renderer_vsync_fifo_relaxed">FIFO Relaxed [On]</string>
 
   <!-- Scaling Filters -->
   <string name="scaling_filter_nearest_neighbor">Nearest Neighbor</string>
   <string name="scaling_filter_bilinear">Bilinear</string>
   <string name="scaling_filter_bicubic">Bicubic</string>
   <string name="scaling_filter_gaussian">Gaussian</string>
-  <string name="scaling_filter_scale_force">ScaleForce</string>
+  <string name="scaling_filter_scale_force">ScaleForce [Preferred]</string>
   <string name="scaling_filter_fsr">AMD FidelityFX™ Super Resolution</string>
 
   <!-- Anti-Aliasing -->
@@ -765,13 +768,13 @@
   <string name="ratio_stretch">Stretch to window</string>
 
   <!-- CPU Backend -->
-  <string name="cpu_backend_dynarmic">Dynarmic (Slow)</string>
-  <string name="cpu_backend_nce">Native code execution (NCE)</string>
+  <string name="cpu_backend_dynarmic">Dynarmic (Modern)</string>
+  <string name="cpu_backend_nce">Native Code Execution (Standard)</string>
 
   <!-- CPU Accuracy -->
-  <string name="cpu_accuracy_accurate">Accurate</string>
-  <string name="cpu_accuracy_unsafe">Unsafe</string>
-  <string name="cpu_accuracy_paranoid">Paranoid (Slow)</string>
+  <string name="cpu_accuracy_accurate">Accurate (Standard)</string>
+  <string name="cpu_accuracy_unsafe">Unsafe (Fast)</string>
+  <string name="cpu_accuracy_paranoid">Unreliable  (Ultra Fast)</string>
 
   <!-- Gamepad Buttons -->
   <string name="gamepad_d_pad">D-pad</string>
