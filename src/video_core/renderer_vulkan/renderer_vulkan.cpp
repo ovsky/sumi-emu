@@ -264,32 +264,36 @@ class BooleanSetting {
 
 void RendererVulkan::Composite(std::span<const Tegra::FramebufferConfig> framebuffers) {
 
-    #ifdef __ANDROID__ || defined(ANDROID) || defined(__ANDROID__)
+    #if defined(ANDROID || __ANDROID__)
 
+    // FRAMERATE = FRAME SKIPPING + FRAME INTERPOLATION
     static int frame_counter = 0;
-    // static int target_fps = 30; // Target FPS (30 or 60)
-    // int frame_skip_threshold = 1;
+    static int target_fps = 30; // Target FPS (30 or 60)
+    int frame_skip_threshold = 1;
 
     // bool frame_skipping = BooleanSetting::FRAME_SKIPPING.getBoolean();
     // bool frame_interpolation = BooleanSetting::FRAME_INTERPOLATION.getBoolean();
 
-    // bool frame_skipping = true;
+
+
+    bool frame_skipping = true;
     bool frame_interpolation = true;
 
-    if (framebuffers.empty()) {
+    if (framebuffers.empty() || frame_counter <= 1) {
         return;
     }
 
-    // if (frame_skipping) {
-    //     // int current_buffer = framebuffers[0].GetFrameRate(); // Count of frames in the buffer at the moment
-    //     // frame_skip_threshold = (current_buffer >= 2) ? (current_buffer / 2) : 0;
-    //     // frame_skip_threshold = (current_framerate >= target_fps) ? 1 : 0;
-    //     // frame_skip_threshold = (target_fps == 30) ? 2 : 2;
-    // }
+    if (frame_skipping) {
+        // int current_buffer = framebuffers[0].GetFrameRate(); // Count of frames in the buffer at the moment
+        // frame_skip_threshold = (current_framerate >= target_fps) ? 1 : 0;
+        // frame_skip_threshold = (target_fps == 30) ? 2 : 2;
+
+        double framerate = system.GetCurrentFrameRate();
+        frame_skip_threshold = framerate >= target_fps ? (framerate/1.333f/target_fps) : 0;
+    }
 
     frame_counter++;
-    // if (frame_counter % frame_skip_threshold != 0) {
-    if (frame_counter != 0) {
+    if (frame_counter % frame_skip_threshold != 0) {
         if (frame_interpolation && previous_frame) {
             Frame* interpolated_frame = present_manager.GetRenderFrame();
             InterpolateFrames(previous_frame, interpolated_frame);
