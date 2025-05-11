@@ -402,6 +402,14 @@ abstract class SettingsItem(
                     descriptionId = R.string.use_auto_stub_description
                 )
             )
+
+            put(
+                SwitchSetting(
+                    BooleanSetting.USE_DEMO_SETTING,
+                    titleId = R.string.use_demo_setting,
+                    descriptionId = R.string.use_demo_setting_description
+                )
+            )
         }
     }
 }

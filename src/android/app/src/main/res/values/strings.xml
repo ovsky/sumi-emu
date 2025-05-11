@@ -4,7 +4,8 @@
   <!-- Settings strings -->
   <string name="use_auto_stub">Use Auto Stub</string>
   <string name="use_auto_stub_description">Automatically stub missing services and functions. This
-    may improve compatibility but can cause crashes and stability issues.</string>
+  <string name="use_demo_setting">Use Demo Setting</string>
+  <string name="use_demo_setting_description">Test new experimental experience.</string>
 
   <!-- General application strings -->
   <string name="app_name" translatable="false">sumi</string>
