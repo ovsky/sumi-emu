@@ -6,13 +6,13 @@
 
 #include "common/common_types.h"
 
-// This file contains sumi's HLE API version constants.
+// This file contains citron's HLE API version constants.
 
 namespace HLE::ApiVersion {
 
 // Horizon OS version constants.
 
-constexpr u8 HOS_VERSION_MAJOR = 19;
+constexpr u8 HOS_VERSION_MAJOR = 20;
 constexpr u8 HOS_VERSION_MINOR = 0;
 constexpr u8 HOS_VERSION_MICRO = 1;
 
@@ -22,9 +22,9 @@ constexpr u8 SDK_REVISION_MAJOR = 1;
 constexpr u8 SDK_REVISION_MINOR = 0;
 
 constexpr char PLATFORM_STRING[] = "NX";
-constexpr char VERSION_HASH[] = "835c78223df116284ef7e36e8441760edc81729c";
-constexpr char DISPLAY_VERSION[] = "19.0.1";
-constexpr char DISPLAY_TITLE[] = "NintendoSDK Firmware for NX 19.0.1-1.0";
+constexpr char VERSION_HASH[] = "0b2540e5cd7498dd61f6caeca5136c73d9b1d21a";
+constexpr char DISPLAY_VERSION[] = "20.0.1";
+constexpr char DISPLAY_TITLE[] = "NintendoSDK Firmware for NX 20.0.1-1.0";
 
 // Atmosphere version constants.
 
