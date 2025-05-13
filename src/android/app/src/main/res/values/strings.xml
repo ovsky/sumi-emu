@@ -776,9 +776,9 @@
   <string name="cpu_backend_nce">Native Code Execution (Slow on ARM/Fast on X64)</string>
 
   <!-- CPU Accuracy -->
-  <string name="cpu_accuracy_accurate">Accurate</string>
-  <string name="cpu_accuracy_unsafe">Unsafe</string>
-  <string name="cpu_accuracy_paranoid">Paranoid (Slow on X64)</string>
+  <string name="cpu_accuracy_accurate">CPU Precise [Standard]</string>
+  <string name="cpu_accuracy_unsafe">CPU Imprecise [Fast]</string>
+  <string name="cpu_accuracy_paranoid">CPU Paranoid [Ultra Slow]</string>
 
   <!-- Gamepad Buttons -->
   <string name="gamepad_d_pad">D-pad</string>
