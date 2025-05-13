@@ -76,7 +76,7 @@ std::unique_ptr<TranslationMap> InitializeTranslations(QWidget* parent) {
     // Cpu
     INSERT(Settings, cpu_accuracy, tr("Accuracy:"),
            tr("This setting controls the accuracy of the emulated CPU.\nDon't change this unless "
-              "you know what you are doing."));
+              "you really know what you are doing."));
     INSERT(Settings, cpu_backend, tr("Backend:"), QStringLiteral());
 
     // Cpu Debug
@@ -196,7 +196,7 @@ std::unique_ptr<TranslationMap> InitializeTranslations(QWidget* parent) {
     INSERT(Settings, async_presentation, tr("Enable asynchronous presentation (Vulkan only)"),
            tr("Slightly improves performance by moving presentation to a separate CPU thread."));
     INSERT(
-        Settings, renderer_force_max_clock, tr("Force maximum clocks (Vulkan only)"),
+        Settings, renderer_force_max_clock, tr("Force Maximum Clocks [Adreno]"),
         tr("Runs work in the background while waiting for graphics commands to keep the GPU from "
            "lowering its clock speed."));
     INSERT(Settings, max_anisotropy, tr("Anisotropic Filtering:"),
@@ -315,8 +315,8 @@ std::unique_ptr<ComboboxTranslationMap> ComboboxEnumeration(QWidget* parent) {
     // Intentionally skipping VSyncMode to let the UI fill that one out
     translations->insert({Settings::EnumMetadata<Settings::AppletMode>::Index(),
                           {
-                              PAIR(AppletMode, HLE, tr("Custom frontend")),
-                              PAIR(AppletMode, LLE, tr("Real applet")),
+                              PAIR(AppletMode, HLE, tr("Custom Frontend")),
+                              PAIR(AppletMode, LLE, tr("Real Applet")),
                           }});
 
     translations->insert({Settings::EnumMetadata<Settings::AstcDecodeMode>::Index(),
@@ -354,9 +354,9 @@ std::unique_ptr<ComboboxTranslationMap> ComboboxEnumeration(QWidget* parent) {
          }});
     translations->insert({Settings::EnumMetadata<Settings::GpuAccuracy>::Index(),
                           {
-                              PAIR(GpuAccuracy, Normal, tr("Normal")),
-                              PAIR(GpuAccuracy, High, tr("High")),
-                              PAIR(GpuAccuracy, Extreme, tr("Extreme")),
+                              PAIR(GpuAccuracy, Normal, tr("Normal (Accurate)")),
+                              PAIR(GpuAccuracy, High, tr("High (Super Accurate)")),
+                              PAIR(GpuAccuracy, Extreme, tr("Extreme (Slow)")),
                           }});
     translations->insert(
         {Settings::EnumMetadata<Settings::CpuAccuracy>::Index(),
@@ -385,7 +385,7 @@ std::unique_ptr<ComboboxTranslationMap> ComboboxEnumeration(QWidget* parent) {
     translations->insert(
         {Settings::EnumMetadata<Settings::ResolutionSetup>::Index(),
          {
-             PAIR(ResolutionSetup, Res1_EX, tr("0.25X (180p/270p) [PIXELART]")),
+             PAIR(ResolutionSetup, Res1_EX, tr("0.25X (180p/270p) [PIXEL]")),
              PAIR(ResolutionSetup, Res1_2X, tr("0.5X (360p/540p) [EXPERIMENTAL]")),
              PAIR(ResolutionSetup, Res3_4X, tr("0.75X (540p/810p) [EXPERIMENTAL]")),
              PAIR(ResolutionSetup, Res1X, tr("1X (720p/1080p)")),

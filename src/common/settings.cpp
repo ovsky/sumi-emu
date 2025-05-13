@@ -228,7 +228,7 @@ const char* TranslateCategory(Category category) {
     case Category::AddOns:
         return "DisabledAddOns";
     case Category::Controls:
-        return "Controls";
+        return "Input Controllers";
     case Category::Ui:
     case Category::UiGeneral:
         return "UI";

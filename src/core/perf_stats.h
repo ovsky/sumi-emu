@@ -51,6 +51,11 @@ public:
      */
     double GetLastFrameTimeScale() const;
 
+    /**
+     * Returns the current frame rate of the game.
+     */
+    double GetCurrentFrameRate() const;
+
 private:
     mutable std::mutex object_mutex;
 

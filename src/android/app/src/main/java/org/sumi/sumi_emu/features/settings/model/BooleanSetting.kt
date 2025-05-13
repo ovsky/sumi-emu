@@ -30,7 +30,7 @@ enum class BooleanSetting(override val key: String) : AbstractBooleanSetting {
     TOUCHSCREEN("touchscreen"),
     SHOW_THERMAL_OVERLAY("show_thermal_overlay"),
     SHOW_RAM_OVERLAY("show_ram_overlay"),
-    USE_AUTO_STUB("use_auto_stub");
+    USE_AUTO_STUB("use_auto_stub"),
     USE_DEMO_SETTING("use_demo_setting");
 
     override fun getBoolean(needsGlobal: Boolean): Boolean =

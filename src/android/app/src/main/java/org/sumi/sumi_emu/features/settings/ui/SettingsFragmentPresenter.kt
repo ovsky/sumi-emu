@@ -87,6 +87,7 @@ class SettingsFragmentPresenter(
             MenuTag.SECTION_SYSTEM -> addSystemSettings(sl)
             MenuTag.SECTION_RENDERER -> addGraphicsSettings(sl)
             MenuTag.SECTION_AUDIO -> addAudioSettings(sl)
+            MenuTag.SECTION_EXPERIMENTAL -> addExperimentalSettings(sl)
             MenuTag.SECTION_INPUT -> addInputSettings(sl)
             MenuTag.SECTION_INPUT_PLAYER_ONE -> addInputPlayer(sl, 0)
             MenuTag.SECTION_INPUT_PLAYER_TWO -> addInputPlayer(sl, 1)
@@ -113,8 +114,24 @@ class SettingsFragmentPresenter(
                 SubmenuSetting(
                     titleId = R.string.preferences_system,
                     descriptionId = R.string.preferences_system_description,
-                    iconId = R.drawable.ic_system_settings,
+                    iconId = R.drawable.ui_select_all,
                     menuKey = MenuTag.SECTION_SYSTEM
+                )
+            )
+            add(
+                SubmenuSetting(
+                    titleId = R.string.preferences_graphics,
+                    descriptionId = R.string.preferences_graphics_description,
+                    iconId = R.drawable.ic_graphics,
+                    menuKey = MenuTag.SECTION_RENDERER
+                )
+            )
+            add(
+                SubmenuSetting(
+                    titleId = R.string.experimental_settings,
+                    descriptionId = R.string.experimental_settings_description,
+                    iconId = R.drawable.ic_system_settings,
+                    menuKey = MenuTag.SECTION_EXPERIMENTAL
                 )
             )
             add(
@@ -155,15 +172,15 @@ class SettingsFragmentPresenter(
     private fun addSystemSettings(sl: ArrayList<SettingsItem>) {
         sl.apply {
             add(StringSetting.DEVICE_NAME.key)
-            add(BooleanSetting.RENDERER_USE_SPEED_LIMIT.key)
-            add(ShortSetting.RENDERER_SPEED_LIMIT.key)
             add(BooleanSetting.USE_DOCKED_MODE.key)
             add(BooleanSetting.USE_AUTO_STUB.key)
             add(BooleanSetting.USE_DEMO_SETTING.key)
+            add(LongSetting.CUSTOM_RTC.key)
+            add(BooleanSetting.RENDERER_USE_SPEED_LIMIT.key)
+            add(ShortSetting.RENDERER_SPEED_LIMIT.key)
             add(IntSetting.REGION_INDEX.key)
             add(IntSetting.LANGUAGE_INDEX.key)
             add(BooleanSetting.USE_CUSTOM_RTC.key)
-            add(LongSetting.CUSTOM_RTC.key)
         }
     }
 
@@ -171,18 +188,25 @@ class SettingsFragmentPresenter(
         sl.apply {
             add(IntSetting.RENDERER_ACCURACY.key)
             add(IntSetting.RENDERER_RESOLUTION.key)
-            add(IntSetting.RENDERER_VSYNC.key)
-            add(IntSetting.RENDERER_SCALING_FILTER.key)
-            add(IntSetting.FSR_SHARPENING_SLIDER.key)
-            add(IntSetting.RENDERER_ANTI_ALIASING.key)
             add(IntSetting.MAX_ANISOTROPY.key)
             add(IntSetting.RENDERER_SCREEN_LAYOUT.key)
             add(IntSetting.RENDERER_ASPECT_RATIO.key)
             add(IntSetting.VERTICAL_ALIGNMENT.key)
             add(BooleanSetting.PICTURE_IN_PICTURE.key)
+        }
+    }
+
+    // Better mapped settings - from actual to real emulation settings
+    private fun addExperimentalSettings(sl: ArrayList<SettingsItem>) {
+        sl.apply {
+            add(IntSetting.INTELLIGENT_PERFORMANCE.key)
+            add(IntSetting.RENDERER_VSYNC.key)
+            add(IntSetting.RENDERER_SCALING_FILTER.key)
+            add(IntSetting.FSR_SHARPENING_SLIDER.key)
+            add(IntSetting.RENDERER_ANTI_ALIASING.key)
+            add(BooleanSetting.RENDERER_ASYNCHRONOUS_SHADERS.key)
             add(BooleanSetting.RENDERER_USE_DISK_SHADER_CACHE.key)
             add(BooleanSetting.RENDERER_FORCE_MAX_CLOCK.key)
-            add(BooleanSetting.RENDERER_ASYNCHRONOUS_SHADERS.key)
             add(BooleanSetting.RENDERER_REACTIVE_FLUSHING.key)
         }
     }

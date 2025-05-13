@@ -24,6 +24,7 @@ using std::chrono::microseconds;
 // Purposefully ignore the first five frames, as there's a significant amount of overhead in
 // booting that we shouldn't account for
 constexpr std::size_t IgnoreFrames = 5;
+double game_current_fps = 0.0f;
 
 namespace Core {
 
@@ -62,6 +63,7 @@ void PerfStats::EndSystemFrame() {
 
     auto frame_end = Clock::now();
     const auto frame_time = frame_end - frame_begin;
+
     if (current_index < perf_history.size()) {
         perf_history[current_index++] =
             std::chrono::duration<double, std::milli>(frame_time).count();
@@ -75,6 +77,10 @@ void PerfStats::EndSystemFrame() {
 
 void PerfStats::EndGameFrame() {
     game_frames.fetch_add(1, std::memory_order_relaxed);
+}
+
+double PerfStats::GetCurrentFrameRate() const {
+    return game_current_fps;
 }
 
 double PerfStats::GetMeanFrametime() const {
@@ -106,6 +112,8 @@ PerfStatsResults PerfStats::GetAndResetStats(microseconds current_system_time_us
                      static_cast<double>(system_frames),
         .emulation_speed = system_us_per_second.count() / 1'000'000.0,
     };
+
+    game_current_fps = results.average_game_fps;
 
     // Reset counters
     reset_point = now;

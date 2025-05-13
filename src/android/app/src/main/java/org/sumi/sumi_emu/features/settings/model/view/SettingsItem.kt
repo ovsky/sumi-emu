@@ -123,7 +123,7 @@ abstract class SettingsItem(
                     ShortSetting.RENDERER_SPEED_LIMIT,
                     titleId = R.string.frame_limit_slider,
                     descriptionId = R.string.frame_limit_slider_description,
-                    min = 10,
+                    min = 25,
                     max = 500,
                     units = "%"
                 )

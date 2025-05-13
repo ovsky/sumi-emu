@@ -52,74 +52,74 @@ static u64 GenerateTelemetryId() {
 
 static const char* TranslateRenderer(Settings::RendererBackend backend) {
     switch (backend) {
-    case Settings::RendererBackend::OpenGL:
-        return "OpenGL";
-    case Settings::RendererBackend::Vulkan:
-        return "Vulkan";
-    case Settings::RendererBackend::Null:
-        return "Null";
+        case Settings::RendererBackend::OpenGL:
+            return "OpenGL";
+        case Settings::RendererBackend::Vulkan:
+            return "Vulkan";
+        case Settings::RendererBackend::Null:
+            return "Null";
     }
     return "Unknown";
 }
 
 static const char* TranslateGPUAccuracyLevel(Settings::GpuAccuracy backend) {
     switch (backend) {
-    case Settings::GpuAccuracy::Normal:
-        return "Normal";
-    case Settings::GpuAccuracy::High:
-        return "High";
-    case Settings::GpuAccuracy::Extreme:
-        return "Extreme";
+        case Settings::GpuAccuracy::Normal:
+            return "Normal";
+        case Settings::GpuAccuracy::High:
+            return "High";
+        case Settings::GpuAccuracy::Extreme:
+            return "Extreme";
     }
     return "Unknown";
 }
 
 static const char* TranslateNvdecEmulation(Settings::NvdecEmulation backend) {
     switch (backend) {
-    case Settings::NvdecEmulation::Off:
-        return "Off";
-    case Settings::NvdecEmulation::Cpu:
-        return "CPU";
-    case Settings::NvdecEmulation::Gpu:
-        return "GPU";
+        case Settings::NvdecEmulation::Off:
+            return "Off";
+        case Settings::NvdecEmulation::Cpu:
+            return "CPU";
+        case Settings::NvdecEmulation::Gpu:
+            return "GPU";
     }
     return "Unknown";
 }
 
 static constexpr const char* TranslateVSyncMode(Settings::VSyncMode mode) {
     switch (mode) {
-    case Settings::VSyncMode::Immediate:
-        return "Immediate";
-    case Settings::VSyncMode::Mailbox:
-        return "Mailbox";
-    case Settings::VSyncMode::Fifo:
-        return "FIFO";
-    case Settings::VSyncMode::FifoRelaxed:
-        return "FIFO Relaxed";
+        case Settings::VSyncMode::Immediate:
+            return "Immediate";
+        case Settings::VSyncMode::Mailbox:
+            return "Mailbox";
+        case Settings::VSyncMode::Fifo:
+            return "FIFO";
+        case Settings::VSyncMode::FifoRelaxed:
+            return "FIFO Relaxed";
     }
     return "Unknown";
 }
 
 static constexpr const char* TranslateIntelligentPerformanceMode(Settings::IntelligentPerformanceMode mode) {
     switch (mode) {
-    case Settings::IntelligentPerformanceMode::Performance:
-        return "Performance";
-    case Settings::IntelligentPerformanceMode::Moderate:
-        return "Moderate";
-    case Settings::IntelligentPerformanceMode::Relaxed:
-        return "Relaxed";
+        case Settings::IntelligentPerformanceMode::Performance:
+            return "Performance";
+        case Settings::IntelligentPerformanceMode::Moderate:
+            return "Moderate";
+        case Settings::IntelligentPerformanceMode::Relaxed:
+            return "Relaxed";
     }
     return "Unknown";
 }
 
 static constexpr const char* TranslateASTCDecodeMode(Settings::AstcDecodeMode mode) {
     switch (mode) {
-    case Settings::AstcDecodeMode::Cpu:
-        return "CPU";
-    case Settings::AstcDecodeMode::Gpu:
-        return "GPU";
-    case Settings::AstcDecodeMode::CpuAsynchronous:
-        return "CPU Asynchronous";
+        case Settings::AstcDecodeMode::Cpu:
+            return "CPU";
+        case Settings::AstcDecodeMode::Gpu:
+            return "GPU";
+        case Settings::AstcDecodeMode::CpuAsynchronous:
+            return "CPU Asynchronous";
     }
     return "Unknown";
 }
@@ -284,8 +284,8 @@ void TelemetrySession::AddInitialInfo(Loader::AppLoader& app_loader,
              TranslateASTCDecodeMode(Settings::values.accelerate_astc.GetValue()));
     AddField(field_type, "Renderer_UseVsync",
              TranslateVSyncMode(Settings::values.vsync_mode.GetValue()));
-        AddField(field_type, "System_IntelligentPerformanceMode",
-            TranslateIntelligentPerformanceMode(Settings::values.intelligent_performance.GetValue()));
+    AddField(field_type, "System_IntelligentPerformanceMode",
+        TranslateIntelligentPerformanceMode(Settings::values.intelligent_performance.GetValue()));
     AddField(field_type, "Renderer_ShaderBackend",
              static_cast<u32>(Settings::values.shader_backend.GetValue()));
     AddField(field_type, "Renderer_UseAsynchronousShaders",

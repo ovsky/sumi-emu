@@ -303,14 +303,14 @@ public class ThermalMonitor(private val context: Context) : AppCompatActivity() 
 
         // Throttle the GPU speed limit
         public fun ThrottleGpuSpeedLimit(context: Context) {
-            val throttleGpuMaxLimit = 120;
+            val throttleGpuMaxLimit = 500;
             val throttleGpuMinLimit = 50;
-            val throttleGpuStep = 20;
+            val throttleGpuStep = 25;
 
-            var currentGpuSpeedLimit = ShortSetting.RENDERER_SPEED_LIMIT
+            var currentGpuSpeedLimit = ((ShortSetting.RENDERER_SPEED_LIMIT
                 .getShort()
                 .toInt()
-                .coerceIn(throttleGpuMinLimit, throttleGpuMaxLimit)
+                .coerceIn(throttleGpuMinLimit, throttleGpuMaxLimit) / throttleGpuStep) * throttleGpuStep);
 
             if (currentGpuSpeedLimit >= throttleGpuMinLimit + throttleGpuStep) {
                 currentGpuSpeedLimit -= throttleGpuStep;

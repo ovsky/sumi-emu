@@ -401,7 +401,7 @@ struct Values {
                                                                   "astc_recompression",
                                                                   Category::RendererAdvanced};
     SwitchableSetting<VramUsageMode, true> vram_usage_mode{linkage,
-                                                           VramUsageMode::Conservative,
+                                                           VramUsageMode::Aggressive,
                                                            VramUsageMode::Conservative,
                                                            VramUsageMode::Aggressive,
                                                            "vram_usage_mode",
@@ -416,14 +416,10 @@ struct Values {
     SwitchableSetting<bool> renderer_force_max_clock{linkage, false, "force_max_clock",
                                                      Category::RendererAdvanced};
     SwitchableSetting<bool> use_reactive_flushing{linkage,
-#ifdef ANDROID
                                                   false,
-#else
-                                                  true,
-#endif
                                                   "use_reactive_flushing",
                                                   Category::RendererAdvanced};
-    SwitchableSetting<bool> use_asynchronous_shaders{linkage, false, "use_asynchronous_shaders",
+    SwitchableSetting<bool> use_asynchronous_shaders{linkage, true, "use_asynchronous_shaders",
                                                      Category::RendererAdvanced};
     SwitchableSetting<bool> use_fast_gpu_time{
         linkage, true, "use_fast_gpu_time", Category::RendererAdvanced, Specialization::Default,
@@ -435,7 +431,7 @@ struct Values {
                                                              Specialization::Default,
                                                              true,
                                                              true};
-    SwitchableSetting<bool> enable_compute_pipelines{linkage, false, "enable_compute_pipelines",
+    SwitchableSetting<bool> enable_compute_pipelines{linkage, true, "enable_compute_pipelines",
                                                      Category::RendererAdvanced};
     SwitchableSetting<bool> use_video_framerate{linkage, false, "use_video_framerate",
                                                 Category::RendererAdvanced};
@@ -487,7 +483,7 @@ struct Values {
         linkage, 0,    "rng_seed",       Category::System, Specialization::Hex,
         true,    true, &rng_seed_enabled};
     Setting<std::string> device_name{
-        linkage, "sumi", "device_name", Category::System, Specialization::Default, true, true};
+        linkage, "Sumi User", "device_name", Category::System, Specialization::Default, true, true};
 
     Setting<s32> current_user{linkage, 0, "current_user", Category::System};
 
@@ -635,7 +631,7 @@ struct Values {
     // Add-Ons
     std::map<u64, std::vector<std::string>> disabled_addons;
 
-    // Renderer Advanced Settings
+    // Renderer Emulation Settings
     SwitchableSetting<bool> use_enhanced_shader_building{linkage, false, "Enhanced Shader Building",
                                                         Category::RendererAdvanced};
 

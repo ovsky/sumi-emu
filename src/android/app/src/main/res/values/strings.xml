@@ -100,10 +100,9 @@
     redump your keys.</string>
   <string name="gpu_driver_manager">GPU Driver Manager</string>
   <string name="install_gpu_driver">Install GPU driver</string>
-  <string name="install_gpu_driver_description">Install alternative drivers for potentially better
-    performance or accuracy. It is highly suggested to install custom Mesa/Turnip driver builds.</string>
-  <string name="advanced_settings">Advanced Settings</string>
-  <string name="advanced_settings_game">Advanced Settings: %1$s</string>
+  <string name="install_gpu_driver_description">It is highly suggested to install custom Mesa/Turnip Driver Builds for potentially better performance, accuracy and games compatibility.</string>
+  <string name="advanced_settings">Emulation Settings</string>
+  <string name="advanced_settings_game">Emulation Settings: %1$s</string>
   <string name="settings_description">Configure Emulator Settings</string>
   <string name="search_recently_played">Recently Played</string>
   <string name="search_recently_added">Recently Added</string>
@@ -170,7 +169,7 @@
   <string name="share_save_file">Share save file</string>
   <string name="export_save_failed">Failed to export save</string>
   <string name="game_folders">Game folders</string>
-  <string name="deep_scan">Deep Scan </string>
+  <string name="deep_scan">Deep Scan</string>
   <string name="add_game_folder">Add game folder</string>
   <string name="folder_already_added">This folder was already added!</string>
   <string name="game_folder_properties">Game folder properties</string>
@@ -300,10 +299,11 @@
   <string name="renderer_scaling_filter">Window Scaling Effect</string>
   <string name="fsr_sharpness">FSR Sharpness</string>
   <string name="fsr_sharpness_description">Determines how sharpened the image will look while using
-    AMD\'s FSR Dynamic Contrast/string>
+    AMD\'s FSR Dynamic Contrast</string>
   <string name="renderer_anti_aliasing">Anti-aliasing Method</string>
   <string name="renderer_force_max_clock">Force Maximum Clocks (Adreno)</string>
-  <string name="renderer_force_max_clock_description">Force the GPU to operate at maximum clock speed. [Not recommended as it may lead to overheating, potentially causing reduced performance and long-term lasting effects.]</string>
+  <string name="renderer_force_max_clock_description">Forces the GPU to run at the maximum possible
+    clocks (thermal constraints will still be applied).</string>
   <string name="renderer_asynchronous_shaders">Use Asynchronous Shaders</string>
   <string name="renderer_asynchronous_shaders_description">Compiles shaders asynchronously, reducing
     stutter but may introduce glitches.</string>
@@ -479,15 +479,19 @@
   <string name="preferences_settings">Settings</string>
   <string name="preferences_general">General</string>
   <string name="preferences_system">System</string>
+  <string name="preferences_renderer">Renderer</string>
+  <string name="preferences_experimental">Experimental</string>
   <string name="preferences_system_description">Docked mode, region, language</string>
   <string name="preferences_graphics">Graphics</string>
-  <string name="preferences_graphics_description">Accuracy level, resolution, shader cache</string>
+  <string name="preferences_graphics_description">Graphics Settings - VSync, Anti-Aliasing, Shader Cache, etc.</string>
+  <string name="preferences_view">Display View</string>
+  <string name="preferences_view_description">Display View Settings - Resolution, Aspect Ratio, Window Display FX, etc/</string>
   <string name="preferences_audio">Audio</string>
   <string name="preferences_audio_description">Output engine, volume</string>
   <string name="preferences_controls">Controls</string>
-  <string name="preferences_controls_description">Map controller input</string>
+  <string name="preferences_controls_description">Map Controllers Input</string>
   <string name="preferences_player">Player %d</string>
-  <string name="preferences_theme">Theme and color</string>
+  <string name="preferences_theme">Theme and Color</string>
   <string name="preferences_debug">Debug</string>
   <string name="preferences_debug_description" translatable="false">CPU/GPU debugging, graphics API, fastmem</string>
 
@@ -724,7 +728,7 @@
   <string name="renderer_accuracy_extreme">Maximum (Slow)</string>
 
   <!-- Resolutions -->
-  <string name="resolution_pico">0.25X (180p/270p) [PIXEL]</string>
+  <string name="resolution_pico">0.25X (180p/270p) (PIXEL)</string>
   <string name="resolution_half">0.5X (360p/540p)</string>
   <string name="resolution_three_quarter">0.75X (540p/810p)</string>
   <string name="resolution_one">1X (720p/1080p)</string>
@@ -743,7 +747,7 @@
   <string name="scaling_filter_bilinear">Bilinear</string>
   <string name="scaling_filter_bicubic">Bicubic</string>
   <string name="scaling_filter_gaussian">Gaussian</string>
-  <string name="scaling_filter_scale_force">ScaleForce [Preferred]</string>
+  <string name="scaling_filter_scale_force">ScaleForce</string>
   <string name="scaling_filter_fsr">AMD FidelityFX™ Super Resolution</string>
 
   <!-- Anti-Aliasing -->
@@ -752,13 +756,13 @@
   <string name="anti_aliasing_smaa">SMAA</string>
 
   <!-- Screen Layouts -->
-  <string name="screen_layout_auto">Auto</string>
-  <string name="screen_layout_sensor_landscape">Sensor landscape</string>
-  <string name="screen_layout_landscape">Landscape</string>
-  <string name="screen_layout_reverse_landscape">Reverse landscape</string>
-  <string name="screen_layout_sensor_portrait">Sensor portrait</string>
-  <string name="screen_layout_portrait">Portrait</string>
-  <string name="screen_layout_reverse_portrait">Reverse portrait</string>
+  <string name="screen_layout_auto">Device Automatic</string>
+  <string name="screen_layout_sensor_landscape">Landscape Sensor</string>
+  <string name="screen_layout_landscape">Landscape Device</string>
+  <string name="screen_layout_reverse_landscape">landscape Reverse</string>
+  <string name="screen_layout_sensor_portrait">Portrait Sensor</string>
+  <string name="screen_layout_portrait">Portrait Device</string>
+  <string name="screen_layout_reverse_portrait">Portrait Reverse</string>
 
   <!-- Aspect Ratios -->
   <string name="ratio_default">Default (16:9)</string>
@@ -768,13 +772,13 @@
   <string name="ratio_stretch">Stretch to window</string>
 
   <!-- CPU Backend -->
-  <string name="cpu_backend_dynarmic">Dynarmic (Modern)</string>
-  <string name="cpu_backend_nce">Native Code Execution (Standard)</string>
+  <string name="cpu_backend_dynarmic">Dynarmic (Fast on ARM/Slow on X64)</string>
+  <string name="cpu_backend_nce">Native Code Execution (Slow on ARM/Fast on X64)</string>
 
   <!-- CPU Accuracy -->
-  <string name="cpu_accuracy_accurate">Accurate (Standard)</string>
-  <string name="cpu_accuracy_unsafe">Unsafe (Fast)</string>
-  <string name="cpu_accuracy_paranoid">Unreliable  (Ultra Fast)</string>
+  <string name="cpu_accuracy_accurate">Accurate</string>
+  <string name="cpu_accuracy_unsafe">Unsafe</string>
+  <string name="cpu_accuracy_paranoid">Paranoid (Slow on X64)</string>
 
   <!-- Gamepad Buttons -->
   <string name="gamepad_d_pad">D-pad</string>
