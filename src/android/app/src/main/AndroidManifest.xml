@@ -13,10 +13,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
         android:required="true" />
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.NFC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- Permissions for NFC (only if needed) -->
+    <uses-permission android:name="android.permission.NFC" android:required="false" />
 
     <application
         android:name="org.sumi.sumi_emu.SumiApplication"
@@ -33,29 +35,39 @@ SPDX-License-Identifier: GPL-3.0-or-later
         android:dataExtractionRules="@xml/data_extraction_rules_api_31"
         android:enableOnBackInvokedCallback="true">
 
-        <meta-data android:name="android.game_mode_config"
+        <!-- Samsung Gaming Hub specific metadata -->
+        <meta-data
+            android:name="com.samsung.android.gamehub"
+            android:value="true" />
+
+        <!-- Game Mode configuration -->
+        <meta-data
+            android:name="android.game_mode_config"
             android:resource="@xml/game_mode_config" />
 
+        <!-- Main Activity -->
         <activity
             android:name="org.sumi.sumi_emu.ui.main.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Sumi.Splash.Main">
 
-            <!-- This intentfilter marks this Activity as the one that gets launched from Home
-            screen. -->
+            <!-- This intentfilter marks this Activity as the one that gets launched from Home Screen. -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.GAME" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
         </activity>
 
+        <!-- Settings Activity -->
         <activity
             android:name="org.sumi.sumi_emu.features.settings.ui.SettingsActivity"
             android:theme="@style/Theme.Sumi.Main"
             android:label="@string/preferences_settings" />
 
+        <!-- Emulation Activity -->
         <activity
             android:name="org.sumi.sumi_emu.activities.EmulationActivity"
             android:theme="@style/Theme.Sumi.Main"
@@ -83,6 +95,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
                 android:resource="@xml/nfc_tech_filter" />
         </activity>
 
+        <!-- Document Provider -->
         <provider
             android:name=".features.DocumentProvider"
             android:authorities="${applicationId}.user"
