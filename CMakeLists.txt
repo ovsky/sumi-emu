@@ -447,7 +447,7 @@ if (ENABLE_SDL2)
     if (SUMI_USE_BUNDLED_SDL2)
         # Detect toolchain and platform
         if ((MSVC_VERSION GREATER_EQUAL 1920) AND ARCHITECTURE_x86_64)
-            set(SDL2_VER "SDL2-2.28.2")
+            set(SDL2_VER "SDL2-2.32.6")
         else()
             message(FATAL_ERROR "No bundled SDL2 binaries for your toolchain. Disable SUMI_USE_BUNDLED_SDL2 and provide your own.")
         endif()
@@ -479,7 +479,7 @@ endif()
 
 if (ENABLE_QT)
     if (NOT USE_SYSTEM_QT)
-        download_qt(6.8.2)
+        download_qt(6.8.3)
     endif()
 
     find_package(Qt6 REQUIRED COMPONENTS Widgets Multimedia Concurrent Network)
