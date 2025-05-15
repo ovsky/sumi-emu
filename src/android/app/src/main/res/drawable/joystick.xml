@@ -4,9 +4,9 @@
     xmlns:aapt="http://schemas.android.com/aapt"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <path android:fillAlpha="1.0"
+    <path android:fillAlpha="0.9"
         android:pathData="M80.8,80.8m-67.05,0a67.05,67.05 0,1 1,134.1 0a67.05,67.05 0,1 1,-134.1 0"
-        android:strokeAlpha="1.0">
+        android:strokeAlpha="0.9">
         <aapt:attr name="android:fillColor">
             <gradient android:centerX="80.49" android:centerY="60.19"
                 android:gradientRadius="88.23" android:type="radial">

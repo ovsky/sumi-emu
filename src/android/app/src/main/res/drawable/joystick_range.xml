@@ -1,4 +1,4 @@
-<vector android:alpha="1.0" android:height="265.64dp"
+<vector android:alpha="0.8" android:height="265.64dp"
     android:viewportHeight="265.64" android:viewportWidth="265.64"
     android:width="265.64dp"
     xmlns:aapt="http://schemas.android.com/aapt"
@@ -22,9 +22,9 @@
             </gradient>
         </aapt:attr>
     </path> -->
-    <path android:fillAlpha="1.0"
+    <path android:fillAlpha="0.8"
         android:pathData="m18.72,64.82a132.8,132.8 0,1 0,182.06 -46.1,132.8 132.8,0 0,0 -182.06,46.1zM229.98,190.7a113.12,113.12 0,1 1,-39.28 -155.08,113.12 113.12,0 0,1 39.28,155.08z"
-        android:strokeAlpha="1.0">
+        android:strokeAlpha="0.8">
         <aapt:attr name="android:fillColor">
             <gradient android:centerX="132.82" android:centerY="132.7"
                 android:gradientRadius="141.24" android:type="radial">
