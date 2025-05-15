@@ -724,7 +724,7 @@
 
   <!-- Renderer Accuracy -->
   <string name="renderer_accuracy_normal">High</string>
-  <string name="renderer_accuracy_high">Equivalent</string>
+  <string name="renderer_accuracy_high">Ideal</string>
   <string name="renderer_accuracy_extreme">Maximum (Slow)</string>
 
   <!-- Resolutions -->
@@ -772,8 +772,8 @@
   <string name="ratio_stretch">Stretch to window</string>
 
   <!-- CPU Backend -->
-  <string name="cpu_backend_dynarmic">Dynarmic (Fast on ARM/Slow on X64)</string>
-  <string name="cpu_backend_nce">Native Code Execution (Slow on ARM/Fast on X64)</string>
+  <string name="cpu_backend_dynarmic">Dynarmic</string>
+  <string name="cpu_backend_nce">Native Code Execution [NCE]</string>
 
   <!-- CPU Accuracy -->
   <string name="cpu_accuracy_accurate">CPU Precise [Standard]</string>
@@ -788,8 +788,8 @@
   <string name="gamepad_screenshot">Screenshot</string>
 
   <!-- Disk shader cache -->
-  <string name="preparing_shaders">Preparing shaders</string>
-  <string name="building_shaders">Building shaders</string>
+  <string name="preparing_shaders">Preparing Shaders</string>
+  <string name="building_shaders">Building Shaders</string>
 
   <!-- Theme options -->
   <string name="change_app_theme">Change app theme</string>
