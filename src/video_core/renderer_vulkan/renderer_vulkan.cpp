@@ -270,7 +270,7 @@ void RendererVulkan::Composite(std::span<const Tegra::FramebufferConfig> framebu
     static int target_fps = 60; // Target FPS (30 or 60)
     int frame_skip_threshold = 1;
 
-    bool frame_skipping = true;
+    bool frame_skipping = false;
     bool frame_interpolation = true;
 
     #endif
@@ -288,7 +288,7 @@ void RendererVulkan::Composite(std::span<const Tegra::FramebufferConfig> framebu
         // - If target FPS is 30, skip every 2nd frame (1 frame displayed, 1 skipped)
         // - If target FPS is 60, skip every frame (1 frame displayed, 0 skipped)
         // This is a simple implementation and can be adjusted based on the actual requirements.
-        frame_skip_threshold = (target_fps == 30) ? 2 : 2;
+        frame_skip_threshold = (target_fps == 30) ? 1 : 0;
     }
 
     // Frame interpolation logic:
