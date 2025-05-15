@@ -134,14 +134,14 @@ class SettingsFragmentPresenter(
                     menuKey = MenuTag.SECTION_EXPERIMENTAL
                 )
             )
-            add(
-                SubmenuSetting(
-                    titleId = R.string.preferences_graphics,
-                    descriptionId = R.string.preferences_graphics_description,
-                    iconId = R.drawable.ic_graphics,
-                    menuKey = MenuTag.SECTION_RENDERER
-                )
-            )
+            // add(
+            //     SubmenuSetting(
+            //         titleId = R.string.preferences_graphics,
+            //         descriptionId = R.string.preferences_graphics_description,
+            //         iconId = R.drawable.ic_graphics,
+            //         menuKey = MenuTag.SECTION_RENDERER
+            //     )
+            // )
             add(
                 SubmenuSetting(
                     titleId = R.string.preferences_audio,
