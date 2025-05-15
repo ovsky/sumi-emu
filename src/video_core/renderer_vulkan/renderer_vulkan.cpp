@@ -6,7 +6,9 @@
 #include <cstring>
 #include <memory>
 #include <optional>
+#include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <fmt/ranges.h>
@@ -38,6 +40,7 @@
 #ifdef __ANDROID__
 #include <jni.h>
 #endif
+
 namespace Vulkan {
 namespace {
 
@@ -54,32 +57,32 @@ constexpr VkExtent3D CaptureImageExtent{
 
 constexpr VkFormat CaptureFormat = VK_FORMAT_A8B8G8R8_UNORM_PACK32;
 
-std::string GetReadableVersion(u32 version) {
+inline std::string GetReadableVersion(u32 version) {
     return fmt::format("{}.{}.{}", VK_VERSION_MAJOR(version), VK_VERSION_MINOR(version),
                        VK_VERSION_PATCH(version));
 }
 
-std::string GetDriverVersion(const Device& device) {
-    // Extracted from
-    // https://github.com/SaschaWillems/vulkan.gpuinfo.org/blob/5dddea46ea1120b0df14eef8f15ff8e318e35462/functions.php#L308-L314
+inline std::string GetDriverVersion(const Device& device) {
     const u32 version = device.GetDriverVersion();
-
-    if (device.GetDriverID() == VK_DRIVER_ID_NVIDIA_PROPRIETARY) {
+    switch (device.GetDriverID()) {
+    case VK_DRIVER_ID_NVIDIA_PROPRIETARY: {
         const u32 major = (version >> 22) & 0x3ff;
         const u32 minor = (version >> 14) & 0x0ff;
         const u32 secondary = (version >> 6) & 0x0ff;
         const u32 tertiary = version & 0x003f;
         return fmt::format("{}.{}.{}.{}", major, minor, secondary, tertiary);
     }
-    if (device.GetDriverID() == VK_DRIVER_ID_INTEL_PROPRIETARY_WINDOWS) {
+    case VK_DRIVER_ID_INTEL_PROPRIETARY_WINDOWS: {
         const u32 major = version >> 14;
         const u32 minor = version & 0x3fff;
         return fmt::format("{}.{}", major, minor);
     }
-    return GetReadableVersion(version);
+    default:
+        return GetReadableVersion(version);
+    }
 }
 
-std::string BuildCommaSeparatedExtensions(
+inline std::string BuildCommaSeparatedExtensions(
     const std::set<std::string, std::less<>>& available_extensions) {
     return fmt::format("{}", fmt::join(available_extensions, ","));
 }
@@ -88,7 +91,7 @@ std::string BuildCommaSeparatedExtensions(
 
 Device CreateDevice(const vk::Instance& instance, const vk::InstanceDispatch& dld,
                     VkSurfaceKHR surface) {
-    const std::vector<VkPhysicalDevice> devices = instance.EnumeratePhysicalDevices();
+    const auto devices = instance.EnumeratePhysicalDevices();
     const s32 device_index = Settings::values.vulkan_device.GetValue();
     if (device_index < 0 || device_index >= static_cast<s32>(devices.size())) {
         LOG_ERROR(Render_Vulkan, "Invalid device index {}!", device_index);
@@ -103,22 +106,17 @@ RendererVulkan::RendererVulkan(Core::Frontend::EmuWindow& emu_window,
                                std::unique_ptr<Core::Frontend::GraphicsContext> context_) try
     : RendererBase(emu_window, std::move(context_)), device_memory(device_memory_), gpu(gpu_),
       library(OpenLibrary(context.get())),
-      // Create raw Vulkan instance first
       instance(CreateInstance(*library, dld, VK_API_VERSION_1_1, render_window.GetWindowInfo().type,
-                            Settings::values.renderer_debug.GetValue())),
-      // Now create RAII wrappers for the resources in the correct order
+                              Settings::values.renderer_debug.GetValue())),
       managed_instance(MakeManagedInstance(instance, dld)),
-      // Create debug messenger if debug is enabled
       debug_messenger(Settings::values.renderer_debug ? CreateDebugUtilsCallback(instance)
-                                                    : vk::DebugUtilsMessenger{}),
+                                                      : vk::DebugUtilsMessenger{}),
       managed_debug_messenger(Settings::values.renderer_debug
-                             ? MakeManagedDebugUtilsMessenger(debug_messenger, instance, dld)
-                             : ManagedDebugUtilsMessenger{}),
-      // Create surface
+                                  ? MakeManagedDebugUtilsMessenger(debug_messenger, instance, dld)
+                                  : ManagedDebugUtilsMessenger{}),
       surface(CreateSurface(instance, render_window.GetWindowInfo())),
       managed_surface(MakeManagedSurface(surface, instance, dld)),
-      device(CreateDevice(instance, dld, *surface)),
-      memory_allocator(device), state_tracker(),
+      device(CreateDevice(instance, dld, *surface)), memory_allocator(device), state_tracker(),
       scheduler(device, state_tracker),
       swapchain(*surface, device, scheduler, render_window.GetFramebufferLayout().width,
                 render_window.GetFramebufferLayout().height),
@@ -134,12 +132,11 @@ RendererVulkan::RendererVulkan(Core::Frontend::EmuWindow& emu_window,
                  scheduler),
       applet_frame() {
 
-   if (Settings::values.renderer_force_max_clock.GetValue() && device.ShouldBoostClocks()) {
+    if (Settings::values.renderer_force_max_clock.GetValue() && device.ShouldBoostClocks()) {
         turbo_mode.emplace(instance, dld);
         scheduler.RegisterOnSubmit([this] { turbo_mode->QueueSubmitted(); });
     }
 
-    // Release ownership from the old instance and surface
     instance.release();
     surface.release();
     if (Settings::values.renderer_debug) {
@@ -159,169 +156,114 @@ RendererVulkan::~RendererVulkan() {
 
 #ifdef __ANDROID__
 class BooleanSetting {
-    public:
-        static BooleanSetting FRAME_SKIPPING;
-        static BooleanSetting FRAME_INTERPOLATION;
-        explicit BooleanSetting(bool initial_value = false) : value(initial_value) {}
+public:
+    static BooleanSetting FRAME_SKIPPING;
+    static BooleanSetting FRAME_INTERPOLATION;
+    explicit BooleanSetting(bool initial_value = false) : value(initial_value) {}
 
-        [[nodiscard]] bool getBoolean() const {
-            return value;
-        }
-
-        void setBoolean(bool new_value) {
-            value = new_value;
-        }
-
-    private:
-        bool value;
-    };
-
-    // Initialize static members
-    BooleanSetting BooleanSetting::FRAME_SKIPPING(true);
-    BooleanSetting BooleanSetting::FRAME_INTERPOLATION(true);
-
-    extern "C" JNIEXPORT jboolean JNICALL
-    Java_org_uzuy_uzuy_1emu_features_settings_model_BooleanSetting_isFrameSkippingEnabled(JNIEnv* env, jobject /* this */) {
-        return static_cast<jboolean>(BooleanSetting::FRAME_SKIPPING.getBoolean());
+    [[nodiscard]] bool getBoolean() const {
+        return value;
+    }
+    void setBoolean(bool new_value) {
+        value = new_value;
     }
 
-    extern "C" JNIEXPORT jboolean JNICALL
-    Java_org_uzuy_uzuy_1emu_features_settings_model_BooleanSetting_isFrameInterpolationEnabled(JNIEnv* env, jobject /* this */) {
-        return static_cast<jboolean>(BooleanSetting::FRAME_INTERPOLATION.getBoolean());
+private:
+    bool value;
+};
+
+BooleanSetting BooleanSetting::FRAME_SKIPPING(true);
+BooleanSetting BooleanSetting::FRAME_INTERPOLATION(true);
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_org_uzuy_uzuy_1emu_features_settings_model_BooleanSetting_isFrameSkippingEnabled(JNIEnv*,
+                                                                                      jobject) {
+    return static_cast<jboolean>(BooleanSetting::FRAME_SKIPPING.getBoolean());
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_org_uzuy_uzuy_1emu_features_settings_model_BooleanSetting_isFrameInterpolationEnabled(
+    JNIEnv*, jobject) {
+    return static_cast<jboolean>(BooleanSetting::FRAME_INTERPOLATION.getBoolean());
+}
+
+void RendererVulkan::InterpolateFrames(Frame* prev_frame, Frame* interpolated_frame) {
+    if (!prev_frame || !interpolated_frame || !prev_frame->image || !interpolated_frame->image)
+        return;
+
+    const auto& framebuffer_layout = render_window.GetFramebufferLayout();
+    constexpr float scale = 0.5f;
+    VkExtent2D dst_extent{.width = static_cast<uint32_t>(framebuffer_layout.width * scale),
+                          .height = static_cast<uint32_t>(framebuffer_layout.height * scale)};
+
+    bool needs_recreation = !interpolated_frame->image_view ||
+                            ((interpolated_frame->framebuffer &&
+                             (framebuffer_layout.width * (static_cast<uint32_t>(scale) != dst_extent.width) ||
+                              (framebuffer_layout.height * (static_cast<uint32_t>(scale) != dst_extent.height)))));
+
+    if (needs_recreation) {
+        interpolated_frame->image =
+            CreateWrappedImage(memory_allocator, dst_extent, swapchain.GetImageViewFormat());
+        interpolated_frame->image_view = CreateWrappedImageView(device, interpolated_frame->image,
+                                                                swapchain.GetImageViewFormat());
+        interpolated_frame->framebuffer = blit_swapchain.CreateFramebuffer(
+            Layout::FramebufferLayout{dst_extent.width, dst_extent.height},
+            *interpolated_frame->image_view, swapchain.GetImageViewFormat());
     }
 
-    void RendererVulkan::InterpolateFrames(Frame* prev_frame, Frame* interpolated_frame) {
-        if (!prev_frame || !interpolated_frame || !prev_frame->image || !interpolated_frame->image) {
-            return;
-        }
+    scheduler.RequestOutsideRenderPassOperationContext();
+    scheduler.Record([&](vk::CommandBuffer cmdbuf) {
+        TransitionImageLayout(cmdbuf, *prev_frame->image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+        TransitionImageLayout(cmdbuf, *interpolated_frame->image,
+                              VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
-        const auto& framebuffer_layout = render_window.GetFramebufferLayout();
-        // Fixed aggressive downscale (50%)
-        VkExtent2D dst_extent{
-            .width = framebuffer_layout.width / 2,
-            .height = framebuffer_layout.height / 2
-        };
+        VkImageBlit blit_region{};
+        blit_region.srcSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
+        blit_region.srcOffsets[1] = {static_cast<int32_t>(framebuffer_layout.width),
+                                     static_cast<int32_t>(framebuffer_layout.height), 1};
+        blit_region.dstSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
+        blit_region.dstOffsets[1] = {static_cast<int32_t>(dst_extent.width),
+                                     static_cast<int32_t>(dst_extent.height), 1};
 
-        // Check if we need to recreate the destination frame
-        bool needs_recreation = false;  // Only recreate when necessary
-        if (!interpolated_frame->image_view) {
-            needs_recreation = true;  // Need to create initially
-        } else {
-            // Check if dimensions have changed
-            if (interpolated_frame->framebuffer) {
-                needs_recreation = (framebuffer_layout.width / 2 != dst_extent.width) ||
-                                  (framebuffer_layout.height / 2 != dst_extent.height);
-            } else {
-                needs_recreation = true;
-            }
-        }
+        cmdbuf.BlitImage(*prev_frame->image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                         *interpolated_frame->image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                         blit_region, VK_FILTER_NEAREST);
 
-        if (needs_recreation) {
-            interpolated_frame->image = CreateWrappedImage(memory_allocator, dst_extent, swapchain.GetImageViewFormat());
-            interpolated_frame->image_view = CreateWrappedImageView(device, interpolated_frame->image, swapchain.GetImageViewFormat());
-            interpolated_frame->framebuffer = blit_swapchain.CreateFramebuffer(
-                Layout::FramebufferLayout{dst_extent.width, dst_extent.height},
-                *interpolated_frame->image_view,
-                swapchain.GetImageViewFormat());
-        }
-
-        scheduler.RequestOutsideRenderPassOperationContext();
-        scheduler.Record([&](vk::CommandBuffer cmdbuf) {
-            // Transition images to transfer layouts
-            TransitionImageLayout(cmdbuf, *prev_frame->image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-            TransitionImageLayout(cmdbuf, *interpolated_frame->image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-
-            // Perform the downscale blit
-            VkImageBlit blit_region{};
-            blit_region.srcSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
-            blit_region.srcOffsets[0] = {0, 0, 0};
-            blit_region.srcOffsets[1] = {
-                static_cast<int32_t>(framebuffer_layout.width),
-                static_cast<int32_t>(framebuffer_layout.height),
-                1
-            };
-            blit_region.dstSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
-            blit_region.dstOffsets[0] = {0, 0, 0};
-            blit_region.dstOffsets[1] = {
-                static_cast<int32_t>(dst_extent.width),
-                static_cast<int32_t>(dst_extent.height),
-                1
-            };
-
-            // Using the wrapper's BlitImage with proper parameters
-            cmdbuf.BlitImage(
-                *prev_frame->image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                *interpolated_frame->image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                blit_region, VK_FILTER_NEAREST
-            );
-
-            // Transition back to general layout
-            TransitionImageLayout(cmdbuf, *prev_frame->image, VK_IMAGE_LAYOUT_GENERAL);
-            TransitionImageLayout(cmdbuf, *interpolated_frame->image, VK_IMAGE_LAYOUT_GENERAL);
-        });
-    }
+        TransitionImageLayout(cmdbuf, *prev_frame->image, VK_IMAGE_LAYOUT_GENERAL);
+        TransitionImageLayout(cmdbuf, *interpolated_frame->image, VK_IMAGE_LAYOUT_GENERAL);
+    });
+}
 #endif
 
 void RendererVulkan::Composite(std::span<const Tegra::FramebufferConfig> framebuffers) {
-    #ifdef __ANDROID__
-    // Frame skipping and interpolation settings
-    // These settings are used to control the frame skipping and interpolation behavior
+#ifdef __ANDROID__
     static int frame_counter = 0;
-    static int target_fps = 30; // Target FPS (30 or 60)
-    int frame_skip_threshold = 1;
+    static constexpr int target_fps = 30;
+    static constexpr int frame_skip_threshold = (target_fps == 30) ? 1 : 0;
+    // const bool frame_skipping = BooleanSetting::FRAME_SKIPPING.getBoolean();
+    const bool frame_skipping = false;
+    const bool frame_interpolation = BooleanSetting::FRAME_INTERPOLATION.getBoolean();
+#endif
 
-    bool frame_skipping = false;
-    bool frame_interpolation = true;
+    if (framebuffers.empty())
+        return;
 
-    #endif
-
-    if (framebuffers.empty()) {
+#ifdef __ANDROID__
+    ++frame_counter;
+    if (frame_skipping && (frame_counter % frame_skip_threshold != 0)) {
+        if (frame_interpolation && previous_frame) {
+            Frame* interpolated_frame = present_manager.GetRenderFrame();
+            InterpolateFrames(previous_frame, interpolated_frame);
+            blit_swapchain.DrawToFrame(rasterizer, interpolated_frame, framebuffers,
+                                       render_window.GetFramebufferLayout(),
+                                       swapchain.GetImageCount(), swapchain.GetImageViewFormat());
+            scheduler.Flush(*interpolated_frame->render_ready);
+            present_manager.Present(interpolated_frame);
+            previous_frame = interpolated_frame;
+        }
         return;
     }
-
-    #ifdef __ANDROID__
-    // Check if frame skipping and interpolation are enabled
-    // These settings can be toggled from the applet
-    if (frame_skipping) {
-        // Frame skipping logic:
-        // Skip frames based on the target FPS and the current frame counter. Strictly speaking:
-        // - If target FPS is 30, skip every 2nd frame (1 frame displayed, 1 skipped)
-        // - If target FPS is 60, skip every frame (1 frame displayed, 0 skipped)
-        // This is a simple implementation and can be adjusted based on the actual requirements.
-        frame_skip_threshold = (target_fps == 30) ? 1 : 0;
-    }
-
-    // Frame interpolation logic:
-    // Interpolate frames if frame skipping is enabled and the previous frame is available
-    // This is a simple implementation and can be adjusted based on the actual requirements.
-    // The interpolation logic can be more complex, depending on the requirements.
-    // For now, we just check if the previous frame is available.
-    // If frame skipping is enabled, we will skip frames based on the target FPS
-    // and interpolate the skipped frames.
-    frame_counter++;
-    if (frame_counter % frame_skip_threshold != 0) {
-        if (frame_interpolation && previous_frame) { // Check if the previous frame is available
-            Frame* interpolated_frame = present_manager.GetRenderFrame(); // Get a new frame for interpolation
-            InterpolateFrames(previous_frame, interpolated_frame); // Interpolate the skipped frame
-            blit_swapchain.DrawToFrame(rasterizer, interpolated_frame, framebuffers, // Draw the interpolated frame
-                                       render_window.GetFramebufferLayout(), swapchain.GetImageCount(), // Get the image count, used for the swapchain
-                                       swapchain.GetImageViewFormat()); // Get the image view format and draw the frame
-            scheduler.Flush(*interpolated_frame->render_ready); // Flush the frame to ensure it's ready for presentation
-            present_manager.Present(interpolated_frame); // Present the interpolated frame
-            previous_frame = interpolated_frame; // Update the previous frame to the current one
-            // Set the current frame to the interpolated frame
-            // This is a simple implementation and can be adjusted based on the actual requirements.
-            // For now, we just set the current frame to the interpolated frame.
-        } else
-        {
-            return; // If frame skipping is enabled and interpolation is not needed, just skip the frame
-        }
-
-        return; // If frame skipping is not enabled, we will just display the current frame
-    }
-    #endif
-
-    // Create a new frame for rendering and presentation to the swapchain
+#endif
 
     SCOPE_EXIT {
         render_window.OnFrameDisplayed();
@@ -329,9 +271,8 @@ void RendererVulkan::Composite(std::span<const Tegra::FramebufferConfig> framebu
 
     RenderAppletCaptureLayer(framebuffers);
 
-    if (!render_window.IsShown()) {
+    if (!render_window.IsShown())
         return;
-    }
 
     RenderScreenshot(framebuffers);
     Frame* frame = present_manager.GetRenderFrame();
@@ -351,11 +292,8 @@ void RendererVulkan::Report() const {
     const std::string model_name{device.GetModelName()};
     const std::string driver_version = GetDriverVersion(device);
     const std::string driver_name = fmt::format("{} {}", vendor_name, driver_version);
-
     const std::string api_version = GetReadableVersion(device.ApiVersion());
-
     const std::string extensions = BuildCommaSeparatedExtensions(device.GetAvailableExtensions());
-
     const auto available_vram = static_cast<f64>(device.GetDeviceLocalMemory()) / f64{1_GiB};
 
     LOG_INFO(Render_Vulkan, "Driver: {}", driver_name);
@@ -367,14 +305,11 @@ void RendererVulkan::Report() const {
 vk::Buffer RendererVulkan::RenderToBuffer(std::span<const Tegra::FramebufferConfig> framebuffers,
                                           const Layout::FramebufferLayout& layout, VkFormat format,
                                           VkDeviceSize buffer_size) {
-    auto frame = [&]() {
-        Frame f{};
-        f.image =
-            CreateWrappedImage(memory_allocator, VkExtent2D{layout.width, layout.height}, format);
-        f.image_view = CreateWrappedImageView(device, f.image, format);
-        f.framebuffer = blit_capture.CreateFramebuffer(layout, *f.image_view, format);
-        return f;
-    }();
+    Frame frame{};
+    frame.image =
+        CreateWrappedImage(memory_allocator, VkExtent2D{layout.width, layout.height}, format);
+    frame.image_view = CreateWrappedImageView(device, frame.image, format);
+    frame.framebuffer = blit_capture.CreateFramebuffer(layout, *frame.image_view, format);
 
     auto dst_buffer = CreateWrappedBuffer(memory_allocator, buffer_size, MemoryUsage::Download);
     blit_capture.DrawToFrame(rasterizer, &frame, framebuffers, layout, 1, format);
@@ -385,18 +320,14 @@ vk::Buffer RendererVulkan::RenderToBuffer(std::span<const Tegra::FramebufferConf
                            VkExtent3D{layout.width, layout.height, 1});
     });
 
-    // Ensure the copy is fully completed before saving the capture
     scheduler.Finish();
-
-    // Copy backing image data to the capture buffer
     dst_buffer.Invalidate();
     return dst_buffer;
 }
 
 void RendererVulkan::RenderScreenshot(std::span<const Tegra::FramebufferConfig> framebuffers) {
-    if (!renderer_settings.screenshot_requested) {
+    if (!renderer_settings.screenshot_requested)
         return;
-    }
 
     const auto& layout{renderer_settings.screenshot_framebuffer_layout};
     const auto dst_buffer = RenderToBuffer(framebuffers, layout, VK_FORMAT_B8G8R8A8_UNORM,
@@ -413,9 +344,8 @@ std::vector<u8> RendererVulkan::GetAppletCaptureBuffer() {
 
     std::vector<u8> out(VideoCore::Capture::TiledSize);
 
-    if (!applet_frame.image) {
+    if (!applet_frame.image)
         return out;
-    }
 
     const auto dst_buffer =
         CreateWrappedBuffer(memory_allocator, VideoCore::Capture::TiledSize, MemoryUsage::Download);
@@ -425,10 +355,7 @@ std::vector<u8> RendererVulkan::GetAppletCaptureBuffer() {
         DownloadColorImage(cmdbuf, *applet_frame.image, *dst_buffer, CaptureImageExtent);
     });
 
-    // Ensure the copy is fully completed before writing the capture
     scheduler.Finish();
-
-    // Swizzle image data to the capture buffer
     dst_buffer.Invalidate();
     Tegra::Texture::SwizzleTexture(out, dst_buffer.Mapped(), BytesPerPixel, LinearWidth,
                                    LinearHeight, LinearDepth, BlockHeight, BlockDepth);

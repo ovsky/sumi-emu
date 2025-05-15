@@ -5,6 +5,12 @@
 #include <array>
 #include <memory>
 #include <mutex>
+#include <cstring> // for std::memcpy
+#include <limits>
+#include <span>
+#include <stop_token>
+#include <utility>
+#include <boost/container/static_vector.hpp>
 
 #include "video_core/renderer_vulkan/renderer_vulkan.h"
 
@@ -61,7 +67,7 @@ struct DrawParams {
     bool is_indexed;
 };
 
-VkViewport GetViewportState(const Device& device, const Maxwell& regs, size_t index, float scale) {
+inline VkViewport GetViewportState(const Device& device, const Maxwell& regs, size_t index, float scale) {
     const auto& src = regs.viewport_transform[index];
     const auto conv = [scale](float value) {
         float new_value = value * scale;
@@ -82,13 +88,11 @@ VkViewport GetViewportState(const Device& device, const Maxwell& regs, size_t in
                           src.swizzle.y == Maxwell::ViewportSwizzle::NegativeY;
 
     if (lower_left) {
-        // Flip by surface clip height
         y += conv(static_cast<f32>(regs.surface_clip.height));
         height = -height;
     }
 
     if (y_negate) {
-        // Flip by viewport height
         y += height;
         height = -height;
     }
@@ -109,7 +113,7 @@ VkViewport GetViewportState(const Device& device, const Maxwell& regs, size_t in
     return viewport;
 }
 
-VkRect2D GetScissorState(const Maxwell& regs, size_t index, u32 up_scale = 1, u32 down_shift = 0) {
+inline VkRect2D GetScissorState(const Maxwell& regs, size_t index, u32 up_scale = 1, u32 down_shift = 0) {
     const auto& src = regs.scissor_test[index];
     VkRect2D scissor;
     const auto scale_up = [&](s32 value) -> s32 {
@@ -129,11 +133,9 @@ VkRect2D GetScissorState(const Maxwell& regs, size_t index, u32 up_scale = 1, u3
     const bool lower_left = regs.window_origin.mode != Maxwell::WindowOrigin::Mode::UpperLeft;
     const s32 clip_height = regs.surface_clip.height;
 
-    // Flip coordinates if lower left
     s32 min_y = lower_left ? (clip_height - src.max_y) : src.min_y.Value();
     s32 max_y = lower_left ? (clip_height - src.min_y) : src.max_y.Value();
 
-    // Bound to render area
     min_y = std::max(min_y, 0);
     max_y = std::max(max_y, 0);
 
@@ -151,7 +153,7 @@ VkRect2D GetScissorState(const Maxwell& regs, size_t index, u32 up_scale = 1, u3
     return scissor;
 }
 
-DrawParams MakeDrawParams(const MaxwellDrawState& draw_state, u32 num_instances, bool is_indexed) {
+inline DrawParams MakeDrawParams(const MaxwellDrawState& draw_state, u32 num_instances, bool is_indexed) {
     DrawParams params{
         .base_instance = draw_state.base_instance,
         .num_instances = num_instances,
@@ -160,8 +162,6 @@ DrawParams MakeDrawParams(const MaxwellDrawState& draw_state, u32 num_instances,
         .first_index = is_indexed ? draw_state.index_buffer.first : 0,
         .is_indexed = is_indexed,
     };
-    // 6 triangle vertices per quad, base vertex is part of the index
-    // See BindQuadIndexBuffer for more details
     if (draw_state.topology == Maxwell::PrimitiveTopology::Quads) {
         params.num_vertices = (params.num_vertices / 4) * 6;
         params.base_vertex = 0;
@@ -173,7 +173,7 @@ DrawParams MakeDrawParams(const MaxwellDrawState& draw_state, u32 num_instances,
     }
     return params;
 }
-} // Anonymous namespace
+}
 
 RasterizerVulkan::RasterizerVulkan(Core::Frontend::EmuWindow& emu_window_, Tegra::GPU& gpu_,
                                    Tegra::MaxwellDeviceMemoryManager& device_memory_,
@@ -1586,5 +1586,4 @@ void RasterizerVulkan::ReleaseChannel(s32 channel_id) {
     pipeline_cache.EraseChannel(channel_id);
     query_cache.EraseChannel(channel_id);
 }
-
 } // namespace Vulkan
