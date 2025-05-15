@@ -10,6 +10,20 @@ if(LIBVA_FOUND)
     list(APPEND FFmpeg_LIBRARIES ${LIBVA_LIBRARIES})
 endif()
 
+# CAS sources
+set(VULKAN_SOURCES
+    renderer_vulkan/vk_cas.cpp
+    renderer_vulkan/vk_cas.h
+    ${VULKAN_SOURCES}
+)
+
+set(SHADER_SOURCES
+    renderer_vulkan/shaders/amd_fidelityfx/cas.comp
+    renderer_vulkan/shaders/amd_fidelityfx/ffx_cas.h
+    renderer_vulkan/shaders/amd_fidelityfx/ffx_cas.glsl
+    ${SHADER_SOURCES}
+)
+
 add_library(video_core STATIC
     buffer_cache/buffer_base.h
     buffer_cache/buffer_cache_base.h

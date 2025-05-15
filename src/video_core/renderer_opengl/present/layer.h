@@ -27,6 +27,7 @@ namespace OpenGL {
 
 struct FramebufferTextureInfo;
 class FSR;
+class CAS;
 class FXAA;
 class ProgramManager;
 class RasterizerOpenGL;
@@ -77,6 +78,7 @@ private:
     TextureInfo framebuffer_texture;
 
     std::unique_ptr<FSR> fsr;
+    std::unique_ptr<FSR> cas;
     std::unique_ptr<FXAA> fxaa;
     std::unique_ptr<SMAA> smaa;
 };

@@ -7,6 +7,7 @@
 #include "common/settings.h"
 #include "video_core/framebuffer_config.h"
 #include "video_core/renderer_vulkan/present/fsr.h"
+#include "video_core/renderer_vulkan/vk_cas.h"
 #include "video_core/renderer_vulkan/present/fxaa.h"
 #include "video_core/renderer_vulkan/present/layer.h"
 #include "video_core/renderer_vulkan/present/present_push_constants.h"
@@ -16,7 +17,6 @@
 #include "video_core/textures/decoders.h"
 
 namespace Vulkan {
-
 namespace {
 
 u32 GetBytesPerPixel(const Tegra::FramebufferConfig& framebuffer) {
@@ -56,6 +56,9 @@ Layer::Layer(const Device& device_, MemoryAllocator& memory_allocator_, Schedule
     CreateDescriptorSets(layout);
     if (filters.get_scaling_filter() == Settings::ScalingFilter::Fsr) {
         CreateFSR(output_size);
+    }
+    if (true) { //debug_true_cas
+        CreateCAS(output_size);
     }
 }
 
@@ -108,6 +111,13 @@ void Layer::ConfigureDraw(PresentPushConstants* out_push_constants,
         crop_rect = {0, 0, 1, 1};
     }
 
+    if (cas) {
+        // source_image_view = cas->Draw(cmdbuf, image_index, renderer_extent);
+        cas->Configure(source_image_view, renderer_extent);
+        cas->Draw(scheduler, image_index, renderer_extent, source_image_view);
+        crop_rect = {0, 0, 1, 1};
+    }
+
     SetMatrixData(*out_push_constants, layout);
     SetVertexData(*out_push_constants, layout, crop_rect);
 
@@ -155,6 +165,10 @@ void Layer::CreateRawImages(const Tegra::FramebufferConfig& framebuffer) {
 
 void Layer::CreateFSR(VkExtent2D output_size) {
     fsr = std::make_unique<FSR>(device, memory_allocator, image_count, output_size);
+}
+
+void Layer::CreateCAS(VkExtent2D output_size) {
+    cas = std::make_unique<CAS>(device, memory_allocator, image_count);
 }
 
 void Layer::RefreshResources(const Tegra::FramebufferConfig& framebuffer) {

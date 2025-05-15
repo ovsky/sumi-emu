@@ -1,0 +1,30 @@
+#version 450 core
+#extension GL_EXT_samplerless_texture_functions : require
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+layout(set = 0, binding = 0) uniform texture2D input_image;
+layout(set = 0, binding = 1, rgba8) uniform writeonly image2D output_image;
+
+layout(push_constant) uniform PushConstants {
+    vec4 resolution; // x=width, y=height, z=1/width, w=1/height
+    float sharpness;
+} cas_constants;
+
+#define A_GPU 1
+#define A_GLSL 1
+
+#include "ffx_cas.h"
+
+void main() {
+    ivec2 coord = ivec2(gl_GlobalInvocationID.xy);
+    if (any(greaterThanEqual(coord, ivec2(cas_constants.resolution.xy)))) {
+        return;
+    }
+
+    vec3 color;
+    CasFilter(color.r, color.g, color.b, coord, cas_constants.resolution.xy,
+              cas_constants.sharpness, 0.0, 0.0, 0.0, input_image);
+
+    imageStore(output_image, coord, vec4(color, 1.0));
+}
