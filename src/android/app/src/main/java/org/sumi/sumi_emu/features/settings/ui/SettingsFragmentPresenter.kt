@@ -85,9 +85,11 @@ class SettingsFragmentPresenter(
         when (menuTag) {
             MenuTag.SECTION_ROOT -> addConfigSettings(sl)
             MenuTag.SECTION_SYSTEM -> addSystemSettings(sl)
-            MenuTag.SECTION_RENDERER -> addGraphicsSettings(sl)
+            MenuTag.SECTION_GRAPHICS -> addGraphicsSettings(sl)
+            MenuTag.SECTION_DISPLAY -> addDisplaySettings(sl)
+            MenuTag.SECTION_ENHANCEMENTS -> addEnhancementsSettings(sl)
+            MenuTag.SECTION_EMULATION -> addEmulationSettings(sl)
             MenuTag.SECTION_AUDIO -> addAudioSettings(sl)
-            MenuTag.SECTION_EXPERIMENTAL -> addExperimentalSettings(sl)
             MenuTag.SECTION_INPUT -> addInputSettings(sl)
             MenuTag.SECTION_INPUT_PLAYER_ONE -> addInputPlayer(sl, 0)
             MenuTag.SECTION_INPUT_PLAYER_TWO -> addInputPlayer(sl, 1)
@@ -123,23 +125,31 @@ class SettingsFragmentPresenter(
                     titleId = R.string.preferences_graphics,
                     descriptionId = R.string.preferences_graphics_description,
                     iconId = R.drawable.ic_graphics,
-                    menuKey = MenuTag.SECTION_RENDERER
+                    menuKey = MenuTag.SECTION_GRAPHICS
                 )
             )
             add(
                 SubmenuSetting(
-                    titleId = R.string.experimental_settings,
-                    descriptionId = R.string.experimental_settings_description,
-                    iconId = R.drawable.ic_system_settings,
-                    menuKey = MenuTag.SECTION_EXPERIMENTAL
-                )
-            )
-            add(
-                SubmenuSetting(
-                    titleId = R.string.preferences_graphics,
-                    descriptionId = R.string.preferences_graphics_description,
+                    titleId = R.string.preferences_view,
+                    descriptionId = R.string.preferences_view_description,
                     iconId = R.drawable.ic_graphics,
-                    menuKey = MenuTag.SECTION_RENDERER
+                    menuKey = MenuTag.SECTION_DISPLAY
+                )
+            )
+            add(
+                SubmenuSetting(
+                    titleId = R.string.emulation_settings,
+                    descriptionId = R.string.emulation_settings_description,
+                    iconId = R.drawable.ic_system_settings,
+                    menuKey = MenuTag.SECTION_EMULATION
+                )
+            )
+            add(
+                SubmenuSetting(
+                    titleId = R.string.preferences_enhancements,
+                    descriptionId = R.string.preferences_enhancements_description,
+                    iconId = R.drawable.ic_graphics,
+                    menuKey = MenuTag.SECTION_ENHANCEMENTS
                 )
             )
             add(
@@ -173,11 +183,8 @@ class SettingsFragmentPresenter(
         sl.apply {
             add(StringSetting.DEVICE_NAME.key)
             add(BooleanSetting.USE_DOCKED_MODE.key)
-            add(BooleanSetting.USE_AUTO_STUB.key)
             add(BooleanSetting.USE_DEMO_SETTING.key)
             add(LongSetting.CUSTOM_RTC.key)
-            add(BooleanSetting.RENDERER_USE_SPEED_LIMIT.key)
-            add(ShortSetting.RENDERER_SPEED_LIMIT.key)
             add(IntSetting.REGION_INDEX.key)
             add(IntSetting.LANGUAGE_INDEX.key)
             add(BooleanSetting.USE_CUSTOM_RTC.key)
@@ -186,33 +193,52 @@ class SettingsFragmentPresenter(
 
     private fun addGraphicsSettings(sl: ArrayList<SettingsItem>) {
         sl.apply {
+            add(IntSetting.RENDERER_VSYNC.key)
             add(IntSetting.RENDERER_ACCURACY.key)
             add(IntSetting.RENDERER_RESOLUTION.key)
             add(IntSetting.MAX_ANISOTROPY.key)
+        }
+    }
+
+    private fun addDisplaySettings(sl: ArrayList<SettingsItem>) {
+        sl.apply {
             add(IntSetting.RENDERER_SCREEN_LAYOUT.key)
             add(IntSetting.RENDERER_ASPECT_RATIO.key)
             add(IntSetting.VERTICAL_ALIGNMENT.key)
-            add(BooleanSetting.PICTURE_IN_PICTURE.key)
+            add(IntSetting.RENDERER_SCALING_FILTER.key)
+            add(IntSetting.FSR_SHARPENING_SLIDER.key)
+            add(IntSetting.RENDERER_ANTI_ALIASING.key)
         }
     }
 
     // Better mapped settings - from actual to real emulation settings
-    private fun addExperimentalSettings(sl: ArrayList<SettingsItem>) {
+    private fun addEmulationSettings(sl: ArrayList<SettingsItem>) {
         sl.apply {
+            add(BooleanSetting.RENDERER_USE_SPEED_LIMIT.key)
+            add(ShortSetting.RENDERER_SPEED_LIMIT.key)
+            add(BooleanSetting.USE_AUTO_STUB.key)
             add(IntSetting.INTELLIGENT_PERFORMANCE.key)
-            add(IntSetting.RENDERER_VSYNC.key)
-            add(IntSetting.RENDERER_SCALING_FILTER.key)
-            add(IntSetting.FSR_SHARPENING_SLIDER.key)
-            add(IntSetting.RENDERER_ANTI_ALIASING.key)
+            add(BooleanSetting.PICTURE_IN_PICTURE.key)
+            add(BooleanSetting.HAPTIC_FEEDBACK.key)
+        }
+    }
+
+    private fun addEnhancementsSettings(sl: ArrayList<SettingsItem>) {
+        sl.apply {
             add(BooleanSetting.RENDERER_ASYNCHRONOUS_SHADERS.key)
             add(BooleanSetting.RENDERER_USE_DISK_SHADER_CACHE.key)
             add(BooleanSetting.RENDERER_FORCE_MAX_CLOCK.key)
             add(BooleanSetting.RENDERER_REACTIVE_FLUSHING.key)
+            add(IntSetting.INTELLIGENT_PERFORMANCE.key)
+            add(BooleanSetting.FRAME_SKIPPING.key)
+            add(BooleanSetting.FRAME_INTERPOLATION.key)
+
         }
     }
 
     private fun addAudioSettings(sl: ArrayList<SettingsItem>) {
         sl.apply {
+            add(BooleanSetting.AUDIO_MUTED.key)
             add(IntSetting.AUDIO_OUTPUT_ENGINE.key)
             add(ByteSetting.AUDIO_VOLUME.key)
         }
@@ -990,11 +1016,12 @@ class SettingsFragmentPresenter(
             add(HeaderSetting(R.string.gpu))
             add(IntSetting.RENDERER_BACKEND.key)
             add(BooleanSetting.RENDERER_DEBUG.key)
-
             add(HeaderSetting(R.string.cpu))
             add(IntSetting.CPU_BACKEND.key)
             add(IntSetting.CPU_ACCURACY.key)
             add(BooleanSetting.CPU_DEBUG_MODE.key)
+            add(BooleanSetting.FASTMEM.key)
+            add(BooleanSetting.FASTMEM_EXCLUSIVES.key)
             add(SettingsItem.FASTMEM_COMBINED)
         }
     }

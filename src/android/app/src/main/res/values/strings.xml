@@ -476,28 +476,35 @@
   <string name="installing_driver">Installing driver…</string>
 
   <!-- Preferences Screen -->
-  <string name="preferences_settings">Settings</string>
-  <string name="preferences_general">General</string>
   <string name="preferences_system">System</string>
-  <string name="preferences_renderer">Renderer</string>
-  <string name="preferences_experimental">Experimental</string>
-  <string name="preferences_system_description">Docked mode, region, language</string>
-  <string name="preferences_graphics">Graphics</string>
-  <string name="preferences_graphics_description">Graphics Settings - VSync, Anti-Aliasing, Shader Cache, etc.</string>
-  <string name="preferences_view">Display View</string>
-  <string name="preferences_view_description">Display View Settings - Resolution, Aspect Ratio, Window Display FX, etc/</string>
+  <string name="preferences_system_description">System Settings: Docked Mode, Region, Language, etc.</string>
+
+  <string name="preferences_graphics">Rendering</string>
+  <string name="preferences_graphics_description">Graphics Rendering Settings: VSync, Anti-Aliasing, Shader Cache, etc.</string>
+
+  <string name="preferences_view">Display</string>
+  <string name="preferences_view_description">Display View Settings: Resolution, Aspect Ratio, Window Display FX, etc/</string>
+
+  <string name="emulation_settings">Emulation</string>
+  <string name="emulation_settings_description">Emulation Processing Settings: CPU, GPU Setup, Accuracy, Shader Handling.</string>
+
+  <string name="preferences_enhancements">Enhancements</string>
+  <string name="preferences_enhancements_description">Emulation Enhancements: VSync, Graphics Handling, Post-Processing Setup, Experimental Modules, etc.</string>
+
   <string name="preferences_audio">Audio</string>
   <string name="preferences_audio_description">Output engine, volume</string>
+
   <string name="preferences_controls">Controls</string>
   <string name="preferences_controls_description">Map Controllers Input</string>
-  <string name="preferences_player">Player %d</string>
-  <string name="preferences_theme">Theme and Color</string>
+
   <string name="preferences_debug">Debug</string>
   <string name="preferences_debug_description" translatable="false">CPU/GPU debugging, graphics API, fastmem</string>
 
-  <!-- Experimental / Emulation Settings -->
-  <string name="experimental_settings" translatable="false">Emulation</string>
-  <string name="experimental_settings_description">CPU and GPU Emulation Setup - accuracy and performance.</string>
+  <string name="preferences_settings">Settings</string>
+  <string name="preferences_general">General</string>
+  <string name="preferences_renderer">Renderer</string>
+  <string name="preferences_player">Player %d</string>
+  <string name="preferences_theme">Theme and Color</string>
 
   <!-- Multiplayer -->
   <string name="multiplayer">Multiplayer</string>

@@ -149,7 +149,7 @@ class GamePropertiesFragment : Fragment() {
                 SubmenuProperty(
                     R.string.preferences_settings,
                     R.string.per_game_settings_description,
-                    R.drawable.ic_settings
+                    R.drawable.ic_settings_boxed
                 ) {
                     val action = HomeNavigationDirections.actionGlobalSettingsActivity(
                         args.game,

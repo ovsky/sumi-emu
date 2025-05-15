@@ -79,7 +79,7 @@ class HomeSettingsFragment : Fragment() {
                 HomeSetting(
                     R.string.advanced_settings,
                     R.string.settings_description,
-                    R.drawable.ic_settings,
+                    R.drawable.ic_settings_boxed,
                     {
                         val action = HomeNavigationDirections.actionGlobalSettingsActivity(
                             null,

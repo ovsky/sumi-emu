@@ -450,6 +450,13 @@ struct Values {
     Setting<bool> disable_buffer_reorder{linkage, false, "disable_buffer_reorder",
                                          Category::RendererDebug};
 
+#ifdef __ANDROID__
+        SwitchableSetting<bool> frame_interpolation{linkage, true, "frame_interpolation", Category::Renderer,
+                                                    Specialization::RuntimeList};
+        SwitchableSetting<bool> frame_skipping{linkage, false, "frame_skipping", Category::Renderer,
+                                               Specialization::RuntimeList};
+#endif
+
     // System
     SwitchableSetting<Language, true> language_index{linkage,
                                                      Language::EnglishAmerican,
