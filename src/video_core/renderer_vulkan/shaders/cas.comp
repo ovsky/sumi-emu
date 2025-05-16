@@ -1,0 +1,100 @@
+#version 450 core
+#extension GL_EXT_samplerless_texture_functions : require
+
+// Recommended group size by AMD for CAS
+layout (local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+// Bindings must match your descriptor set layout
+layout (binding = 0) uniform sampler2D uInputTexture;
+layout (binding = 1, rgba8) uniform restrict writeonly image2D uOutputImage; // Use a format like rgba8 if appropriate
+
+// UBO for constants
+layout (binding = 2, std140) uniform CASConstantsBlock {
+    uvec2 inputOutputWH; // Pass input width and height
+    // AMD's full shader uses 4 constants: const0, const1, const2, const3
+    // const0: XY = Half sharpness value (derived from sharpness), ZW = 1.0/InputWidth, 1.0/InputHeight
+    // This example simplifies and expects sharpness via push constant, and calculates 1.0/WH in shader.
+} cas_constants;
+
+layout (push_constant) uniform PushConstants {
+    float sharpness_param; // Sharpness value [0, 1]
+} push_consts;
+
+//------------------------------------------------------------------------------------------------------------------------------
+// Common CAS utility functions (adapted from AMD FidelityFX-CAS GLSL sample)
+// Note: For full FP16 support as in AMD's sample, you'd use their AF1/AH1 types and functions.
+// This version is simplified for FP32.
+//------------------------------------------------------------------------------------------------------------------------------
+#define A_UINT uint
+#define A_INT int
+#define A_FLOAT float
+#define A_FVEC2 vec2
+#define A_FVEC3 vec3
+#define A_FVEC4 vec4
+
+void Store(A_UINT x, A_UINT y, A_FVEC3 color) {
+    imageStore(uOutputImage, ivec2(x, y), A_FVEC4(color, 1.0f)); // Assuming alpha is 1.0 or from input
+}
+
+A_FVEC3 Load(A_INT x, A_INT y) {
+    ivec2 clamped_coords = clamp(ivec2(x,y), ivec2(0,0), ivec2(cas_constants.inputOutputWH) - 1);
+    return textureLod(uInputTexture, vec2(clamped_coords) / vec2(cas_constants.inputOutputWH), 0.0).rgb;
+}
+
+// Simpler Luma calculation
+A_FLOAT Luma(A_FVEC3 c) { return dot(c, A_FVEC3(0.299f, 0.587f, 0.114f)); }
+
+
+void main() {
+    ivec2 ipos = ivec2(gl_GlobalInvocationID.xy);
+
+    if (ipos.x >= cas_constants.inputOutputWH.x || ipos.y >= cas_constants.inputOutputWH.y) {
+        return;
+    }
+
+    // Get sharpness: [0, no-CAS] to [1, max-CAS].
+    // Remap from [0,1] to [1,0] for 'no Scaling' to 'max Scaling'.
+    // Then remap to a range, for example, [0 to -1] or as AMD does.
+    // AMD CAS equation for sharpness (A parameter):
+    // sharpness = clamp(sharpness_param, 0.f, 1.f); (assuming sharpness_param is already 0..1)
+    // A_FLOAT casCtrl = -1.0f / (4.0f * (1.0f - (sharpness_param * 0.5f))); // Example internal scaling
+    // For this example, let's use a simpler remapping if sharpness_param is 0..1
+    A_FLOAT sharpness = push_consts.sharpness_param;
+    if (sharpness < 0.01) { // If disabled or nearly disabled
+        A_FVEC3 color = Load(ipos.x, ipos.y);
+        Store(ipos.x, ipos.y, color);
+        return;
+    }
+
+    // Sample 3x3 neighborhood
+    A_FVEC3 b = Load(ipos.x, ipos.y - 1); // N
+    A_FVEC3 d = Load(ipos.x - 1, ipos.y); // W
+    A_FVEC3 e = Load(ipos.x, ipos.y);     // Current
+    A_FVEC3 f = Load(ipos.x + 1, ipos.y); // E
+    A_FVEC3 h = Load(ipos.x, ipos.y + 1); // S
+
+    // Compute Luma for relevant pixels
+    A_FLOAT lumaB = Luma(b);
+    A_FLOAT lumaD = Luma(d);
+    A_FLOAT lumaE = Luma(e);
+    A_FLOAT lumaF = Luma(f);
+    A_FLOAT lumaH = Luma(h);
+
+    // Calculate min and max Luma in cross shape
+    A_FLOAT minLuma = min(lumaE, min(min(lumaD, lumaF), min(lumaB, lumaH)));
+    A_FLOAT maxLuma = max(lumaE, max(max(lumaD, lumaF), max(lumaB, lumaH)));
+
+    // Calculate ratio and apply sharpness
+    // This avoids sharpening flat areas, and avoids over-sharpening edges.
+    A_FLOAT ratio = 0.0f;
+    if (maxLuma - minLuma > 1e-5) { // Avoid division by zero on perfectly flat areas
+         ratio = clamp((maxLuma - lumaE) / (maxLuma - minLuma), 0.0f, 1.0f);
+    }
+    A_FLOAT sharpenFactor = ratio * sharpness;
+
+    // Weighted sum
+    A_FVEC3 outputColor = e + (e - (b + d + f + h) * 0.25f) * sharpenFactor;
+    outputColor = clamp(outputColor, A_FVEC3(0.0f), A_FVEC3(1.0f));
+
+    Store(ipos.x, ipos.y, outputColor);
+}

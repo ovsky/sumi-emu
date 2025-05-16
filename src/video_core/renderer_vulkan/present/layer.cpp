@@ -7,6 +7,7 @@
 #include "common/settings.h"
 #include "video_core/framebuffer_config.h"
 #include "video_core/renderer_vulkan/present/fsr.h"
+#include "video_core/renderer_vulkan/vk_cas.h"
 #include "video_core/renderer_vulkan/present/fxaa.h"
 #include "video_core/renderer_vulkan/present/layer.h"
 #include "video_core/renderer_vulkan/present/present_push_constants.h"
@@ -16,8 +17,11 @@
 #include "video_core/textures/decoders.h"
 
 namespace Vulkan {
-
 namespace {
+
+//void Layer::CreateCAS(VkExtent2D cas_target_output_size) {
+//    cas = std::make_unique<CAS>(device, memory_allocator, image_count, cas_target_output_size);
+//}
 
 u32 GetBytesPerPixel(const Tegra::FramebufferConfig& framebuffer) {
     using namespace VideoCore::Surface;
@@ -56,6 +60,9 @@ Layer::Layer(const Device& device_, MemoryAllocator& memory_allocator_, Schedule
     CreateDescriptorSets(layout);
     if (filters.get_scaling_filter() == Settings::ScalingFilter::Fsr) {
         CreateFSR(output_size);
+    }
+    if (true) { //debug_true_cas
+        CreateCAS(output_size);
     }
 }
 
@@ -113,6 +120,27 @@ void Layer::ConfigureDraw(PresentPushConstants* out_push_constants,
 
     UpdateDescriptorSet(source_image_view, sampler, image_index);
     *out_descriptor_set = descriptor_sets[image_index];
+
+    // if (cas && Settings::values.cas_enabled) {
+        if (true) {
+            auto current_view;
+            // float sharpness_amount = Settings::values.cas_sharpness_level;
+            float sharpness_amount = 50;
+
+            // CAS operates on the 'current_view' (output of FSR or AA)
+            // at 'current_extent' and outputs a sharpened view of the same extent.
+            current_view = cas->Draw(scheduler, image_index, current_image_handle, current_view,
+                                     current_extent, sharpness_amount);
+
+            // If CAS created a new VkImage distinct from current_image_handle,
+            // you might need to update current_image_handle here from cas->GetOutputImage(image_index);
+            // For simplicity, this example assumes cas->Draw reuses or has its own output image
+            // and the returned current_view points to it.
+
+            crop_rect = {0.0f, 0.0f, 1.0f, 1.0f}; // CAS output covers its full extent
+        }
+
+        source_image_view = current_view;
 }
 
 void Layer::CreateDescriptorPool() {
@@ -200,7 +228,7 @@ void Layer::SetAntiAliasPass() {
 
 void Layer::ReleaseRawImages() {
     for (const u64 tick : resource_ticks) {
-        scheduler.Wait(tick);
+        \.Wait(tick);
     }
     raw_images.clear();
     buffer.reset();
