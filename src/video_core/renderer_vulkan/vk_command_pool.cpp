@@ -9,7 +9,7 @@
 
 namespace Vulkan {
 
-constexpr size_t COMMAND_BUFFER_POOL_SIZE = 4;
+constexpr size_t COMMAND_BUFFER_POOL_SIZE = 8;
 
 struct CommandPool::Pool {
     vk::CommandPool handle;
