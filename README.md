@@ -2,7 +2,7 @@
 
 <h1 align="center">
     <a href="https://github.com/ovsky/sumi-emu" target="_blank">
-        <img height="40%" width="40%" src="https://github.com/ovsky/sumi-emu-citrus/blob/master/src/android/app/src/main/res/drawable-xhdpi/tv_banner_big.png"><br>
+        <img height="40%" width="40%" src="https://github.com/ovsky/sumi-emu/blob/experimental/src/android/app/src/main/res/drawable-xhdpi/tv_banner.png"><br>
     </a>
     <a href="https://discord.gg/work-in-progress" target="_blank">
         <img src="https://img.shields.io/discord/1104386300750082081.svg?label=&logo=discord&logoColor=ffffff&color=5865F2&labelColor=404EED">
