@@ -176,7 +176,7 @@ public:
             PauseCounter();
         }
         AbandonCurrentQuery();
-        std::function<void()> func([this, counts = pending_flush_queries.size()] {
+        std::function<void()> func([this] {
             amend_value = 0;
             accumulation_value = 0;
         });
