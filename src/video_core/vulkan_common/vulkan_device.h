@@ -42,6 +42,7 @@ VK_DEFINE_HANDLE(VmaAllocator)
 #define FOR_EACH_VK_FEATURE_EXT(FEATURE)                                                           \
     FEATURE(EXT, CustomBorderColor, CUSTOM_BORDER_COLOR, custom_border_color)                      \
     FEATURE(EXT, DepthBiasControl, DEPTH_BIAS_CONTROL, depth_bias_control)                         \
+    FEATURE(EXT, DescriptorIndexing, DESCRIPTOR_INDEXING, descriptor_indexing)                     \
     FEATURE(EXT, DepthClipControl, DEPTH_CLIP_CONTROL, depth_clip_control)                         \
     FEATURE(EXT, ExtendedDynamicState, EXTENDED_DYNAMIC_STATE, extended_dynamic_state)             \
     FEATURE(EXT, ExtendedDynamicState2, EXTENDED_DYNAMIC_STATE_2, extended_dynamic_state2)         \
@@ -100,6 +101,7 @@ VK_DEFINE_HANDLE(VmaAllocator)
     EXTENSION_NAME(VK_EXT_CONSERVATIVE_RASTERIZATION_EXTENSION_NAME)                               \
     EXTENSION_NAME(VK_EXT_DEPTH_BIAS_CONTROL_EXTENSION_NAME)                                       \
     EXTENSION_NAME(VK_EXT_DEPTH_RANGE_UNRESTRICTED_EXTENSION_NAME)                                 \
+    EXTENSION_NAME(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME)                                      \
     EXTENSION_NAME(VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME)                                   \
     EXTENSION_NAME(VK_EXT_EXTENDED_DYNAMIC_STATE_2_EXTENSION_NAME)                                 \
     EXTENSION_NAME(VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME)                                 \
@@ -154,6 +156,13 @@ VK_DEFINE_HANDLE(VmaAllocator)
     FEATURE_NAME(depth_bias_control, depthBiasControl)                                             \
     FEATURE_NAME(depth_bias_control, leastRepresentableValueForceUnormRepresentation)              \
     FEATURE_NAME(depth_bias_control, depthBiasExact)                                               \
+    FEATURE_NAME(descriptor_indexing, descriptorBindingPartiallyBound)                             \
+    FEATURE_NAME(descriptor_indexing, descriptorBindingVariableDescriptorCount)                    \
+    FEATURE_NAME(descriptor_indexing, runtimeDescriptorArray)                                      \
+    FEATURE_NAME(descriptor_indexing, descriptorBindingVariableDescriptorCount)                    \
+    FEATURE_NAME(descriptor_indexing, shaderSampledImageArrayNonUniformIndexing)                   \
+    FEATURE_NAME(descriptor_indexing, shaderStorageBufferArrayNonUniformIndexing)                  \
+    FEATURE_NAME(descriptor_indexing, shaderStorageImageArrayNonUniformIndexing)                   \
     FEATURE_NAME(extended_dynamic_state, extendedDynamicState)                                     \
     FEATURE_NAME(format_a4b4g4r4, formatA4B4G4R4)                                                  \
     FEATURE_NAME(index_type_uint8, indexTypeUint8)                                                 \

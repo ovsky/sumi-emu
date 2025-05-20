@@ -431,11 +431,11 @@ Instance Instance::Create(u32 version, Span<const char*> layers, Span<const char
     const VkApplicationInfo application_info{
         .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
         .pNext = nullptr,
-        .pApplicationName = "sumi Emulator",
+        .pApplicationName = "yuzu Emulator",
         .applicationVersion = VK_MAKE_VERSION(0, 1, 0),
-        .pEngineName = "sumi Emulator",
+        .pEngineName = "yuzu Emulator",
         .engineVersion = VK_MAKE_VERSION(0, 1, 0),
-        .apiVersion = VK_API_VERSION_1_4,
+        .apiVersion = VK_API_VERSION_1_3,
     };
     const VkInstanceCreateInfo ci{
         .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
