@@ -3,12 +3,18 @@
 
 #pragma once
 
+#include <condition_variable>
+#include <deque>
 #include <memory>
+#include <mutex>
+#include <thread>
 #include <vector>
 
 #include "common/bit_field.h"
 #include "common/common_funcs.h"
 #include "common/common_types.h"
+#include "common/polyfill_thread.h"
+#include "core/memory.h"
 
 namespace Tegra {
 
@@ -62,23 +68,31 @@ struct ChCommand {
     std::vector<u32> arguments;
 };
 
-using ChCommandHeaderList = std::vector<ChCommandHeader>;
+using ChCommandHeaderList =
+    Core::Memory::CpuGuestMemory<Tegra::ChCommandHeader, Core::Memory::GuestMemoryFlags::SafeRead>;
 
 struct ThiRegisters {
-    u32_le increment_syncpt{};
-    INSERT_PADDING_WORDS(1);
-    u32_le increment_syncpt_error{};
-    u32_le ctx_switch_incremement_syncpt{};
-    INSERT_PADDING_WORDS(4);
-    u32_le ctx_switch{};
-    INSERT_PADDING_WORDS(1);
-    u32_le ctx_syncpt_eof{};
-    INSERT_PADDING_WORDS(5);
-    u32_le method_0{};
-    u32_le method_1{};
-    INSERT_PADDING_WORDS(12);
-    u32_le int_status{};
-    u32_le int_mask{};
+    static constexpr std::size_t NUM_REGS = 0x20;
+
+    union {
+        struct {
+            u32_le increment_syncpt;
+            INSERT_PADDING_WORDS_NOINIT(1);
+            u32_le increment_syncpt_error;
+            u32_le ctx_switch_incremement_syncpt;
+            INSERT_PADDING_WORDS_NOINIT(4);
+            u32_le ctx_switch;
+            INSERT_PADDING_WORDS_NOINIT(1);
+            u32_le ctx_syncpt_eof;
+            INSERT_PADDING_WORDS_NOINIT(5);
+            u32_le method_0;
+            u32_le method_1;
+            INSERT_PADDING_WORDS_NOINIT(12);
+            u32_le int_status;
+            u32_le int_mask;
+        };
+        std::array<u32, NUM_REGS> reg_array;
+    };
 };
 
 enum class ThiMethod : u32 {
@@ -89,32 +103,39 @@ enum class ThiMethod : u32 {
 
 class CDmaPusher {
 public:
-    explicit CDmaPusher(Host1x::Host1x& host1x);
-    ~CDmaPusher();
+    CDmaPusher() = delete;
+    virtual ~CDmaPusher();
 
-    /// Process the command entry
-    void ProcessEntries(ChCommandHeaderList&& entries);
+    void PushEntries(ChCommandHeaderList&& entries) {
+        std::scoped_lock l{command_mutex};
+        command_lists.push_back(std::move(entries));
+        command_cv.notify_one();
+    }
+
+protected:
+    explicit CDmaPusher(Host1x::Host1x& host1x, s32 id);
+
+    virtual void ProcessMethod(u32 method, u32 arg) = 0;
+
+    Host1x::Host1x& host1x;
+    Tegra::MemoryManager& memory_manager;
 
 private:
+    /// Process the command entry
+    void ProcessEntries(std::stop_token stop_token);
+
     /// Invoke command class devices to execute the command based on the current state
     void ExecuteCommand(u32 state_offset, u32 data);
 
-    /// Write arguments value to the ThiRegisters member at the specified offset
-    void ThiStateWrite(ThiRegisters& state, u32 offset, u32 argument);
+    std::unique_ptr<Host1x::Control> host_processor;
 
-    Host1x::Host1x& host1x;
-    std::shared_ptr<Tegra::Host1x::Nvdec> nvdec_processor;
-    std::unique_ptr<Tegra::Host1x::Vic> vic_processor;
-    std::unique_ptr<Tegra::Host1x::Control> host1x_processor;
-    std::unique_ptr<Host1x::SyncptIncrManager> sync_manager;
-    ChClassId current_class{};
-    ThiRegisters vic_thi_state{};
-    ThiRegisters nvdec_thi_state{};
+    std::mutex command_mutex;
+    std::condition_variable_any command_cv;
+    std::deque<ChCommandHeaderList> command_lists;
+    std::jthread thread;
 
-    u32 count{};
-    u32 offset{};
-    u32 mask{};
-    bool incrementing{};
+    ThiRegisters thi_regs{};
+    ChClassId current_class;
 };
 
 } // namespace Tegra
