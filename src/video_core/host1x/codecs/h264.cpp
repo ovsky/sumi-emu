@@ -1,5 +1,5 @@
-// SPDX-FileCopyrightText: Ryujinx Team and Contributors
-// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
+// SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <array>
 #include <bit>
@@ -10,7 +10,7 @@
 #include "video_core/host1x/host1x.h"
 #include "video_core/memory_manager.h"
 
-namespace Tegra::Decoder {
+namespace Tegra::Decoders {
 namespace {
 // ZigZag LUTs from libavcodec.
 constexpr std::array<u8, 64> zig_zag_direct{
@@ -25,22 +25,55 @@ constexpr std::array<u8, 16> zig_zag_scan{
 };
 } // Anonymous namespace
 
-H264::H264(Host1x::Host1x& host1x_) : host1x{host1x_} {}
+H264::H264(Host1x::Host1x& host1x_, const Host1x::NvdecCommon::NvdecRegisters& regs_, s32 id_,
+           Host1x::FrameQueue& frame_queue_)
+    : Decoder{host1x_, id_, regs_, frame_queue_} {
+    codec = Host1x::NvdecCommon::VideoCodec::H264;
+    initialized = decode_api.Initialize(codec);
+}
 
 H264::~H264() = default;
 
-std::span<const u8> H264::ComposeFrame(const Host1x::NvdecCommon::NvdecRegisters& state,
-                                       size_t* out_configuration_size, bool is_first_frame) {
-    H264DecoderContext context;
-    host1x.GMMU().ReadBlock(state.picture_info_offset, &context, sizeof(H264DecoderContext));
+std::tuple<u64, u64> H264::GetProgressiveOffsets() {
+    auto pic_idx{current_context.h264_parameter_set.curr_pic_idx};
+    auto luma{regs.surface_luma_offsets[pic_idx].Address() +
+              current_context.h264_parameter_set.luma_frame_offset.Address()};
+    auto chroma{regs.surface_chroma_offsets[pic_idx].Address() +
+                current_context.h264_parameter_set.chroma_frame_offset.Address()};
+    return {luma, chroma};
+}
 
-    const s64 frame_number = context.h264_parameter_set.frame_number.Value();
+std::tuple<u64, u64, u64, u64> H264::GetInterlacedOffsets() {
+    auto pic_idx{current_context.h264_parameter_set.curr_pic_idx};
+    auto luma_top{regs.surface_luma_offsets[pic_idx].Address() +
+                  current_context.h264_parameter_set.luma_top_offset.Address()};
+    auto luma_bottom{regs.surface_luma_offsets[pic_idx].Address() +
+                     current_context.h264_parameter_set.luma_bot_offset.Address()};
+    auto chroma_top{regs.surface_chroma_offsets[pic_idx].Address() +
+                    current_context.h264_parameter_set.chroma_top_offset.Address()};
+    auto chroma_bottom{regs.surface_chroma_offsets[pic_idx].Address() +
+                       current_context.h264_parameter_set.chroma_bot_offset.Address()};
+    return {luma_top, luma_bottom, chroma_top, chroma_bottom};
+}
+
+bool H264::IsInterlaced() {
+    return current_context.h264_parameter_set.luma_top_offset.Address() != 0 ||
+           current_context.h264_parameter_set.luma_bot_offset.Address() != 0;
+}
+
+std::span<const u8> H264::ComposeFrame() {
+    memory_manager.ReadBlock(regs.picture_info_offset.Address(), &current_context,
+                             sizeof(H264DecoderContext));
+
+    const s64 frame_number = current_context.h264_parameter_set.frame_number.Value();
     if (!is_first_frame && frame_number != 0) {
-        frame.resize_destructive(context.stream_len);
-        host1x.GMMU().ReadBlock(state.frame_bitstream_offset, frame.data(), frame.size());
-        *out_configuration_size = 0;
-        return frame;
+        frame_scratch.resize_destructive(current_context.stream_len);
+        memory_manager.ReadBlock(regs.frame_bitstream_offset.Address(), frame_scratch.data(),
+                                 frame_scratch.size());
+        return frame_scratch;
     }
+
+    is_first_frame = false;
 
     // Encode header
     H264BitWriter writer{};
@@ -53,7 +86,7 @@ std::span<const u8> H264::ComposeFrame(const Host1x::NvdecCommon::NvdecRegisters
     writer.WriteU(31, 8);
     writer.WriteUe(0);
     const u32 chroma_format_idc =
-        static_cast<u32>(context.h264_parameter_set.chroma_format_idc.Value());
+        static_cast<u32>(current_context.h264_parameter_set.chroma_format_idc.Value());
     writer.WriteUe(chroma_format_idc);
     if (chroma_format_idc == 3) {
         writer.WriteBit(false);
@@ -61,42 +94,44 @@ std::span<const u8> H264::ComposeFrame(const Host1x::NvdecCommon::NvdecRegisters
 
     writer.WriteUe(0);
     writer.WriteUe(0);
-    writer.WriteBit(false); // QpprimeYZeroTransformBypassFlag
+    writer.WriteBit(current_context.qpprime_y_zero_transform_bypass_flag.Value() != 0);
     writer.WriteBit(false); // Scaling matrix present flag
 
-    writer.WriteUe(static_cast<u32>(context.h264_parameter_set.log2_max_frame_num_minus4.Value()));
+    writer.WriteUe(
+        static_cast<u32>(current_context.h264_parameter_set.log2_max_frame_num_minus4.Value()));
 
     const auto order_cnt_type =
-        static_cast<u32>(context.h264_parameter_set.pic_order_cnt_type.Value());
+        static_cast<u32>(current_context.h264_parameter_set.pic_order_cnt_type.Value());
     writer.WriteUe(order_cnt_type);
     if (order_cnt_type == 0) {
-        writer.WriteUe(context.h264_parameter_set.log2_max_pic_order_cnt_lsb_minus4);
+        writer.WriteUe(current_context.h264_parameter_set.log2_max_pic_order_cnt_lsb_minus4);
     } else if (order_cnt_type == 1) {
-        writer.WriteBit(context.h264_parameter_set.delta_pic_order_always_zero_flag != 0);
+        writer.WriteBit(current_context.h264_parameter_set.delta_pic_order_always_zero_flag != 0);
 
         writer.WriteSe(0);
         writer.WriteSe(0);
         writer.WriteUe(0);
     }
 
-    const s32 pic_height = context.h264_parameter_set.frame_height_in_map_units /
-                           (context.h264_parameter_set.frame_mbs_only_flag ? 1 : 2);
+    const s32 pic_height = current_context.h264_parameter_set.frame_height_in_mbs /
+                           (current_context.h264_parameter_set.frame_mbs_only_flag ? 1 : 2);
 
-    // TODO (ameerj): Where do we get this number, it seems to be particular for each stream
-    const auto nvdec_decoding = Settings::values.nvdec_emulation.GetValue();
-    const bool uses_gpu_decoding = nvdec_decoding == Settings::NvdecEmulation::Gpu;
-    const u32 max_num_ref_frames = uses_gpu_decoding ? 6u : 16u;
+    u32 max_num_ref_frames =
+        std::max(std::max(current_context.h264_parameter_set.num_refidx_l0_default_active,
+                          current_context.h264_parameter_set.num_refidx_l1_default_active) +
+                     1,
+                 4);
     writer.WriteUe(max_num_ref_frames);
     writer.WriteBit(false);
-    writer.WriteUe(context.h264_parameter_set.pic_width_in_mbs - 1);
+    writer.WriteUe(current_context.h264_parameter_set.pic_width_in_mbs - 1);
     writer.WriteUe(pic_height - 1);
-    writer.WriteBit(context.h264_parameter_set.frame_mbs_only_flag != 0);
+    writer.WriteBit(current_context.h264_parameter_set.frame_mbs_only_flag != 0);
 
-    if (!context.h264_parameter_set.frame_mbs_only_flag) {
-        writer.WriteBit(context.h264_parameter_set.flags.mbaff_frame.Value() != 0);
+    if (!current_context.h264_parameter_set.frame_mbs_only_flag) {
+        writer.WriteBit(current_context.h264_parameter_set.flags.mbaff_frame.Value() != 0);
     }
 
-    writer.WriteBit(context.h264_parameter_set.flags.direct_8x8_inference.Value() != 0);
+    writer.WriteBit(current_context.h264_parameter_set.flags.direct_8x8_inference.Value() != 0);
     writer.WriteBit(false); // Frame cropping flag
     writer.WriteBit(false); // VUI parameter present flag
 
@@ -111,57 +146,59 @@ std::span<const u8> H264::ComposeFrame(const Host1x::NvdecCommon::NvdecRegisters
     writer.WriteUe(0);
     writer.WriteUe(0);
 
-    writer.WriteBit(context.h264_parameter_set.entropy_coding_mode_flag != 0);
-    writer.WriteBit(context.h264_parameter_set.pic_order_present_flag != 0);
+    writer.WriteBit(current_context.h264_parameter_set.entropy_coding_mode_flag != 0);
+    writer.WriteBit(current_context.h264_parameter_set.pic_order_present_flag != 0);
     writer.WriteUe(0);
-    writer.WriteUe(context.h264_parameter_set.num_refidx_l0_default_active);
-    writer.WriteUe(context.h264_parameter_set.num_refidx_l1_default_active);
-    writer.WriteBit(context.h264_parameter_set.flags.weighted_pred.Value() != 0);
-    writer.WriteU(static_cast<s32>(context.h264_parameter_set.weighted_bipred_idc.Value()), 2);
-    s32 pic_init_qp = static_cast<s32>(context.h264_parameter_set.pic_init_qp_minus26.Value());
+    writer.WriteUe(current_context.h264_parameter_set.num_refidx_l0_default_active);
+    writer.WriteUe(current_context.h264_parameter_set.num_refidx_l1_default_active);
+    writer.WriteBit(current_context.h264_parameter_set.flags.weighted_pred.Value() != 0);
+    writer.WriteU(static_cast<s32>(current_context.h264_parameter_set.weighted_bipred_idc.Value()),
+                  2);
+    s32 pic_init_qp =
+        static_cast<s32>(current_context.h264_parameter_set.pic_init_qp_minus26.Value());
     writer.WriteSe(pic_init_qp);
     writer.WriteSe(0);
     s32 chroma_qp_index_offset =
-        static_cast<s32>(context.h264_parameter_set.chroma_qp_index_offset.Value());
+        static_cast<s32>(current_context.h264_parameter_set.chroma_qp_index_offset.Value());
 
     writer.WriteSe(chroma_qp_index_offset);
-    writer.WriteBit(context.h264_parameter_set.deblocking_filter_control_present_flag != 0);
-    writer.WriteBit(context.h264_parameter_set.flags.constrained_intra_pred.Value() != 0);
-    writer.WriteBit(context.h264_parameter_set.redundant_pic_cnt_present_flag != 0);
-    writer.WriteBit(context.h264_parameter_set.transform_8x8_mode_flag != 0);
+    writer.WriteBit(current_context.h264_parameter_set.deblocking_filter_control_present_flag != 0);
+    writer.WriteBit(current_context.h264_parameter_set.flags.constrained_intra_pred.Value() != 0);
+    writer.WriteBit(current_context.h264_parameter_set.redundant_pic_cnt_present_flag != 0);
+    writer.WriteBit(current_context.h264_parameter_set.transform_8x8_mode_flag != 0);
 
     writer.WriteBit(true); // pic_scaling_matrix_present_flag
 
     for (s32 index = 0; index < 6; index++) {
         writer.WriteBit(true);
-        std::span<const u8> matrix{context.weight_scale};
-        writer.WriteScalingList(scan, matrix, index * 16, 16);
+        std::span<const u8> matrix{current_context.weight_scale_4x4};
+        writer.WriteScalingList(scan_scratch, matrix, index * 16, 16);
     }
 
-    if (context.h264_parameter_set.transform_8x8_mode_flag) {
+    if (current_context.h264_parameter_set.transform_8x8_mode_flag) {
         for (s32 index = 0; index < 2; index++) {
             writer.WriteBit(true);
-            std::span<const u8> matrix{context.weight_scale_8x8};
-            writer.WriteScalingList(scan, matrix, index * 64, 64);
+            std::span<const u8> matrix{current_context.weight_scale_8x8};
+            writer.WriteScalingList(scan_scratch, matrix, index * 64, 64);
         }
     }
 
     s32 chroma_qp_index_offset2 =
-        static_cast<s32>(context.h264_parameter_set.second_chroma_qp_index_offset.Value());
+        static_cast<s32>(current_context.h264_parameter_set.second_chroma_qp_index_offset.Value());
 
     writer.WriteSe(chroma_qp_index_offset2);
 
     writer.End();
 
     const auto& encoded_header = writer.GetByteArray();
-    frame.resize(encoded_header.size() + context.stream_len);
-    std::memcpy(frame.data(), encoded_header.data(), encoded_header.size());
+    frame_scratch.resize(encoded_header.size() + current_context.stream_len);
+    std::memcpy(frame_scratch.data(), encoded_header.data(), encoded_header.size());
 
-    *out_configuration_size = encoded_header.size();
-    host1x.GMMU().ReadBlock(state.frame_bitstream_offset, frame.data() + encoded_header.size(),
-                            context.stream_len);
+    memory_manager.ReadBlock(regs.frame_bitstream_offset.Address(),
+                             frame_scratch.data() + encoded_header.size(),
+                             current_context.stream_len);
 
-    return frame;
+    return frame_scratch;
 }
 
 H264BitWriter::H264BitWriter() = default;
@@ -278,4 +315,4 @@ void H264BitWriter::Flush() {
     buffer = 0;
     buffer_pos = 0;
 }
-} // namespace Tegra::Decoder
+} // namespace Tegra::Decoders

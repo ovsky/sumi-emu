@@ -4,12 +4,13 @@
 #include <algorithm> // for std::copy
 #include <numeric>
 
+#include "common/alignment.h"
 #include "common/assert.h"
 #include "video_core/host1x/codecs/vp9.h"
 #include "video_core/host1x/host1x.h"
 #include "video_core/memory_manager.h"
 
-namespace Tegra::Decoder {
+namespace Tegra::Decoders {
 namespace {
 constexpr u32 diff_update_probability = 252;
 constexpr u32 frame_sync_code = 0x498342;
@@ -237,7 +238,12 @@ constexpr std::array<u8, 254> map_lut{
 }
 } // Anonymous namespace
 
-VP9::VP9(Host1x::Host1x& host1x_) : host1x{host1x_} {}
+VP9::VP9(Host1x::Host1x& host1x_, const Host1x::NvdecCommon::NvdecRegisters& regs_, s32 id_,
+         Host1x::FrameQueue& frame_queue_)
+    : Decoder{host1x_, id_, regs_, frame_queue_} {
+    codec = Host1x::NvdecCommon::VideoCodec::VP9;
+    initialized = decode_api.Initialize(codec);
+}
 
 VP9::~VP9() = default;
 
@@ -356,35 +362,113 @@ void VP9::WriteMvProbabilityUpdate(VpxRangeEncoder& writer, u8 new_prob, u8 old_
     }
 }
 
-Vp9PictureInfo VP9::GetVp9PictureInfo(const Host1x::NvdecCommon::NvdecRegisters& state) {
-    PictureInfo picture_info;
-    host1x.GMMU().ReadBlock(state.picture_info_offset, &picture_info, sizeof(PictureInfo));
-    Vp9PictureInfo vp9_info = picture_info.Convert();
+void VP9::WriteSegmentation(VpxBitStreamWriter& writer) {
+    bool enabled = current_picture_info.segmentation.enabled != 0;
+    writer.WriteBit(enabled);
+    if (!enabled) {
+        return;
+    }
 
-    InsertEntropy(state.vp9_entropy_probs_offset, vp9_info.entropy);
+    auto update_map = current_picture_info.segmentation.update_map != 0;
+    writer.WriteBit(update_map);
+
+    if (update_map) {
+        EntropyProbs entropy_probs{};
+        memory_manager.ReadBlock(regs.vp9_prob_tab_buffer_offset.Address(), &entropy_probs,
+                                 sizeof(entropy_probs));
+
+        auto WriteProb = [&](u8 prob) {
+            bool coded = prob != 255;
+            writer.WriteBit(coded);
+            if (coded) {
+                writer.WriteU(prob, 8);
+            }
+        };
+
+        for (size_t i = 0; i < entropy_probs.mb_segment_tree_probs.size(); i++) {
+            WriteProb(entropy_probs.mb_segment_tree_probs[i]);
+        }
+
+        auto temporal_update = current_picture_info.segmentation.temporal_update != 0;
+        writer.WriteBit(temporal_update);
+
+        if (temporal_update) {
+            for (s32 i = 0; i < 3; i++) {
+                WriteProb(entropy_probs.segment_pred_probs[i]);
+            }
+        }
+    }
+
+    if (last_segmentation == current_picture_info.segmentation) {
+        writer.WriteBit(false);
+        return;
+    }
+
+    last_segmentation = current_picture_info.segmentation;
+    writer.WriteBit(true);
+    writer.WriteBit(current_picture_info.segmentation.abs_delta != 0);
+
+    constexpr s32 MAX_SEGMENTS = 8;
+    constexpr std::array SegmentationFeatureBits = {8, 6, 2, 0};
+
+    for (s32 i = 0; i < MAX_SEGMENTS; i++) {
+        auto q_enabled = current_picture_info.segmentation.feature_enabled[i][0] != 0;
+        writer.WriteBit(q_enabled);
+        if (q_enabled) {
+            writer.WriteS(current_picture_info.segmentation.feature_data[i][0],
+                          SegmentationFeatureBits[0]);
+        }
+
+        auto lf_enabled = current_picture_info.segmentation.feature_enabled[i][1] != 0;
+        writer.WriteBit(lf_enabled);
+        if (lf_enabled) {
+            writer.WriteS(current_picture_info.segmentation.feature_data[i][1],
+                          SegmentationFeatureBits[1]);
+        }
+
+        auto ref_enabled = current_picture_info.segmentation.feature_enabled[i][2] != 0;
+        writer.WriteBit(ref_enabled);
+        if (ref_enabled) {
+            writer.WriteU(current_picture_info.segmentation.feature_data[i][2],
+                          SegmentationFeatureBits[2]);
+        }
+
+        auto skip_enabled = current_picture_info.segmentation.feature_enabled[i][3] != 0;
+        writer.WriteBit(skip_enabled);
+    }
+}
+
+Vp9PictureInfo VP9::GetVp9PictureInfo() {
+    memory_manager.ReadBlock(regs.picture_info_offset.Address(), &current_picture_info,
+                             sizeof(PictureInfo));
+    Vp9PictureInfo vp9_info = current_picture_info.Convert();
+
+    InsertEntropy(regs.vp9_prob_tab_buffer_offset.Address(), vp9_info.entropy);
 
     // surface_luma_offset[0:3] contains the address of the reference frame offsets in the following
     // order: last, golden, altref, current.
-    std::copy(state.surface_luma_offset.begin(), state.surface_luma_offset.begin() + 4,
-              vp9_info.frame_offsets.begin());
+    for (size_t i = 0; i < 4; i++) {
+        vp9_info.frame_offsets[i] = regs.surface_luma_offsets[i].Address();
+    }
 
     return vp9_info;
 }
 
 void VP9::InsertEntropy(u64 offset, Vp9EntropyProbs& dst) {
     EntropyProbs entropy;
-    host1x.GMMU().ReadBlock(offset, &entropy, sizeof(EntropyProbs));
+    memory_manager.ReadBlock(offset, &entropy, sizeof(EntropyProbs));
     entropy.Convert(dst);
 }
 
-Vp9FrameContainer VP9::GetCurrentFrame(const Host1x::NvdecCommon::NvdecRegisters& state) {
+Vp9FrameContainer VP9::GetCurrentFrame() {
     Vp9FrameContainer current_frame{};
     {
         // gpu.SyncGuestHost(); epic, why?
-        current_frame.info = GetVp9PictureInfo(state);
+        current_frame.info = GetVp9PictureInfo();
         current_frame.bit_stream.resize(current_frame.info.bitstream_size);
-        host1x.GMMU().ReadBlock(state.frame_bitstream_offset, current_frame.bit_stream.data(),
-                                current_frame.info.bitstream_size);
+        memory_manager.ReadBlock(regs.frame_bitstream_offset.Address(),
+                                 current_frame.bit_stream.data(),
+                                 current_frame.info.bitstream_size);
     }
     if (!next_frame.bit_stream.empty()) {
         Vp9FrameContainer temp{
@@ -742,8 +826,7 @@ VpxBitStreamWriter VP9::ComposeUncompressedHeader() {
     uncomp_writer.WriteDeltaQ(current_frame_info.uv_dc_delta_q);
     uncomp_writer.WriteDeltaQ(current_frame_info.uv_ac_delta_q);
 
-    ASSERT(!current_frame_info.segment_enabled);
-    uncomp_writer.WriteBit(false); // Segmentation enabled (TODO).
+    WriteSegmentation(uncomp_writer);
 
     const s32 min_tile_cols_log2 = CalcMinLog2TileCols(current_frame_info.frame_size.width);
     const s32 max_tile_cols_log2 = CalcMaxLog2TileCols(current_frame_info.frame_size.width);
@@ -770,10 +853,29 @@ VpxBitStreamWriter VP9::ComposeUncompressedHeader() {
     return uncomp_writer;
 }
 
-void VP9::ComposeFrame(const Host1x::NvdecCommon::NvdecRegisters& state) {
+std::tuple<u64, u64> VP9::GetProgressiveOffsets() {
+    auto luma{regs.surface_luma_offsets[static_cast<u32>(Vp9SurfaceIndex::Current)].Address()};
+    auto chroma{regs.surface_chroma_offsets[static_cast<u32>(Vp9SurfaceIndex::Current)].Address()};
+    return {luma, chroma};
+}
+
+std::tuple<u64, u64, u64, u64> VP9::GetInterlacedOffsets() {
+    auto luma_top{regs.surface_luma_offsets[static_cast<u32>(Vp9SurfaceIndex::Current)].Address()};
+    auto luma_bottom{
+        regs.surface_luma_offsets[static_cast<u32>(Vp9SurfaceIndex::Current)].Address()};
+    auto chroma_top{
+        regs.surface_chroma_offsets[static_cast<u32>(Vp9SurfaceIndex::Current)].Address()};
+    auto chroma_bottom{
+        regs.surface_chroma_offsets[static_cast<u32>(Vp9SurfaceIndex::Current)].Address()};
+    return {luma_top, luma_bottom, chroma_top, chroma_bottom};
+}
+
+std::span<const u8> VP9::ComposeFrame() {
+    vp9_hidden_frame = false;
+
     std::vector<u8> bitstream;
     {
-        Vp9FrameContainer curr_frame = GetCurrentFrame(state);
+        Vp9FrameContainer curr_frame = GetCurrentFrame();
         current_frame_info = curr_frame.info;
         bitstream = std::move(curr_frame.bit_stream);
     }
@@ -786,12 +888,16 @@ void VP9::ComposeFrame(const Host1x::NvdecCommon::NvdecRegisters& state) {
     std::vector<u8> uncompressed_header = uncomp_writer.GetByteArray();
 
     // Write headers and frame to buffer
-    frame.resize(uncompressed_header.size() + compressed_header.size() + bitstream.size());
-    std::copy(uncompressed_header.begin(), uncompressed_header.end(), frame.begin());
+    frame_scratch.resize(uncompressed_header.size() + compressed_header.size() + bitstream.size());
+    std::copy(uncompressed_header.begin(), uncompressed_header.end(), frame_scratch.begin());
     std::copy(compressed_header.begin(), compressed_header.end(),
-              frame.begin() + uncompressed_header.size());
+              frame_scratch.begin() + uncompressed_header.size());
     std::copy(bitstream.begin(), bitstream.end(),
-              frame.begin() + uncompressed_header.size() + compressed_header.size());
+              frame_scratch.begin() + uncompressed_header.size() + compressed_header.size());
+
+    vp9_hidden_frame = WasFrameHidden();
+
+    return GetFrameBytes();
 }
 
 VpxRangeEncoder::VpxRangeEncoder() {
@@ -944,4 +1050,4 @@ const std::vector<u8>& VpxBitStreamWriter::GetByteArray() const {
     return byte_array;
 }
 
-} // namespace Tegra::Decoder
+} // namespace Tegra::Decoders

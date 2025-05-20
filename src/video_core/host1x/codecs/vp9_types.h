@@ -11,7 +11,14 @@
 
 namespace Tegra {
 
-namespace Decoder {
+namespace Decoders {
+enum class Vp9SurfaceIndex : u32 {
+    Last = 0,
+    Golden = 1,
+    AltRef = 2,
+    Current = 3,
+};
+
 struct Vp9FrameDimensions {
     s16 width;
     s16 height;
@@ -48,11 +55,13 @@ enum class TxMode {
 };
 
 struct Segmentation {
+    constexpr bool operator==(const Segmentation& rhs) const = default;
+
     u8 enabled;
     u8 update_map;
     u8 temporal_update;
     u8 abs_delta;
-    std::array<u32, 8> feature_mask;
+    std::array<std::array<u8, 4>, 8> feature_enabled;
     std::array<std::array<s16, 4>, 8> feature_data;
 };
 static_assert(sizeof(Segmentation) == 0x64, "Segmentation is an invalid size");
@@ -190,7 +199,17 @@ struct PictureInfo {
 static_assert(sizeof(PictureInfo) == 0x100, "PictureInfo is an invalid size");
 
 struct EntropyProbs {
-    INSERT_PADDING_BYTES_NOINIT(1024);                 ///< 0x0000
+    std::array<u8, 10 * 10 * 8> kf_bmode_prob;         ///< 0x0000
+    std::array<u8, 10 * 10 * 1> kf_bmode_probB;        ///< 0x0320
+    std::array<u8, 3> ref_pred_probs;                  ///< 0x0384
+    std::array<u8, 7> mb_segment_tree_probs;           ///< 0x0387
+    std::array<u8, 3> segment_pred_probs;              ///< 0x038E
+    std::array<u8, 4> ref_scores;                      ///< 0x0391
+    std::array<u8, 2> prob_comppred;                   ///< 0x0395
+    INSERT_PADDING_BYTES_NOINIT(9);                    ///< 0x0397
+    std::array<u8, 10 * 8> kf_uv_mode_prob;            ///< 0x03A0
+    std::array<u8, 10 * 1> kf_uv_mode_probB;           ///< 0x03F0
+    INSERT_PADDING_BYTES_NOINIT(6);                    ///< 0x03FA
     std::array<u8, 28> inter_mode_prob;                ///< 0x0400
     std::array<u8, 4> intra_inter_prob;                ///< 0x041C
     INSERT_PADDING_BYTES_NOINIT(80);                   ///< 0x0420
@@ -302,5 +321,5 @@ ASSERT_POSITION(class_0_fr, 0x560);
 ASSERT_POSITION(coef_probs, 0x5A0);
 #undef ASSERT_POSITION
 
-}; // namespace Decoder
+}; // namespace Decoders
 }; // namespace Tegra

@@ -9,6 +9,7 @@
 #include "common/common_funcs.h"
 #include "common/common_types.h"
 #include "common/scratch_buffer.h"
+#include "video_core/host1x/codecs/decoder.h"
 #include "video_core/host1x/nvdec_common.h"
 
 namespace Tegra {
@@ -17,20 +18,41 @@ namespace Host1x {
 class Host1x;
 } // namespace Host1x
 
-namespace Decoder {
+namespace Decoders {
+enum class Vp8SurfaceIndex : u32 {
+    Last = 0,
+    Golden = 1,
+    AltRef = 2,
+    Current = 3,
+};
 
-class VP8 {
+class VP8 final : public Decoder {
 public:
-    explicit VP8(Host1x::Host1x& host1x);
-    ~VP8();
+    explicit VP8(Host1x::Host1x& host1x, const Host1x::NvdecCommon::NvdecRegisters& regs, s32 id,
+                 Host1x::FrameQueue& frame_queue);
+    ~VP8() override;
 
-    /// Compose the VP8 frame for FFmpeg decoding
-    [[nodiscard]] std::span<const u8> ComposeFrame(
-        const Host1x::NvdecCommon::NvdecRegisters& state);
+    VP8(const VP8&) = delete;
+    VP8& operator=(const VP8&) = delete;
+
+    VP8(VP8&&) = delete;
+    VP8& operator=(VP8&&) = delete;
+
+    [[nodiscard]] std::span<const u8> ComposeFrame() override;
+
+    std::tuple<u64, u64> GetProgressiveOffsets() override;
+    std::tuple<u64, u64, u64, u64> GetInterlacedOffsets() override;
+
+    bool IsInterlaced() override {
+        return false;
+    }
+
+    std::string_view GetCurrentCodecName() const override {
+        return "VP8";
+    }
 
 private:
-    Common::ScratchBuffer<u8> frame;
-    Host1x::Host1x& host1x;
+    Common::ScratchBuffer<u8> frame_scratch;
 
     struct VP8PictureInfo {
         INSERT_PADDING_WORDS_NOINIT(14);
@@ -73,7 +95,9 @@ private:
         INSERT_PADDING_WORDS_NOINIT(3);
     };
     static_assert(sizeof(VP8PictureInfo) == 0xc0, "PictureInfo is an invalid size");
+
+    VP8PictureInfo current_context{};
 };
 
-} // namespace Decoder
+} // namespace Decoders
 } // namespace Tegra

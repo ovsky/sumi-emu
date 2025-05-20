@@ -1,11 +1,19 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+// SPDX-FileCopyrightText: Copyright 2024 suyu Emulator Project
+// SPDX-License-Identifier: GPL-2.0-or-later
+
+// SPDX-FileCopyrightText: Copyright 2025 eden Emulator Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #include "common/assert.h"
 #include "common/logging/log.h"
 #include "common/scope_exit.h"
 #include "common/settings.h"
+#include "core/memory.h"
 #include "video_core/host1x/ffmpeg/ffmpeg.h"
+#include "video_core/memory_manager.h"
 
 extern "C" {
 #ifdef LIBVA_FOUND
@@ -47,7 +55,8 @@ AVPixelFormat GetGpuFormat(AVCodecContext* codec_context, const AVPixelFormat* p
     return codec_context->pix_fmt;
 }
 
-std::string AVError(int errnum) {
+std::string AVError(int errnum)
+{
     char errbuf[AV_ERROR_MAX_STRING_SIZE] = {};
     av_make_error_string(errbuf, sizeof(errbuf) - 1, errnum);
     return errbuf;
@@ -149,6 +158,7 @@ bool HardwareContext::InitializeForDecoder(DecoderContext& decoder_context,
         }
     }
 
+    LOG_INFO(HW_GPU, "Hardware decoding is disabled due to implementation issues, using CPU.");
     return false;
 }
 
@@ -183,8 +193,8 @@ bool HardwareContext::InitializeWithType(AVHWDeviceType type) {
     return true;
 }
 
-DecoderContext::DecoderContext(const Decoder& decoder) {
-    m_codec_context = avcodec_alloc_context3(decoder.GetCodec());
+DecoderContext::DecoderContext(const Decoder& decoder) : m_decoder{decoder} {
+    m_codec_context = avcodec_alloc_context3(m_decoder.GetCodec());
     av_opt_set(m_codec_context->priv_data, "tune", "zerolatency", 0);
     m_codec_context->thread_count = 0;
     m_codec_context->thread_type &= ~FF_THREAD_FRAME;
@@ -215,7 +225,189 @@ bool DecoderContext::OpenContext(const Decoder& decoder) {
     return true;
 }
 
+// Nasty but allows linux builds to pass.
+// Requires double checks when FFMPEG gets updated.
+// Hopefully a future FFMPEG update will all and expose a solution in the public API.
+namespace {
+
+typedef struct FFCodecDefault {
+    const char* key;
+    const char* value;
+} FFCodecDefault;
+
+typedef struct FFCodec {
+    /**
+     * The public AVCodec. See codec.h for it.
+     */
+    AVCodec p;
+
+    /**
+     * Internal codec capabilities FF_CODEC_CAP_*.
+     */
+    unsigned caps_internal : 29;
+
+    /**
+     * This field determines the type of the codec (decoder/encoder)
+     * and also the exact callback cb implemented by the codec.
+     * cb_type uses enum FFCodecType values.
+     */
+    unsigned cb_type : 3;
+
+    int priv_data_size;
+    /**
+     * @name Frame-level threading support functions
+     * @{
+     */
+    /**
+     * Copy necessary context variables from a previous thread context to the current one.
+     * If not defined, the next thread will start automatically; otherwise, the codec
+     * must call ff_thread_finish_setup().
+     *
+     * dst and src will (rarely) point to the same context, in which case memcpy should be skipped.
+     */
+    int (*update_thread_context)(struct AVCodecContext* dst, const struct AVCodecContext* src);
+
+    /**
+     * Copy variables back to the user-facing context
+     */
+    int (*update_thread_context_for_user)(struct AVCodecContext* dst,
+                                          const struct AVCodecContext* src);
+    /** @} */
+
+    /**
+     * Private codec-specific defaults.
+     */
+    const FFCodecDefault* defaults;
+
+    /**
+     * Initialize codec static data, called from av_codec_iterate().
+     *
+     * This is not intended for time consuming operations as it is
+     * run for every codec regardless of that codec being used.
+     */
+    void (*init_static_data)(struct FFCodec* codec);
+
+    int (*init)(struct AVCodecContext*);
+
+    union {
+        /**
+         * Decode to an AVFrame.
+         * cb is in this state if cb_type is FF_CODEC_CB_TYPE_DECODE.
+         *
+         * @param      avctx          codec context
+         * @param[out] frame          AVFrame for output
+         * @param[out] got_frame_ptr  decoder sets to 0 or 1 to indicate that
+         *                            a non-empty frame was returned in frame.
+         * @param[in]  avpkt          AVPacket containing the data to be decoded
+         * @return amount of bytes read from the packet on success,
+         *         negative error code on failure
+         */
+        int (*decode)(struct AVCodecContext* avctx, struct AVFrame* frame, int* got_frame_ptr,
+                      struct AVPacket* avpkt);
+        /**
+         * Decode subtitle data to an AVSubtitle.
+         * cb is in this state if cb_type is FF_CODEC_CB_TYPE_DECODE_SUB.
+         *
+         * Apart from that this is like the decode callback.
+         */
+        int (*decode_sub)(struct AVCodecContext* avctx, struct AVSubtitle* sub, int* got_frame_ptr,
+                          const struct AVPacket* avpkt);
+        /**
+         * Decode API with decoupled packet/frame dataflow.
+         * cb is in this state if cb_type is FF_CODEC_CB_TYPE_RECEIVE_FRAME.
+         *
+         * This function is called to get one output frame. It should call
+         * ff_decode_get_packet() to obtain input data.
+         */
+        int (*receive_frame)(struct AVCodecContext* avctx, struct AVFrame* frame);
+        /**
+         * Encode data to an AVPacket.
+         * cb is in this state if cb_type is FF_CODEC_CB_TYPE_ENCODE
+         *
+         * @param      avctx          codec context
+         * @param[out] avpkt          output AVPacket
+         * @param[in]  frame          AVFrame containing the input to be encoded
+         * @param[out] got_packet_ptr encoder sets to 0 or 1 to indicate that a
+         *                            non-empty packet was returned in avpkt.
+         * @return 0 on success, negative error code on failure
+         */
+        int (*encode)(struct AVCodecContext* avctx, struct AVPacket* avpkt,
+                      const struct AVFrame* frame, int* got_packet_ptr);
+        /**
+         * Encode subtitles to a raw buffer.
+         * cb is in this state if cb_type is FF_CODEC_CB_TYPE_ENCODE_SUB.
+         */
+        int (*encode_sub)(struct AVCodecContext* avctx, uint8_t* buf, int buf_size,
+                          const struct AVSubtitle* sub);
+        /**
+         * Encode API with decoupled frame/packet dataflow.
+         * cb is in this state if cb_type is FF_CODEC_CB_TYPE_RECEIVE_PACKET.
+         *
+         * This function is called to get one output packet.
+         * It should call ff_encode_get_frame() to obtain input data.
+         */
+        int (*receive_packet)(struct AVCodecContext* avctx, struct AVPacket* avpkt);
+    } cb;
+
+    int (*close)(struct AVCodecContext*);
+
+    /**
+     * Flush buffers.
+     * Will be called when seeking
+     */
+    void (*flush)(struct AVCodecContext*);
+
+    /**
+     * Decoding only, a comma-separated list of bitstream filters to apply to
+     * packets before decoding.
+     */
+    const char* bsfs;
+
+    /**
+     * Array of pointers to hardware configurations supported by the codec,
+     * or NULL if no hardware supported.  The array is terminated by a NULL
+     * pointer.
+     *
+     * The user can only access this field via avcodec_get_hw_config().
+     */
+    const struct AVCodecHWConfigInternal* const* hw_configs;
+
+    /**
+     * List of supported codec_tags, terminated by FF_CODEC_TAGS_END.
+     */
+    const uint32_t* codec_tags;
+} FFCodec;
+
+#ifndef ANDROID
+static av_always_inline const FFCodec* ffcodec(const AVCodec* codec) {
+    return (const FFCodec*)codec;
+}
+#endif
+} // namespace
+
+
 bool DecoderContext::SendPacket(const Packet& packet) {
+    m_temp_frame = std::make_shared<Frame>();
+    m_got_frame = 0;
+
+// Android can randomly crash when calling decode directly, so skip.
+// TODO update ffmpeg and hope that fixes it.
+#ifndef ANDROID
+    if (!m_codec_context->hw_device_ctx && m_codec_context->codec_id == AV_CODEC_ID_H264) {
+        m_decode_order = true;
+        auto* codec{ffcodec(m_decoder.GetCodec())};
+        if (const int ret = codec->cb.decode(m_codec_context,
+                                             m_temp_frame->GetFrame(),
+                                             &m_got_frame,
+                                             packet.GetPacket());
+            ret < 0) {
+            LOG_DEBUG(Service_NVDRV, "avcodec_send_packet error {}", AVError(ret));
+            return false;
+        }
+        return true;
+    }
+#endif
+
     if (const int ret = avcodec_send_packet(m_codec_context, packet.GetPacket()); ret < 0) {
         LOG_ERROR(HW_GPU, "avcodec_send_packet error: {}", AVError(ret));
         return false;
@@ -224,139 +416,74 @@ bool DecoderContext::SendPacket(const Packet& packet) {
     return true;
 }
 
-std::unique_ptr<Frame> DecoderContext::ReceiveFrame(bool* out_is_interlaced) {
-    auto dst_frame = std::make_unique<Frame>();
+std::shared_ptr<Frame> DecoderContext::ReceiveFrame() {
+    // Android can randomly crash when calling decode directly, so skip.
+    // TODO update ffmpeg and hope that fixes it.
+// TODO: This is causing issues on linux, need to bisect
+#ifndef ANDROID
+    if (!m_codec_context->hw_device_ctx && m_codec_context->codec_id == AV_CODEC_ID_H264) {
+        m_decode_order = true;
+        auto* codec{ffcodec(m_decoder.GetCodec())};
+        int ret{0};
 
-    const auto ReceiveImpl = [&](AVFrame* frame) {
-        if (const int ret = avcodec_receive_frame(m_codec_context, frame); ret < 0) {
-            LOG_ERROR(HW_GPU, "avcodec_receive_frame error: {}", AVError(ret));
-            return false;
+        if (m_got_frame == 0) {
+            Packet packet{{}};
+            auto* pkt = packet.GetPacket();
+            pkt->data = nullptr;
+            pkt->size = 0;
+            ret = codec->cb.decode(m_codec_context, m_temp_frame->GetFrame(), &m_got_frame, pkt);
+            m_codec_context->has_b_frames = 0;
         }
 
-        *out_is_interlaced =
-#if defined(FF_API_INTERLACED_FRAME) || LIBAVUTIL_VERSION_MAJOR >= 59
-            (frame->flags & AV_FRAME_FLAG_INTERLACED) != 0;
-#else
-            frame->interlaced_frame != 0;
+        if (m_got_frame == 0 || ret < 0) {
+            LOG_ERROR(Service_NVDRV, "Failed to receive a frame! error {}", ret);
+            return {};
+        }
+    } else
 #endif
-        return true;
-    };
+    {
 
-    if (m_codec_context->hw_device_ctx) {
-        // If we have a hardware context, make a separate frame here to receive the
-        // hardware result before sending it to the output.
-        Frame intermediate_frame;
+        const auto ReceiveImpl = [&](AVFrame* frame) {
+            if (const int ret = avcodec_receive_frame(m_codec_context, frame); ret < 0) {
+                LOG_ERROR(HW_GPU, "avcodec_receive_frame error: {}", AVError(ret));
+                return false;
+            }
 
-        if (!ReceiveImpl(intermediate_frame.GetFrame())) {
-            return {};
+            return true;
+        };
+
+        if (m_codec_context->hw_device_ctx) {
+            // If we have a hardware context, make a separate frame here to receive the
+            // hardware result before sending it to the output.
+            Frame intermediate_frame;
+
+            if (!ReceiveImpl(intermediate_frame.GetFrame())) {
+                return {};
+            }
+
+            m_temp_frame->SetFormat(PreferredGpuFormat);
+            if (const int ret = av_hwframe_transfer_data(m_temp_frame->GetFrame(),
+                                                         intermediate_frame.GetFrame(), 0);
+                ret < 0) {
+                LOG_ERROR(HW_GPU, "av_hwframe_transfer_data error: {}", AVError(ret));
+                return {};
+            }
+        } else {
+            // Otherwise, decode the frame as normal.
+            if (!ReceiveImpl(m_temp_frame->GetFrame())) {
+                return {};
+            }
         }
-
-        dst_frame->SetFormat(PreferredGpuFormat);
-        if (const int ret =
-                av_hwframe_transfer_data(dst_frame->GetFrame(), intermediate_frame.GetFrame(), 0);
-            ret < 0) {
-            LOG_ERROR(HW_GPU, "av_hwframe_transfer_data error: {}", AVError(ret));
-            return {};
-        }
-    } else {
-        // Otherwise, decode the frame as normal.
-        if (!ReceiveImpl(dst_frame->GetFrame())) {
-            return {};
-        }
     }
 
-    return dst_frame;
-}
-
-DeinterlaceFilter::DeinterlaceFilter(const Frame& frame) {
-    const AVFilter* buffer_src = avfilter_get_by_name("buffer");
-    const AVFilter* buffer_sink = avfilter_get_by_name("buffersink");
-    AVFilterInOut* inputs = avfilter_inout_alloc();
-    AVFilterInOut* outputs = avfilter_inout_alloc();
-    SCOPE_EXIT {
-        avfilter_inout_free(&inputs);
-        avfilter_inout_free(&outputs);
-    };
-
-    // Don't know how to get the accurate time_base but it doesn't matter for yadif filter
-    // so just use 1/1 to make buffer filter happy
-    std::string args = fmt::format("video_size={}x{}:pix_fmt={}:time_base=1/1", frame.GetWidth(),
-                                   frame.GetHeight(), static_cast<int>(frame.GetPixelFormat()));
-
-    m_filter_graph = avfilter_graph_alloc();
-    int ret = avfilter_graph_create_filter(&m_source_context, buffer_src, "in", args.c_str(),
-                                           nullptr, m_filter_graph);
-    if (ret < 0) {
-        LOG_ERROR(HW_GPU, "avfilter_graph_create_filter source error: {}", AVError(ret));
-        return;
-    }
-
-    ret = avfilter_graph_create_filter(&m_sink_context, buffer_sink, "out", nullptr, nullptr,
-                                       m_filter_graph);
-    if (ret < 0) {
-        LOG_ERROR(HW_GPU, "avfilter_graph_create_filter sink error: {}", AVError(ret));
-        return;
-    }
-
-    inputs->name = av_strdup("out");
-    inputs->filter_ctx = m_sink_context;
-    inputs->pad_idx = 0;
-    inputs->next = nullptr;
-
-    outputs->name = av_strdup("in");
-    outputs->filter_ctx = m_source_context;
-    outputs->pad_idx = 0;
-    outputs->next = nullptr;
-
-    const char* description = "yadif=1:-1:0";
-    ret = avfilter_graph_parse_ptr(m_filter_graph, description, &inputs, &outputs, nullptr);
-    if (ret < 0) {
-        LOG_ERROR(HW_GPU, "avfilter_graph_parse_ptr error: {}", AVError(ret));
-        return;
-    }
-
-    ret = avfilter_graph_config(m_filter_graph, nullptr);
-    if (ret < 0) {
-        LOG_ERROR(HW_GPU, "avfilter_graph_config error: {}", AVError(ret));
-        return;
-    }
-
-    m_initialized = true;
-}
-
-bool DeinterlaceFilter::AddSourceFrame(const Frame& frame) {
-    if (const int ret = av_buffersrc_add_frame_flags(m_source_context, frame.GetFrame(),
-                                                     AV_BUFFERSRC_FLAG_KEEP_REF);
-        ret < 0) {
-        LOG_ERROR(HW_GPU, "av_buffersrc_add_frame_flags error: {}", AVError(ret));
-        return false;
-    }
-
-    return true;
-}
-
-std::unique_ptr<Frame> DeinterlaceFilter::DrainSinkFrame() {
-    auto dst_frame = std::make_unique<Frame>();
-    const int ret = av_buffersink_get_frame(m_sink_context, dst_frame->GetFrame());
-
-    if (ret == AVERROR(EAGAIN) || ret == AVERROR(AVERROR_EOF)) {
-        return {};
-    }
-
-    if (ret < 0) {
-        LOG_ERROR(HW_GPU, "av_buffersink_get_frame error: {}", AVError(ret));
-        return {};
-    }
-
-    return dst_frame;
-}
-
-DeinterlaceFilter::~DeinterlaceFilter() {
-    avfilter_graph_free(&m_filter_graph);
+#if defined(FF_API_INTERLACED_FRAME) || LIBAVUTIL_VERSION_MAJOR >= 59
+    m_temp_frame->GetFrame()->interlaced_frame =
+        (m_temp_frame->GetFrame()->flags & AV_FRAME_FLAG_INTERLACED) != 0;
+#endif
+    return std::move(m_temp_frame);
 }
 
 void DecodeApi::Reset() {
-    m_deinterlace_filter.reset();
     m_hardware_context.reset();
     m_decoder_context.reset();
     m_decoder.reset();
@@ -382,43 +509,14 @@ bool DecodeApi::Initialize(Tegra::Host1x::NvdecCommon::VideoCodec codec) {
     return true;
 }
 
-bool DecodeApi::SendPacket(std::span<const u8> packet_data, size_t configuration_size) {
+bool DecodeApi::SendPacket(std::span<const u8> packet_data) {
     FFmpeg::Packet packet(packet_data);
     return m_decoder_context->SendPacket(packet);
 }
 
-void DecodeApi::ReceiveFrames(std::queue<std::unique_ptr<Frame>>& frame_queue) {
+std::shared_ptr<Frame> DecodeApi::ReceiveFrame() {
     // Receive raw frame from decoder.
-    bool is_interlaced;
-    auto frame = m_decoder_context->ReceiveFrame(&is_interlaced);
-    if (!frame) {
-        return;
-    }
-
-    if (!is_interlaced) {
-        // If the frame is not interlaced, we can pend it now.
-        frame_queue.push(std::move(frame));
-    } else {
-        // Create the deinterlacer if needed.
-        if (!m_deinterlace_filter) {
-            m_deinterlace_filter.emplace(*frame);
-        }
-
-        // Add the frame we just received.
-        if (!m_deinterlace_filter->AddSourceFrame(*frame)) {
-            return;
-        }
-
-        // Pend output fields.
-        while (true) {
-            auto filter_frame = m_deinterlace_filter->DrainSinkFrame();
-            if (!filter_frame) {
-                break;
-            }
-
-            frame_queue.push(std::move(filter_frame));
-        }
-    }
+    return m_decoder_context->ReceiveFrame();
 }
 
 } // namespace FFmpeg
