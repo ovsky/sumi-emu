@@ -17,7 +17,6 @@
 
 namespace Core {
 class System;
-class TelemetrySession;
 } // namespace Core
 
 namespace Core::Frontend {

@@ -12,10 +12,8 @@
 #include "common/logging/log.h"
 #include "common/microprofile.h"
 #include "common/settings.h"
-#include "common/telemetry.h"
 #include "core/core_timing.h"
 #include "core/frontend/emu_window.h"
-#include "core/telemetry_session.h"
 #include "video_core/capture.h"
 #include "video_core/present.h"
 #include "video_core/renderer_opengl/gl_blit_screen.h"
@@ -71,7 +69,7 @@ const char* GetType(GLenum type) {
 
 void APIENTRY DebugHandler(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
                            const GLchar* message, const void* user_param) {
-    const char format[] = "{} {} {}: {}";
+    constexpr std::string_view format = "{} {} {}: {}";
     const char* const str_source = GetSource(source);
     const char* const str_type = GetType(type);
 
@@ -93,9 +91,9 @@ void APIENTRY DebugHandler(GLenum source, GLenum type, GLuint id, GLenum severit
 RendererOpenGL::RendererOpenGL(Core::Frontend::EmuWindow& emu_window_,
                                Tegra::MaxwellDeviceMemoryManager& device_memory_, Tegra::GPU& gpu_,
                                std::unique_ptr<Core::Frontend::GraphicsContext> context_)
-    : RendererBase{emu_window_, std::move(context_)},
-      emu_window{emu_window_}, device_memory{device_memory_}, gpu{gpu_}, device{emu_window_},
-      state_tracker{}, program_manager{device},
+    : RendererBase{emu_window_, std::move(context_)}, emu_window{emu_window_},
+      device_memory{device_memory_}, gpu{gpu_}, device{emu_window_}, state_tracker{},
+      program_manager{device},
       rasterizer(emu_window, gpu, device_memory, device, program_manager, state_tracker) {
     if (Settings::values.renderer_debug && GLAD_GL_KHR_debug) {
         glEnable(GL_DEBUG_OUTPUT);
@@ -162,11 +160,6 @@ void RendererOpenGL::AddTelemetryFields() {
     LOG_INFO(Render_OpenGL, "GL_VERSION: {}", gl_version);
     LOG_INFO(Render_OpenGL, "GL_VENDOR: {}", gpu_vendor);
     LOG_INFO(Render_OpenGL, "GL_RENDERER: {}", gpu_model);
-
-    //constexpr auto user_system = Common::Telemetry::FieldType::UserSystem;
-    //telemetry_session.AddField(user_system, "GPU_Vendor", std::string(gpu_vendor));
-    //telemetry_session.AddField(user_system, "GPU_Model", std::string(gpu_model));
-    //telemetry_session.AddField(user_system, "GPU_OpenGL_Version", std::string(gl_version));
 }
 
 void RendererOpenGL::RenderToBuffer(std::span<const Tegra::FramebufferConfig> framebuffers,
