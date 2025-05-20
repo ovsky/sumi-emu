@@ -306,12 +306,10 @@ class BooleanSetting {
 
 void RendererVulkan::Composite(std::span<const Tegra::FramebufferConfig> framebuffers) {
     #ifdef __ANDROID__
-    static int frame_counter = 0;
-    static int target_fps = 60; // Target FPS (30 or 60)
-    int frame_skip_threshold = 1;
 
     bool frame_skipping = false; //BooleanSetting::FRAME_SKIPPING.getBoolean();
-    bool frame_interpolation = BooleanSetting::FRAME_INTERPOLATION.getBoolean();
+    // bool frame_interpolation = BooleanSetting::FRAME_INTERPOLATION.getBoolean();
+    bool frame_interpolation = true;
     #endif
 
     if (framebuffers.empty()) {
@@ -319,23 +317,41 @@ void RendererVulkan::Composite(std::span<const Tegra::FramebufferConfig> framebu
     }
 
     #ifdef __ANDROID__
-    if (frame_skipping) {
-        frame_skip_threshold = (target_fps == 30) ? 2 : 2;
-    }
+        // --- Frame Skipping/Interpolation Parameters ---
+        static intS frame_counter = 0;
+        static int skipped_frames = 0;
+        static int max_skip = 1; // Maximum consecutive frames to skip (configurable)
+        static int target_fps = 60; // Target FPS (configurable)
+        static int game_fps = 30;   // Game's native FPS (configurable)
+        static bool enable_frame_skipping = false; // Should be settable via config
+        static bool enable_frame_interpolation = false; // Should be settable via config
 
-    frame_counter++;
-    if (frame_counter % frame_skip_threshold != 0) {
-        if (frame_interpolation && previous_frame) {
-            Frame* interpolated_frame = present_manager.GetRenderFrame();
-            InterpolateFrames(previous_frame, interpolated_frame);
-            blit_swapchain.DrawToFrame(rasterizer, interpolated_frame, framebuffers,
-                                       render_window.GetFramebufferLayout(), swapchain.GetImageCount(),
-                                       swapchain.GetImageViewFormat());
-            scheduler.Flush(*interpolated_frame->render_ready);
-            present_manager.Present(interpolated_frame);
+        // Calculate skip interval: how many frames to skip before rendering one
+        int skip_interval = (target_fps / game_fps) - 1;
+        if (skip_interval < 0) skip_interval = 0;
+        if (skip_interval > max_skip) skip_interval = max_skip;
+
+        frame_counter++;
+
+        // Frame skipping logic: skip 'skip_interval' frames, then render one
+        if (enable_frame_skipping && skip_interval > 0) {
+            if (skipped_frames < skip_interval) {
+                skipped_frames++;
+                // Optionally interpolate if enabled and previous_frame exists
+                if (enable_frame_interpolation && previous_frame) {
+                    Frame* interpolated_frame = present_manager.GetRenderFrame();
+                    InterpolateFrames(previous_frame, interpolated_frame);
+                    blit_swapchain.DrawToFrame(rasterizer, interpolated_frame, framebuffers,
+                                               render_window.GetFramebufferLayout(), swapchain.GetImageCount(),
+                                               swapchain.GetImageViewFormat());
+                    scheduler.Flush(*interpolated_frame->render_ready);
+                    present_manager.Present(interpolated_frame);
+                }
+                return;
+            } else {
+                skipped_frames = 0; // Reset after rendering a frame
+            }
         }
-        return;
-    }
     #endif
 
     SCOPE_EXIT {

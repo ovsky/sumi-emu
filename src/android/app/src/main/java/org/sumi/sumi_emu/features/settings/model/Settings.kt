@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright yuzu/Citra Emulator Project / Eden Emulator Project
+// SPDX-FileCopyrightText: Copyright yuzu/Citra Emulator Project / Sumi Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 
