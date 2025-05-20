@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 
-package org.yuzu.yuzu_emu.features.settings.model
+package org.sumi.sumi_emu.features.settings.model
 
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
+import org.sumi.sumi_emu.R
+import org.sumi.sumi_emu.YuzuApplication
 
 object Settings {
     enum class MenuTag(val titleId: Int = 0) {

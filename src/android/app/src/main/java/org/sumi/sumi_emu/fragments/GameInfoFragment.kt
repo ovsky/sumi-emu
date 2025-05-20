@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright yuzu/Citra Emulator Project / Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.ui
+package org.sumi.sumi_emu.ui
 
 import android.content.Context
 import android.content.Intent
@@ -33,20 +33,20 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.color.MaterialColors
 import info.debatty.java.stringsimilarity.Jaccard
 import info.debatty.java.stringsimilarity.JaroWinkler
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.adapters.GameAdapter
-import org.yuzu.yuzu_emu.databinding.FragmentGamesBinding
-import org.yuzu.yuzu_emu.model.Game
-import org.yuzu.yuzu_emu.model.GamesViewModel
-import org.yuzu.yuzu_emu.model.HomeViewModel
-import org.yuzu.yuzu_emu.ui.main.MainActivity
-import org.yuzu.yuzu_emu.utils.ViewUtils.setVisible
-import org.yuzu.yuzu_emu.utils.collect
+import org.sumi.sumi_emu.R
+import org.sumi.sumi_emu.YuzuApplication
+import org.sumi.sumi_emu.adapters.GameAdapter
+import org.sumi.sumi_emu.databinding.FragmentGamesBinding
+import org.sumi.sumi_emu.model.Game
+import org.sumi.sumi_emu.model.GamesViewModel
+import org.sumi.sumi_emu.model.HomeViewModel
+import org.sumi.sumi_emu.ui.main.MainActivity
+import org.sumi.sumi_emu.utils.ViewUtils.setVisible
+import org.sumi.sumi_emu.utils.collect
 import java.util.Locale
 import androidx.core.content.edit
 import androidx.core.view.updateLayoutParams
-import org.yuzu.yuzu_emu.features.settings.model.Settings
+import org.sumi.sumi_emu.features.settings.model.Settings
 
 class GamesFragment : Fragment() {
     private var _binding: FragmentGamesBinding? = null

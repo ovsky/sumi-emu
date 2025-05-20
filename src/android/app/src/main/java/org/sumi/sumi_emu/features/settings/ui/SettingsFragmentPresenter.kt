@@ -1,33 +1,33 @@
 // SPDX-FileCopyrightText: Copyright yuzu/Citra Emulator Project / Eden Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.yuzu.yuzu_emu.features.settings.ui
+package org.sumi.sumi_emu.features.settings.ui
 
 import android.annotation.SuppressLint
 import android.os.Build
 import android.widget.Toast
 import androidx.preference.PreferenceManager
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.YuzuApplication
-import org.yuzu.yuzu_emu.features.input.NativeInput
-import org.yuzu.yuzu_emu.features.input.model.AnalogDirection
-import org.yuzu.yuzu_emu.features.input.model.NativeAnalog
-import org.yuzu.yuzu_emu.features.input.model.NativeButton
-import org.yuzu.yuzu_emu.features.input.model.NpadStyleIndex
-import org.yuzu.yuzu_emu.features.settings.model.AbstractBooleanSetting
-import org.yuzu.yuzu_emu.features.settings.model.AbstractIntSetting
-import org.yuzu.yuzu_emu.features.settings.model.BooleanSetting
-import org.yuzu.yuzu_emu.features.settings.model.ByteSetting
-import org.yuzu.yuzu_emu.features.settings.model.IntSetting
-import org.yuzu.yuzu_emu.features.settings.model.LongSetting
-import org.yuzu.yuzu_emu.features.settings.model.Settings
-import org.yuzu.yuzu_emu.features.settings.model.Settings.MenuTag
-import org.yuzu.yuzu_emu.features.settings.model.ShortSetting
-import org.yuzu.yuzu_emu.features.settings.model.StringSetting
-import org.yuzu.yuzu_emu.features.settings.model.view.*
-import org.yuzu.yuzu_emu.utils.InputHandler
-import org.yuzu.yuzu_emu.utils.NativeConfig
+import org.sumi.sumi_emu.NativeLibrary
+import org.sumi.sumi_emu.R
+import org.sumi.sumi_emu.YuzuApplication
+import org.sumi.sumi_emu.features.input.NativeInput
+import org.sumi.sumi_emu.features.input.model.AnalogDirection
+import org.sumi.sumi_emu.features.input.model.NativeAnalog
+import org.sumi.sumi_emu.features.input.model.NativeButton
+import org.sumi.sumi_emu.features.input.model.NpadStyleIndex
+import org.sumi.sumi_emu.features.settings.model.AbstractBooleanSetting
+import org.sumi.sumi_emu.features.settings.model.AbstractIntSetting
+import org.sumi.sumi_emu.features.settings.model.BooleanSetting
+import org.sumi.sumi_emu.features.settings.model.ByteSetting
+import org.sumi.sumi_emu.features.settings.model.IntSetting
+import org.sumi.sumi_emu.features.settings.model.LongSetting
+import org.sumi.sumi_emu.features.settings.model.Settings
+import org.sumi.sumi_emu.features.settings.model.Settings.MenuTag
+import org.sumi.sumi_emu.features.settings.model.ShortSetting
+import org.sumi.sumi_emu.features.settings.model.StringSetting
+import org.sumi.sumi_emu.features.settings.model.view.*
+import org.sumi.sumi_emu.utils.InputHandler
+import org.sumi.sumi_emu.utils.NativeConfig
 import androidx.core.content.edit
 
 class SettingsFragmentPresenter(

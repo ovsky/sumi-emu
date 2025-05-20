@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.yuzu.yuzu_emu.features.settings.model
+package org.sumi.sumi_emu.features.settings.model
 
-import org.yuzu.yuzu_emu.utils.NativeConfig
+import org.sumi.sumi_emu.utils.NativeConfig
 
 enum class IntSetting(override val key: String) : AbstractIntSetting {
     CPU_BACKEND("cpu_backend"),

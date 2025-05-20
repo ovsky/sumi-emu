@@ -288,8 +288,8 @@
     <string name="install_game_content_help_link">https://yuzu-emu.org/help/quickstart/#dumping-installed-updates</string>
     <string name="custom_driver_not_supported">Custom drivers not supported</string>
     <string name="custom_driver_not_supported_description">Custom driver loading isn\'t currently supported for this device.\nCheck this option again in the future to see if support was added!</string>
-    <string name="manage_yuzu_data">Manage eden data</string>
-    <string name="manage_yuzu_data_description">Import/export firmware, keys, user data, and more!</string>
+    <string name="manage_sumi_data">Manage eden data</string>
+    <string name="manage_sumi_data_description">Import/export firmware, keys, user data, and more!</string>
     <string name="share_save_file">Share save file</string>
     <string name="export_save_failed">Failed to export save</string>
     <string name="game_folders">Game folders</string>
@@ -346,7 +346,7 @@
     <string name="exporting_user_data">Exporting user data…</string>
     <string name="importing_user_data">Importing user data…</string>
     <string name="import_user_data">Import user data</string>
-    <string name="invalid_yuzu_backup">Invalid eden backup</string>
+    <string name="invalid_sumi_backup">Invalid eden backup</string>
     <string name="user_data_export_success">User data exported successfully</string>
     <string name="user_data_import_success">User data imported successfully</string>
     <string name="user_data_export_cancelled">Export cancelled</string>
@@ -357,7 +357,7 @@
 
     <!-- Early access upgrade strings -->
     <string name="early_access">Early Access</string>
-    <string name="play_store_link">https://play.google.com/store/apps/details?id=org.yuzu.yuzu_emu.ea</string>
+    <string name="play_store_link">https://play.google.com/store/apps/details?id=org.sumi.sumi_emu.ea</string>
     <string name="early_access_benefits">Early Access Benefits</string>
     <string name="cutting_edge_features">Cutting-edge features</string>
     <string name="early_access_updates">Early access to updates</string>

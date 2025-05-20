@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 
-package org.yuzu.yuzu_emu.fragments
+package org.sumi.sumi_emu.fragments
 
 import android.annotation.SuppressLint
 import android.app.ActivityManager
@@ -53,32 +53,32 @@ import androidx.window.layout.WindowLayoutInfo
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.slider.Slider
-import org.yuzu.yuzu_emu.HomeNavigationDirections
-import org.yuzu.yuzu_emu.NativeLibrary
-import org.yuzu.yuzu_emu.R
-import org.yuzu.yuzu_emu.activities.EmulationActivity
-import org.yuzu.yuzu_emu.databinding.DialogOverlayAdjustBinding
-import org.yuzu.yuzu_emu.databinding.FragmentEmulationBinding
-import org.yuzu.yuzu_emu.features.settings.model.BooleanSetting
-import org.yuzu.yuzu_emu.features.settings.model.IntSetting
-import org.yuzu.yuzu_emu.features.settings.model.Settings
-import org.yuzu.yuzu_emu.features.settings.model.Settings.EmulationOrientation
-import org.yuzu.yuzu_emu.features.settings.model.Settings.EmulationVerticalAlignment
-import org.yuzu.yuzu_emu.features.settings.utils.SettingsFile
-import org.yuzu.yuzu_emu.model.DriverViewModel
-import org.yuzu.yuzu_emu.model.EmulationViewModel
-import org.yuzu.yuzu_emu.model.Game
-import org.yuzu.yuzu_emu.overlay.model.OverlayControl
-import org.yuzu.yuzu_emu.overlay.model.OverlayLayout
-import org.yuzu.yuzu_emu.utils.DirectoryInitialization
-import org.yuzu.yuzu_emu.utils.FileUtil
-import org.yuzu.yuzu_emu.utils.GameHelper
-import org.yuzu.yuzu_emu.utils.GameIconUtils
-import org.yuzu.yuzu_emu.utils.Log
-import org.yuzu.yuzu_emu.utils.NativeConfig
-import org.yuzu.yuzu_emu.utils.ViewUtils
-import org.yuzu.yuzu_emu.utils.ViewUtils.setVisible
-import org.yuzu.yuzu_emu.utils.collect
+import org.sumi.sumi_emu.HomeNavigationDirections
+import org.sumi.sumi_emu.NativeLibrary
+import org.sumi.sumi_emu.R
+import org.sumi.sumi_emu.activities.EmulationActivity
+import org.sumi.sumi_emu.databinding.DialogOverlayAdjustBinding
+import org.sumi.sumi_emu.databinding.FragmentEmulationBinding
+import org.sumi.sumi_emu.features.settings.model.BooleanSetting
+import org.sumi.sumi_emu.features.settings.model.IntSetting
+import org.sumi.sumi_emu.features.settings.model.Settings
+import org.sumi.sumi_emu.features.settings.model.Settings.EmulationOrientation
+import org.sumi.sumi_emu.features.settings.model.Settings.EmulationVerticalAlignment
+import org.sumi.sumi_emu.features.settings.utils.SettingsFile
+import org.sumi.sumi_emu.model.DriverViewModel
+import org.sumi.sumi_emu.model.EmulationViewModel
+import org.sumi.sumi_emu.model.Game
+import org.sumi.sumi_emu.overlay.model.OverlayControl
+import org.sumi.sumi_emu.overlay.model.OverlayLayout
+import org.sumi.sumi_emu.utils.DirectoryInitialization
+import org.sumi.sumi_emu.utils.FileUtil
+import org.sumi.sumi_emu.utils.GameHelper
+import org.sumi.sumi_emu.utils.GameIconUtils
+import org.sumi.sumi_emu.utils.Log
+import org.sumi.sumi_emu.utils.NativeConfig
+import org.sumi.sumi_emu.utils.ViewUtils
+import org.sumi.sumi_emu.utils.ViewUtils.setVisible
+import org.sumi.sumi_emu.utils.collect
 import java.io.File
 
 class EmulationFragment : Fragment(), SurfaceHolder.Callback {
@@ -620,7 +620,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
                     }
 
                     if (BooleanSetting.OVERLAY_BACKGROUND.getBoolean(NativeConfig.isPerGameConfigLoaded())) {
-                        binding.showStatsOverlayText.setBackgroundResource(R.color.yuzu_transparent_black)
+                        binding.showStatsOverlayText.setBackgroundResource(R.color.sumi_transparent_black)
                     } else {
                         binding.showStatsOverlayText.setBackgroundResource(0)
                     }

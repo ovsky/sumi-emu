@@ -6,14 +6,14 @@ set -e
 # check arguments
 if [[ $# != 2 ]]; then
     >&2 echo "Invalid arguments!"
-    echo "Usage: $0 torzu|sumi <build dir>"
+    echo "Usage: $0 sumi|sumi <build dir>"
     exit 1
 fi
 
 BUILD_APP="$1"
-if [[ "${BUILD_APP}" != "torzu" && "${BUILD_APP}" != "sumi" ]]; then
+if [[ "${BUILD_APP}" != "sumi" && "${BUILD_APP}" != "sumi" ]]; then
     >&2 echo "Invalid arguments!"
-    echo "Usage: $0 torzu|sumi <build dir>"
+    echo "Usage: $0 sumi|sumi <build dir>"
     exit 1
 fi
 
@@ -27,7 +27,7 @@ fi
 DEPLOY_LINUX_FOLDER="${BUILD_DIR}/deploy-linux"
 DEPLOY_LINUX_APPDIR_FOLDER="${BUILD_DIR}/deploy-linux/AppDir"
 BIN_FOLDER="${BUILD_DIR}/bin"
-BIN_EXE="${BIN_FOLDER}/${BUILD_APP//torzu/yuzu}"
+BIN_EXE="${BIN_FOLDER}/${BUILD_APP//sumi/sumi-emu}"
 
 CPU_ARCH=$(uname -m)
 
@@ -50,7 +50,7 @@ DESTDIR="${DEPLOY_LINUX_APPDIR_FOLDER}" ninja install
 cd "${DEPLOY_LINUX_FOLDER}"
 
 # remove -cmd executable, not needed for AppImage
-rm -fv "${DEPLOY_LINUX_APPDIR_FOLDER}"/usr/bin/"${BUILD_APP//torzu/yuzu}"-cmd
+rm -fv "${DEPLOY_LINUX_APPDIR_FOLDER}"/usr/bin/"${BUILD_APP//sumi/sumi-emu}"-cmd
 
 curl -fsSLo ./linuxdeploy "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-${CPU_ARCH}.AppImage"
 chmod +x ./linuxdeploy

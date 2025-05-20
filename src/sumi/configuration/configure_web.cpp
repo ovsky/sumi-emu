@@ -55,7 +55,7 @@ void ConfigureWeb::ApplyConfiguration() {
     UISettings::values.enable_discord_presence = ui->toggle_discordrpc->isChecked();
     if (Settings::values.sumi_username.GetValue().empty()) {
         // Backup: default name should already be set by ConfigureProfileManager::UpdateCurrentUser()
-        Settings::values.sumi_username = "torzu";
+        Settings::values.sumi_username = "sumi";
     } else {
         // If a name already exist, reassign it to itself (needed for change set with a profile switch)
         Settings::values.sumi_username = Settings::values.sumi_username.GetValue();
