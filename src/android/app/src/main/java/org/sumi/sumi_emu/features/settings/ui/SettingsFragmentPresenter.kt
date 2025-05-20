@@ -236,7 +236,7 @@ class SettingsFragmentPresenter(
                 SubmenuSetting(
                     titleId = R.string.eden_veil,
                     descriptionId = R.string.eden_veil_description,
-                    iconId = R.drawable.ic_code,
+                    iconId = R.drawable.ui_select_all,
                     menuKey = MenuTag.SECTION_EDEN_VEIL
                 )
             )

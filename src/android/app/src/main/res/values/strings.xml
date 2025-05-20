@@ -45,51 +45,49 @@
     <string name="overlay_background">Overlay Background</string>
     <string name="overlay_background_description">Adds a background behind the overlay for easier reading</string>
 
-    <!-- Sumi`s Veil -->
-    <string name="eden_veil">Sumi’s Veil</string>
-    <string name="eden_veil_description">Experimental settings to improve performance and capability. These settings may cause black screens or other game issues.</string>
-    <string name="eden_veil_warning_title">Experimental Settings</string>
-    <string name="eden_veil_warning_description">The settings contained within Sumi\'s Veil are highly experimental and may cause issues. If your game does not boot, disable any extensions and change Extended Dynamic State to 0.</string>
+    <!-- Sumi Debuf Settings -->
+    <string name="eden_veil">Sumi Debug Settings</string>
+    <string name="eden_veil_description">Access experimental features designed to enhance performance and functionality. Please be aware that enabling these options may lead to instability, such as black screens or other in-game issues.</string>
+    <string name="eden_veil_warning_title">Experimental Settings Advisory</string>
+    <string name="eden_veil_warning_description">Settings within Sumi Debug Settings are highly experimental and may cause instability. If your game fails to start, try disabling any active extensions and setting \'Extended Dynamic State\' to 0 as a first step.</string>
 
     <string name="veil_extensions">GPU Extensions</string>
     <string name="dyna_state">Extended Dynamic State</string>
-    <string name="dyna_state_description">Enables Vulkan features to improve performance, rendering, and save resources on pipeline creation while maintaining lower CPU/GPU usage. These extensions may increase device temperature, and GPUs belonging to the older A6XX line may not react properly. Set to 0 to use Legacy emulated formats.</string>
-    <string name="provoking_vertex">Provoking Vertex</string>
-    <string name="provoking_vertex_description">Improves lighting and vertex handling in certain games. Only supported on Vulkan 1.0+ GPUs.</string>
+    <string name="dyna_state_description">Leverages advanced Vulkan features to potentially boost performance, enhance rendering quality, and optimize resource usage during pipeline creation, aiming for reduced CPU/GPU load. Note: Enabling this may increase device temperature. Older Adreno 6XX series GPUs might experience compatibility issues. Set to \'0\' to use legacy emulated formats.</string>
+    <string name="provoking_vertex">Provoking Vertex Mode</string>
+    <string name="provoking_vertex_description">Adjusts how vertex data is interpreted, potentially improving lighting and geometry rendering in certain games. Requires a GPU supporting Vulkan 1.0 or newer.</string>
     <string name="descriptor_indexing">Descriptor Indexing</string>
-    <string name="descriptor_indexing_description">Improves texture and buffer handling, as well as the Maxwell translation layer. Supported by some Vulkan 1.1 GPUs and all Vulkan 1.2+ GPUs.</string>
+    <string name="descriptor_indexing_description">Enhances texture and buffer management, and may improve the Maxwell translation layer. Supported by some Vulkan 1.1 GPUs and all Vulkan 1.2+ and newer GPUs.</string>
 
-    <string name="veil_renderer">Renderer</string>
+    <string name="veil_renderer">Renderer Settings</string>
     <string name="frame_interpolation">Enhanced Frame Pacing</string>
-    <string name="frame_interpolation_description">Ensures smooth and consistent frame delivery by synchronizing the timing between frames, reducing stuttering and uneven animation. Ideal for games that experience frame timing instability or micro-stutters during gameplay.</string>
-    <string name="use_auto_stub">Use Auto Stub</string>
-    <string name="use_auto_stub_description">Automatically stub missing services and functions. This may improve compatibility but can cause crashes and stability issues.</string>
-    <string name="uninstall_firmware">Uninstall firmware</string>
-    <string name="uninstall_firmware_description">Uninstalling the firmware will remove it from the device and may affect game compatibility.</string>
-    <string name="firmware_uninstalling">Uninstalling firmware</string>
-    <string name="firmware_uninstalled_success">Firmware uninstalled successfully</string>
+    <string name="frame_interpolation_description">Promotes smoother, more consistent frame delivery by synchronizing inter-frame timing. This can reduce stuttering and animation unevenness. Recommended for games prone to frame timing instability or micro-stutters.</string>
+    <string name="use_auto_stub">Enable Automatic Stubbing</string>
+    <string name="use_auto_stub_description">Automatically provides placeholders for missing system services and functions. This can improve compatibility with some titles but may lead to crashes or other stability problems.</string>
+    <string name="uninstall_firmware">Uninstall Firmware</string>
+    <string name="uninstall_firmware_description">Removes installed firmware from the device. This action may impact game compatibility or prevent certain titles from running.</string>
+    <string name="firmware_uninstalling">Uninstalling Firmware...</string>
+    <string name="firmware_uninstalled_success">Firmware successfully uninstalled.</string>
 
-    <string name="veil_misc">Miscellaneous</string>
+    <string name="veil_misc">Miscellaneous Optimizations</string>
     <string name="use_sync_core">Synchronize Core Speed</string>
-    <string name="use_sync_core_description">Synchronize the core tick speed to the maximum speed percentage to improve performance without altering the game\'s actual speed.</string>
+    <string name="use_sync_core_description">Synchronizes the emulated core\'s tick speed with a target percentage of maximum speed. This can enhance performance smoothness without affecting the game\'s internal speed.</string>
     <string name="use_lru_cache">Enable LRU Cache</string>
-    <string name="use_lru_cache_description">Enable or disable the Least Recently Used (LRU) cache, increasing performance by saving CPU process usage. Some games have issue with it, notably TotK 1.2.1, so disable if the game doesn\'t boot or crashes randomly.</string>
-    <string name="memory_layout">Memory Layout</string>
-    <string name="memory_layout_description">(EXPERIMENTAL) Change the emulated memory layout. This setting will not increase performance, but may help with games utilizing high resolutions via mods. Do not use on phones with 8GB of RAM or less.</string>
+    <string name="use_lru_cache_description">Toggles the Least Recently Used (LRU) cache. Enabling it can improve performance by reducing CPU processing overhead. However, some games (e.g., Tears of the Kingdom v1.2.1) may experience issues. Disable if a game fails to boot or crashes unexpectedly.</string>
+    <string name="memory_layout">Memory Layout Configuration</string>
+    <string name="memory_layout_description">(EXPERIMENTAL) Modifies the emulated memory layout. While this won\'t directly boost performance, it can assist with stability in games using high-resolution mods. Not recommended for devices with 8GB of RAM or less.</string>
 
-    <!-- Shader Backend -->
     <string name="shader_backend">Shader Backend</string>
-    <string name="shader_backend_description">Choose how shaders are compiled and translated for your GPU.</string>
-    <string name="shader_backend_glsl">Universal</string>
-    <string name="shader_backend_glasm">Mali</string>
-    <string name="shader_backend_spirv">Adreno/Xclipse</string>
+    <string name="shader_backend_description">Select the compilation and translation method for shaders, tailored to your GPU.</string>
+    <string name="shader_backend_glsl">Universal (GLSL)</string>
+    <string name="shader_backend_glasm">Mali Native (GLASM)</string>
+    <string name="shader_backend_spirv">Adreno/Xclipse Native (SPIR-V)</string>
 
-    <!-- NVDEC Emulation -->
-    <string name="nvdec_emulation">NVDEC Emulation</string>
-    <string name="nvdec_emulation_description">Select how video decoding (NVDEC) is handled during cutscenes and intros.</string>
-    <string name="nvdec_emulation_cpu">CPU</string>
-    <string name="nvdec_emulation_gpu">GPU</string>
-    <string name="nvdec_emulation_none">None</string>
+    <string name="nvdec_emulation">Video Decoding (NVDEC) Emulation</string>
+    <string name="nvdec_emulation_description">Choose the method for handling video decoding, primarily used for in-game cutscenes and introductions.</string>
+    <string name="nvdec_emulation_cpu">CPU Decoding</string>
+    <string name="nvdec_emulation_gpu">GPU Accelerated Decoding</string>
+    <string name="nvdec_emulation_none">Disable Video Decoding</string>
 
     <!-- Optimize SPIRV output -->
     <string name="never">Never</string>
