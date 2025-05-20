@@ -44,6 +44,7 @@ public:
     void ShutdownEmulation();
 
     const Core::PerfStatsResults& PerfStats();
+    int ShadersBuilding();
     void ConfigureFilesystemProvider(const std::string& filepath);
     void InitializeSystem(bool reload);
     void SetAppletId(int applet_id);
@@ -72,6 +73,7 @@ private:
     InputCommon::InputSubsystem m_input_subsystem;
     Common::DetachedTasks m_detached_tasks;
     Core::PerfStatsResults m_perf_stats{};
+    int m_shaders_building{0};
     std::shared_ptr<FileSys::VfsFilesystem> m_vfs;
     Core::SystemResultStatus m_load_result{Core::SystemResultStatus::ErrorNotInitialized};
     std::atomic<bool> m_is_running = false;

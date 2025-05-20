@@ -21,6 +21,18 @@
         <item>1</item>
     </integer-array>
 
+    <string-array name="memoryNames">
+        <item>@string/memory_4gb</item>
+        <item>@string/memory_6gb</item>
+        <item>@string/memory_8gb</item>
+    </string-array>
+
+    <integer-array name="memoryValues">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </integer-array>
+
     <string-array name="languageNames">
         <item>@string/language_brazilian_portuguese</item>
         <item>@string/language_british_english</item>
@@ -85,8 +97,73 @@
         <item>2</item>
     </integer-array>
 
+    <string-array name="rendererShaderNames">
+        <item>@string/shader_backend_glsl</item>
+        <item>@string/shader_backend_glasm</item>
+        <item>@string/shader_backend_spirv</item>
+    </string-array>
+
+    <integer-array name="rendererShaderValues">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </integer-array>
+
+    <!-- VRAM USAGE MODE CHOICES -->
+    <string-array name="vramUsageMethodNames">
+        <item>@string/vram_usage_conservative</item>
+        <item>@string/vram_usage_aggressive</item>
+    </string-array>
+
+    <!-- VRAM USAGE MODE VALUES -->
+    <integer-array name="vramUsageMethodValues">
+        <item>0</item> <!-- Conservative -->
+        <item>1</item> <!-- Aggressive -->
+    </integer-array>
+
+    <!-- ASTC Decoding Method Choices -->
+    <string-array name="astcDecodingMethodNames">
+        <item>@string/accelerate_astc_cpu</item>
+        <item>@string/accelerate_astc_gpu</item>
+        <item>@string/accelerate_astc_async</item>
+    </string-array>
+
+    <!-- ASTC Decoding Method Values -->
+    <integer-array name="astcDecodingMethodValues">
+        <item>0</item> <!-- CPU -->
+        <item>1</item> <!-- GPU -->
+        <item>2</item> <!-- CPU Asynchronously -->
+    </integer-array>
+
+    <!-- ASTC Recompression Method Choices -->
+    <string-array name="astcRecompressionMethodNames">
+        <item>@string/astc_recompression_uncompressed</item>
+        <item>@string/astc_recompression_bc1</item>
+        <item>@string/astc_recompression_bc3</item>
+    </string-array>
+
+    <!-- ASTC Recompression Method Values -->
+    <integer-array name="astcRecompressionMethodValues">
+        <item>0</item> <!-- Uncompressed -->
+        <item>1</item> <!-- BC1 -->
+        <item>2</item> <!-- BC3 -->
+    </integer-array>
+
+    <!-- NVDEC Emulation Choices -->
+    <string-array name="rendererNvdecNames">
+        <item>@string/nvdec_emulation_none</item> <!-- Off -->
+        <item>@string/nvdec_emulation_cpu</item>  <!-- Cpu -->
+        <item>@string/nvdec_emulation_gpu</item>  <!-- Gpu -->
+    </string-array>
+
+    <!-- NVDEC Emulation Values -->
+    <integer-array name="rendererNvdecValues">
+        <item>3</item> <!-- Off value -->
+        <item>1</item> <!-- CPU value -->
+        <item>2</item> <!-- GPU value -->
+    </integer-array>
+
     <string-array name="rendererResolutionNames">
-        <item>@string/resolution_pico</item>
         <item>@string/resolution_half</item>
         <item>@string/resolution_three_quarter</item>
         <item>@string/resolution_one</item>
@@ -102,12 +179,6 @@
         <item>@string/renderer_vsync_fifo_relaxed</item>
     </string-array>
 
-    <string-array name="intelligentPerformanceNames">
-        <item>@string/intelligent_performance_performance</item>
-        <item>@string/intelligent_performance_moderate</item>
-        <item>@string/intelligent_performance_relaxed</item>
-    </string-array>
-
     <integer-array name="rendererResolutionValues">
         <item>0</item>
         <item>1</item>
@@ -115,7 +186,6 @@
         <item>3</item>
         <item>4</item>
         <item>5</item>
-        <item>6</item>
     </integer-array>
 
     <integer-array name="rendererVSyncValues">
@@ -123,12 +193,6 @@
         <item>1</item>
         <item>2</item>
         <item>3</item>
-    </integer-array>
-
-    <integer-array name="intelligentPerformanceValues">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
     </integer-array>
 
     <string-array name="rendererScreenLayoutNames">
@@ -195,6 +259,23 @@
         <item>0</item>
         <item>1</item>
         <item>2</item>
+    </integer-array>
+
+    <string-array name="statsPosition">
+        <item>@string/overlay_position_top_left</item>
+        <item>@string/overlay_position_center_top</item>
+        <item>@string/overlay_position_top_right</item>
+        <item>@string/overlay_position_bottom_left</item>
+        <item>@string/overlay_position_center_bottom</item>
+        <item>@string/overlay_position_bottom_right</item>
+    </string-array>
+    <integer-array name="statsPositionValues">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
     </integer-array>
 
     <string-array name="cpuBackendArm64Names">
@@ -289,6 +370,29 @@
         <item>3</item>
     </integer-array>
 
+    <string-array name="staticThemeNames">
+        <item>@string/violet</item>
+        <item>@string/blue</item>
+        <item>@string/cyan</item>
+        <item>@string/red</item>
+        <item>@string/green</item>
+        <item>@string/yellow</item>
+        <item>@string/orange</item>
+        <item>@string/pink</item>
+        <item>@string/gray</item>
+    </string-array>
+    <integer-array name="staticThemeValues">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+    </integer-array>
+
     <string-array name="anisoEntries">
         <item>@string/auto</item>
         <item>@string/slider_default</item>
@@ -317,4 +421,24 @@
         <item>2</item>
     </integer-array>
 
+    <string-array name="optimizeSpirvOutputEntries">
+        <item>@string/never</item>
+        <item>@string/on_load</item>
+        <item>@string/always</item>
+    </string-array>
+    <integer-array name="optimizeSpirvOutputValues">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </integer-array>
+
+    <string-array name="appletEntries">
+        <item>@string/applet_hle</item>
+        <item>@string/applet_lle</item>
+    </string-array>
+
+    <integer-array name="appletValues">
+        <item>0</item>
+        <item>1</item>
+    </integer-array>
 </resources>

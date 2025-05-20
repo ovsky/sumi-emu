@@ -1,17 +1,18 @@
-// SPDX-FileCopyrightText: 2023 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-FileCopyrightText: Copyright yuzu/Citra Emulator Project / Eden Emulator Project
+// SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.sumi.sumi_emu.features.settings.model
 
-import org.sumi.sumi_emu.R
-import org.sumi.sumi_emu.SumiApplication
+package org.yuzu.yuzu_emu.features.settings.model
+
+import org.yuzu.yuzu_emu.R
+import org.yuzu.yuzu_emu.YuzuApplication
 
 object Settings {
     enum class MenuTag(val titleId: Int = 0) {
         SECTION_ROOT(R.string.advanced_settings),
         SECTION_SYSTEM(R.string.preferences_system),
-        SECTION_RENDERER(R.string.preferences_renderer),
-        SECTION_EXPERIMENTAL(R.string.preferences_experimental),
+        SECTION_RENDERER(R.string.preferences_graphics),
+        SECTION_PERFORMANCE_STATS(R.string.show_stats_overlay),
         SECTION_AUDIO(R.string.preferences_audio),
         SECTION_INPUT(R.string.preferences_controls),
         SECTION_INPUT_PLAYER_ONE,
@@ -23,14 +24,19 @@ object Settings {
         SECTION_INPUT_PLAYER_SEVEN,
         SECTION_INPUT_PLAYER_EIGHT,
         SECTION_THEME(R.string.preferences_theme),
-        SECTION_DEBUG(R.string.preferences_debug);
+        SECTION_DEBUG(R.string.preferences_debug),
+        SECTION_EDEN_VEIL(R.string.eden_veil),
+        SECTION_APPLETS(R.string.applets_menu);
     }
 
     fun getPlayerString(player: Int): String =
-        SumiApplication.appContext.getString(R.string.preferences_player, player)
+        YuzuApplication.appContext.getString(R.string.preferences_player, player)
 
     const val PREF_FIRST_APP_LAUNCH = "FirstApplicationLaunch"
+    const val PREF_SHOULD_SHOW_PRE_ALPHA_WARNING = "ShouldShowPreAlphaWarning"
+    const val PREF_SHOULD_SHOW_PRE_ALPHA_BANNER = "ShouldShowPreAlphaBanner"
     const val PREF_MEMORY_WARNING_SHOWN = "MemoryWarningShown"
+    const val SECTION_STATS_OVERLAY = "Stats Overlay"
 
     // Deprecated input overlay preference keys
     const val PREF_CONTROL_SCALE = "controlScale"
@@ -92,6 +98,7 @@ object Settings {
     const val PREF_THEME = "Theme"
     const val PREF_THEME_MODE = "ThemeMode"
     const val PREF_BLACK_BACKGROUNDS = "BlackBackgrounds"
+    const val PREF_STATIC_THEME_COLOR = "StaticThemeColor"
 
     enum class EmulationOrientation(val int: Int) {
         Unspecified(0),
@@ -118,4 +125,15 @@ object Settings {
                 entries.firstOrNull { it.int == int } ?: Center
         }
     }
+
+     enum class OptimizeSpirvOutput(val int: Int) {
+         Never(0),
+         OnLoad(1),
+         Always(2);
+
+         companion object {
+             fun from(int: Int): OptimizeSpirvOutput =
+                 entries.firstOrNull { it.int == int } ?: OnLoad
+         }
+     }
 }

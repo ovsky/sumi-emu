@@ -1,23 +1,24 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.sumi.sumi_emu.features.settings.model.view
+package org.yuzu.yuzu_emu.features.settings.model.view
 
 import androidx.annotation.StringRes
-import org.sumi.sumi_emu.NativeLibrary
-import org.sumi.sumi_emu.R
-import org.sumi.sumi_emu.SumiApplication
-import org.sumi.sumi_emu.features.input.NativeInput
-import org.sumi.sumi_emu.features.input.model.NpadStyleIndex
-import org.sumi.sumi_emu.features.settings.model.AbstractBooleanSetting
-import org.sumi.sumi_emu.features.settings.model.AbstractSetting
-import org.sumi.sumi_emu.features.settings.model.BooleanSetting
-import org.sumi.sumi_emu.features.settings.model.ByteSetting
-import org.sumi.sumi_emu.features.settings.model.IntSetting
-import org.sumi.sumi_emu.features.settings.model.LongSetting
-import org.sumi.sumi_emu.features.settings.model.ShortSetting
-import org.sumi.sumi_emu.features.settings.model.StringSetting
-import org.sumi.sumi_emu.utils.NativeConfig
+import org.yuzu.yuzu_emu.NativeLibrary
+import org.yuzu.yuzu_emu.R
+import org.yuzu.yuzu_emu.SumiApplication
+import org.yuzu.yuzu_emu.features.input.NativeInput
+import org.yuzu.yuzu_emu.features.input.model.NpadStyleIndex
+import org.yuzu.yuzu_emu.features.settings.model.AbstractBooleanSetting
+import org.yuzu.yuzu_emu.features.settings.model.AbstractSetting
+import org.yuzu.yuzu_emu.features.settings.model.BooleanSetting
+import org.yuzu.yuzu_emu.features.settings.model.ByteSetting
+import org.yuzu.yuzu_emu.features.settings.model.IntSetting
+import org.yuzu.yuzu_emu.features.settings.model.LongSetting
+import org.yuzu.yuzu_emu.features.settings.model.ShortSetting
+import org.yuzu.yuzu_emu.features.settings.model.StringSetting
+import org.yuzu.yuzu_emu.utils.GpuDriverHelper
+import org.yuzu.yuzu_emu.utils.NativeConfig
 
 /**
  * ViewModel abstraction for an Item in the RecyclerView powering SettingsFragments.
@@ -113,6 +114,13 @@ abstract class SettingsItem(
             put(StringInputSetting(StringSetting.DEVICE_NAME, titleId = R.string.device_name))
             put(
                 SwitchSetting(
+                    BooleanSetting.USE_LRU_CACHE,
+                    titleId = R.string.use_lru_cache,
+                    descriptionId = R.string.use_lru_cache_description
+                )
+            )
+            put(
+                SwitchSetting(
                     BooleanSetting.RENDERER_USE_SPEED_LIMIT,
                     titleId = R.string.frame_limit_enable,
                     descriptionId = R.string.frame_limit_enable_description
@@ -120,11 +128,34 @@ abstract class SettingsItem(
             )
             put(
                 SliderSetting(
+                    ByteSetting.RENDERER_DYNA_STATE,
+                    titleId = R.string.dyna_state,
+                    descriptionId = R.string.dyna_state_description,
+                    min = 0,
+                    max = 3,
+                )
+            )
+            put(
+                SwitchSetting(
+                    BooleanSetting.RENDERER_PROVOKING_VERTEX,
+                    titleId = R.string.provoking_vertex,
+                    descriptionId = R.string.provoking_vertex_description
+                )
+            )
+            put(
+                SwitchSetting(
+                    BooleanSetting.RENDERER_DESCRIPTOR_INDEXING,
+                    titleId = R.string.descriptor_indexing,
+                    descriptionId = R.string.descriptor_indexing_description
+                )
+            )
+            put(
+                SliderSetting(
                     ShortSetting.RENDERER_SPEED_LIMIT,
                     titleId = R.string.frame_limit_slider,
                     descriptionId = R.string.frame_limit_slider_description,
-                    min = 25,
-                    max = 500,
+                    min = 1,
+                    max = 400,
                     units = "%"
                 )
             )
@@ -151,6 +182,13 @@ abstract class SettingsItem(
                     descriptionId = R.string.picture_in_picture_description
                 )
             )
+            put(
+                SwitchSetting(
+                    BooleanSetting.DEBUG_FLUSH_BY_LINE,
+                    titleId = R.string.flush_by_line,
+                    descriptionId = R.string.flush_by_line_description
+                )
+            )
 
             val dockedModeSetting = object : AbstractBooleanSetting {
                 override val key = BooleanSetting.USE_DOCKED_MODE.key
@@ -172,6 +210,23 @@ abstract class SettingsItem(
 
                 override fun reset() = BooleanSetting.USE_DOCKED_MODE.reset()
             }
+
+            put(
+                SwitchSetting(
+                    BooleanSetting.FRAME_INTERPOLATION,
+                    titleId = R.string.frame_interpolation,
+                    descriptionId = R.string.frame_interpolation_description
+                )
+            )
+
+//            put(
+//                SwitchSetting(
+//                    BooleanSetting.FRAME_SKIPPING,
+//                    titleId = R.string.frame_skipping,
+//                    descriptionId = R.string.frame_skipping_description
+//                )
+//            )
+
             put(
                 SwitchSetting(
                     dockedModeSetting,
@@ -179,6 +234,22 @@ abstract class SettingsItem(
                     descriptionId = R.string.use_docked_mode_description
                 )
             )
+            put(
+                SingleChoiceSetting(
+                    IntSetting.MEMORY_LAYOUT,
+                    titleId = R.string.memory_layout,
+                    descriptionId = R.string.memory_layout_description,
+                    choicesId = R.array.memoryNames,
+                    valuesId = R.array.memoryValues
+                )
+            )
+            put(
+                 SwitchSetting(
+                     BooleanSetting.CORE_SYNC_CORE_SPEED,
+                     titleId = R.string.use_sync_core,
+                     descriptionId = R.string.use_sync_core_description
+                 )
+             )
 
             put(
                 SingleChoiceSetting(
@@ -214,6 +285,52 @@ abstract class SettingsItem(
             )
             put(
                 SingleChoiceSetting(
+                    IntSetting.RENDERER_SHADER_BACKEND,
+                    titleId = R.string.shader_backend,
+                    descriptionId = R.string.shader_backend_description,
+                    choicesId = R.array.rendererShaderNames,
+                    valuesId = R.array.rendererShaderValues
+                )
+            )
+            put(
+                SingleChoiceSetting(
+                    IntSetting.RENDERER_NVDEC_EMULATION,
+                    titleId = R.string.nvdec_emulation,
+                    descriptionId = R.string.nvdec_emulation_description,
+                    choicesId = R.array.rendererNvdecNames,
+                    valuesId = R.array.rendererNvdecValues
+                )
+            )
+            put(
+                SingleChoiceSetting(
+                    IntSetting.RENDERER_ASTC_DECODE_METHOD,
+                    titleId = R.string.accelerate_astc,
+                    descriptionId = R.string.accelerate_astc_description,
+                    choicesId = R.array.astcDecodingMethodNames,
+                    valuesId = R.array.astcDecodingMethodValues
+                )
+            )
+            put(
+                SingleChoiceSetting(
+                    IntSetting.RENDERER_ASTC_RECOMPRESSION,
+                    titleId = R.string.astc_recompression,
+                    descriptionId = R.string.astc_recompression_description,
+                    choicesId = R.array.astcRecompressionMethodNames,
+                    valuesId = R.array.astcRecompressionMethodValues
+                )
+            )
+            put(
+                SingleChoiceSetting(
+                    IntSetting.RENDERER_VRAM_USAGE_MODE,
+                    titleId = R.string.vram_usage_mode,
+                    descriptionId = R.string.vram_usage_mode_description,
+                    choicesId = R.array.vramUsageMethodNames,
+                    valuesId = R.array.vramUsageMethodValues
+                )
+            )
+
+            put(
+                SingleChoiceSetting(
                     IntSetting.RENDERER_RESOLUTION,
                     titleId = R.string.renderer_resolution,
                     choicesId = R.array.rendererResolutionNames,
@@ -221,11 +338,68 @@ abstract class SettingsItem(
                 )
             )
             put(
+                SwitchSetting(
+                    BooleanSetting.SHOW_PERFORMANCE_OVERLAY,
+                    R.string.enable_stats_overlay_,
+                    descriptionId = R.string.stats_overlay_options_description
+                )
+            )
+            put(
+                SwitchSetting(
+                    BooleanSetting.OVERLAY_BACKGROUND,
+                    R.string.overlay_background,
+                    descriptionId = R.string.overlay_background_description
+                )
+            )
+            put(
                 SingleChoiceSetting(
-                    IntSetting.INTELLIGENT_PERFORMANCE,
-                    titleId = R.string.intelligent_performance,
-                    choicesId = R.array.intelligentPerformanceNames,
-                    valuesId = R.array.intelligentPerformanceValues
+                    IntSetting.PERF_OVERLAY_POSITION,
+                    titleId = R.string.overlay_position,
+                    descriptionId = R.string.overlay_position_description,
+                    choicesId = R.array.statsPosition,
+                    valuesId = R.array.staticThemeValues
+                )
+            )
+            put(
+                SwitchSetting(
+                    BooleanSetting.SHOW_FPS,
+                    R.string.show_fps,
+                    descriptionId = R.string.show_fps_description
+                )
+            )
+            put(
+                SwitchSetting(
+                    BooleanSetting.SHOW_FRAMETIME,
+                    R.string.show_frametime,
+                    descriptionId = R.string.show_frametime_description
+                )
+            )
+            put(
+                SwitchSetting(
+                    BooleanSetting.SHOW_APP_RAM_USAGE,
+                    R.string.show_app_ram_usage,
+                    descriptionId = R.string.show_app_ram_usage_description
+                )
+            )
+            put(
+                SwitchSetting(
+                    BooleanSetting.SHOW_SYSTEM_RAM_USAGE,
+                    R.string.show_system_ram_usage,
+                    descriptionId = R.string.show_system_ram_usage_description
+                )
+            )
+            put(
+                SwitchSetting(
+                    BooleanSetting.SHOW_BAT_TEMPERATURE,
+                    R.string.show_bat_temperature,
+                    descriptionId = R.string.show_bat_temperature_description
+                )
+            )
+            put(
+                SwitchSetting(
+                    BooleanSetting.SHOW_SHADERS_BUILDING,
+                    R.string.show_shaders_building,
+                    descriptionId = R.string.show_shaders_building_description
                 )
             )
             put(
@@ -300,10 +474,33 @@ abstract class SettingsItem(
                 )
             )
             put(
+                 SingleChoiceSetting(
+                     IntSetting.RENDERER_OPTIMIZE_SPIRV_OUTPUT,
+                     titleId = R.string.renderer_optimize_spirv_output,
+                     descriptionId = R.string.renderer_optimize_spirv_output_description,
+                     choicesId = R.array.optimizeSpirvOutputEntries,
+                     valuesId = R.array.optimizeSpirvOutputValues
+                 )
+             )
+            put(
                 SwitchSetting(
                     BooleanSetting.RENDERER_ASYNCHRONOUS_SHADERS,
                     titleId = R.string.renderer_asynchronous_shaders,
                     descriptionId = R.string.renderer_asynchronous_shaders_description
+                )
+            )
+            put(
+                SwitchSetting(
+                    BooleanSetting.RENDERER_FAST_GPU,
+                    titleId = R.string.use_fast_gpu_time,
+                    descriptionId = R.string.use_fast_gpu_time_description
+                )
+            )
+            put(
+                SwitchSetting(
+                    BooleanSetting.FAST_CPU_TIME,
+                    titleId = R.string.use_fast_cpu_time,
+                    descriptionId = R.string.use_fast_cpu_time_description
                 )
             )
             put(
@@ -354,6 +551,13 @@ abstract class SettingsItem(
                 )
             )
             put(
+                 SwitchSetting(
+                     BooleanSetting.USE_AUTO_STUB,
+                     titleId = R.string.use_auto_stub,
+                     descriptionId = R.string.use_auto_stub_description
+                 )
+             )
+            put(
                 SwitchSetting(
                     BooleanSetting.CPU_DEBUG_MODE,
                     titleId = R.string.cpu_debug_mode,
@@ -395,19 +599,13 @@ abstract class SettingsItem(
             }
             put(SwitchSetting(fastmem, R.string.fastmem))
 
+            // Applet Settings
             put(
-                SwitchSetting(
-                    BooleanSetting.USE_AUTO_STUB,
-                    titleId = R.string.use_auto_stub,
-                    descriptionId = R.string.use_auto_stub_description
-                )
-            )
-
-            put(
-                SwitchSetting(
-                    BooleanSetting.USE_DEMO_SETTING,
-                    titleId = R.string.use_demo_setting,
-                    descriptionId = R.string.use_demo_setting_description
+                SingleChoiceSetting(
+                    IntSetting.SWKBD_APPLET,
+                    titleId = R.string.swkbd_applet,
+                    choicesId = R.array.appletEntries,
+                    valuesId = R.array.appletValues
                 )
             )
         }

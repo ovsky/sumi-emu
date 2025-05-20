@@ -1,10 +1,14 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
-// SPDX-FileCopyrightText: 2025 Sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package org.sumi.sumi_emu.fragments
+// SPDX-FileCopyrightText: Copyright yuzu/Citra Emulator Project / Eden Emulator Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+
+package org.yuzu.yuzu_emu.fragments
 
 import android.annotation.SuppressLint
+import android.app.ActivityManager
 import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
@@ -16,13 +20,17 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.BatteryManager
 import android.os.Bundle
-import android.os.Debug
 import android.os.Handler
 import android.os.Looper
-import android.os.PowerManager
 import android.os.SystemClock
 import android.util.Rational
-import android.view.*
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.Surface
+import android.view.SurfaceHolder
+import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -33,7 +41,6 @@ import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
-import androidx.core.view.updatePadding
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.drawerlayout.widget.DrawerLayout.DrawerListener
 import androidx.fragment.app.Fragment
@@ -43,36 +50,44 @@ import androidx.navigation.fragment.navArgs
 import androidx.window.layout.FoldingFeature
 import androidx.window.layout.WindowInfoTracker
 import androidx.window.layout.WindowLayoutInfo
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.slider.Slider
-import org.sumi.sumi_emu.HomeNavigationDirections
-import org.sumi.sumi_emu.NativeLibrary
-import org.sumi.sumi_emu.R
-import org.sumi.sumi_emu.activities.EmulationActivity
-import org.sumi.sumi_emu.databinding.DialogOverlayAdjustBinding
-import org.sumi.sumi_emu.databinding.FragmentEmulationBinding
-import org.sumi.sumi_emu.features.settings.model.BooleanSetting
-import org.sumi.sumi_emu.features.settings.model.IntSetting
-import org.sumi.sumi_emu.features.settings.model.Settings
-import org.sumi.sumi_emu.features.settings.model.Settings.EmulationOrientation
-import org.sumi.sumi_emu.features.settings.model.Settings.EmulationVerticalAlignment
-import org.sumi.sumi_emu.features.settings.utils.SettingsFile
-import org.sumi.sumi_emu.model.DriverViewModel
-import org.sumi.sumi_emu.model.Game
-import org.sumi.sumi_emu.model.EmulationViewModel
-import org.sumi.sumi_emu.overlay.model.OverlayControl
-import org.sumi.sumi_emu.overlay.model.OverlayLayout
-import org.sumi.sumi_emu.utils.*
-import org.sumi.sumi_emu.utils.ViewUtils.setVisible
-import java.lang.NullPointerException
-import org.sumi.sumi_emu.thermal.ThermalMonitor
+import org.yuzu.yuzu_emu.HomeNavigationDirections
+import org.yuzu.yuzu_emu.NativeLibrary
+import org.yuzu.yuzu_emu.R
+import org.yuzu.yuzu_emu.activities.EmulationActivity
+import org.yuzu.yuzu_emu.databinding.DialogOverlayAdjustBinding
+import org.yuzu.yuzu_emu.databinding.FragmentEmulationBinding
+import org.yuzu.yuzu_emu.features.settings.model.BooleanSetting
+import org.yuzu.yuzu_emu.features.settings.model.IntSetting
+import org.yuzu.yuzu_emu.features.settings.model.Settings
+import org.yuzu.yuzu_emu.features.settings.model.Settings.EmulationOrientation
+import org.yuzu.yuzu_emu.features.settings.model.Settings.EmulationVerticalAlignment
+import org.yuzu.yuzu_emu.features.settings.utils.SettingsFile
+import org.yuzu.yuzu_emu.model.DriverViewModel
+import org.yuzu.yuzu_emu.model.EmulationViewModel
+import org.yuzu.yuzu_emu.model.Game
+import org.yuzu.yuzu_emu.overlay.model.OverlayControl
+import org.yuzu.yuzu_emu.overlay.model.OverlayLayout
+import org.yuzu.yuzu_emu.utils.DirectoryInitialization
+import org.yuzu.yuzu_emu.utils.FileUtil
+import org.yuzu.yuzu_emu.utils.GameHelper
+import org.yuzu.yuzu_emu.utils.GameIconUtils
+import org.yuzu.yuzu_emu.utils.Log
+import org.yuzu.yuzu_emu.utils.NativeConfig
+import org.yuzu.yuzu_emu.utils.ViewUtils
+import org.yuzu.yuzu_emu.utils.ViewUtils.setVisible
+import org.yuzu.yuzu_emu.utils.collect
+import java.io.File
 
 class EmulationFragment : Fragment(), SurfaceHolder.Callback {
     private lateinit var emulationState: EmulationState
     private var emulationActivity: EmulationActivity? = null
     private var perfStatsUpdater: (() -> Unit)? = null
-    private var thermalStatsUpdater: (() -> Unit)? = null
-    private var ramStatsUpdater: (() -> Unit)? = null
+    private lateinit var cpuBackend: String
+    private lateinit var gpuDriver: String
+
 
     private var _binding: FragmentEmulationBinding? = null
     private val binding get() = _binding!!
@@ -85,12 +100,6 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
     private val driverViewModel: DriverViewModel by activityViewModels()
 
     private var isInFoldableLayout = false
-
-    private lateinit var powerManager: PowerManager
-
-    private val ramStatsUpdateHandler = Handler(Looper.myLooper()!!)
-
-    private lateinit var thermalMonitor: ThermalMonitor // Temporarily disabled
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -108,8 +117,6 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         updateOrientation()
-
-        powerManager = requireContext().getSystemService(Context.POWER_SERVICE) as PowerManager
 
         val intentUri: Uri? = requireActivity().intent.data
         var intentGame: Game? = null
@@ -153,9 +160,6 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
         emulationState = EmulationState(game.path) {
             return@EmulationState driverViewModel.isInteractionAllowed.value
         }
-
-        // thermalMonitor = ThermalMonitor(requireContext())
-        // thermalMonitor.StartThermalMonitor()
     }
 
     /**
@@ -209,8 +213,10 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
             }
         })
         binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
-        binding.inGameMenu.getHeaderView(0).findViewById<TextView>(R.id.text_game_title).text =
-            game.title
+        binding.inGameMenu.getHeaderView(0).apply {
+            val titleView = findViewById<TextView>(R.id.text_game_title)
+            titleView.text = game.title
+        }
 
         binding.inGameMenu.menu.findItem(R.id.menu_lock_drawer).apply {
             val lockMode = IntSetting.LOCK_DRAWER.getInt()
@@ -393,9 +399,23 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
                 emulationState.updateSurface()
 
                 // Setup overlays
-                updateShowFpsOverlay()
-                updateThermalOverlay()
-                updateRamOverlay()
+                updateShowStatsOverlay()
+
+                // Re update binding when the specs values get initialized properly
+                binding.inGameMenu.getHeaderView(0).apply {
+                    val titleView = findViewById<TextView>(R.id.text_game_title)
+                    val cpuBackendLabel = findViewById<TextView>(R.id.cpu_backend)
+                    val gpuvendorLabel = findViewById<TextView>(R.id.gpu_vendor)
+
+                    titleView.text = game.title
+                    cpuBackendLabel.text = NativeLibrary.getCpuBackend()
+                    gpuvendorLabel.text = NativeLibrary.getGpuDriver()
+                }
+
+
+                val position = IntSetting.PERF_OVERLAY_POSITION.getInt()
+                updateStatsPosition(position)
+
             }
         }
         emulationViewModel.isEmulationStopping.collect(viewLifecycleOwner) {
@@ -403,7 +423,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
                 binding.loadingText.setText(R.string.shutting_down)
                 ViewUtils.showView(binding.loadingIndicator)
                 ViewUtils.hideView(binding.inputContainer)
-                ViewUtils.hideView(binding.showFpsText)
+                ViewUtils.hideView(binding.showStatsOverlayText)
             }
         }
         emulationViewModel.drawerOpen.collect(viewLifecycleOwner) {
@@ -490,15 +510,18 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        if (ramStatsUpdater != null) {
-            ramStatsUpdateHandler.removeCallbacks(ramStatsUpdater!!)
-        }
         _binding = null
     }
 
     override fun onDetach() {
         NativeLibrary.clearEmulationActivity()
         super.onDetach()
+    }
+    override fun onResume() {
+        super.onResume()
+        // If the overlay is enabled, we need to update the position if changed
+        val position = IntSetting.PERF_OVERLAY_POSITION.getInt()
+        updateStatsPosition(position)
     }
 
     private fun resetInputOverlay() {
@@ -508,38 +531,103 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
             binding.surfaceInputOverlay.resetLayoutVisibilityAndPlacement()
         }
     }
-
-    private fun updateShowFpsOverlay() {
+    @SuppressLint("DefaultLocale")
+    private fun updateShowStatsOverlay() {
         val showOverlay = BooleanSetting.SHOW_PERFORMANCE_OVERLAY.getBoolean()
-        binding.showFpsText.setVisible(showOverlay)
+        binding.showStatsOverlayText.apply {
+            setTextColor(
+                MaterialColors.getColor(
+                    this,
+                    com.google.android.material.R.attr.colorPrimary
+               )
+            )
+        }
+        binding.showStatsOverlayText.setVisible(showOverlay)
         if (showOverlay) {
             val SYSTEM_FPS = 0
             val FPS = 1
             val FRAMETIME = 2
             val SPEED = 3
+            val sb = StringBuilder()
             perfStatsUpdater = {
                 if (emulationViewModel.emulationStarted.value &&
                     !emulationViewModel.isEmulationStopping.value
                 ) {
+                    sb.setLength(0)
+
                     val perfStats = NativeLibrary.getPerfStats()
-                    val cpuBackend = NativeLibrary.getCpuBackend()
-                    val gpuDriver = NativeLibrary.getGpuDriver()
-                    if (_binding != null) {
-                        // Calculate color based on FPS (red at 0, green at 30)
-                        val fps = perfStats[FPS].toFloat()
-                        val normalizedFps = (fps / 30f).coerceIn(0f, 1f)
+                    val actualFps = perfStats[FPS]
 
-                        // Interpolate between red (0xFFFF0000) and green (0xFF00FF00)
-                        val red = ((1f - normalizedFps) * 255).toInt()
-                        val white = (normalizedFps * 255).toInt()
-                        val color = android.graphics.Color.rgb(red, white, 0)
+                    if (BooleanSetting.SHOW_FPS.getBoolean(NativeConfig.isPerGameConfigLoaded())) {
+                        val enableFrameInterpolation = BooleanSetting.FRAME_INTERPOLATION.getBoolean()
+//                        val enableFrameSkipping = BooleanSetting.FRAME_SKIPPING.getBoolean()
 
-                        binding.showFpsText.setTextColor(color)
-                        binding.showFpsText.text =
-                            String.format("Sumi | FPS: %.1f\n%s/%s", fps, cpuBackend, gpuDriver)
+                        var fpsText = String.format("FPS: %.1f", actualFps)
+
+                        if (enableFrameInterpolation) {
+                            fpsText += " " + getString(R.string.enhanced_fps_suffix)
+                        }
+
+//                        if (enableFrameSkipping) {
+//                            fpsText += " " + getString(R.string.skipping_fps_suffix)
+//                        }
+
+                        sb.append(fpsText)
                     }
-                    perfStatsUpdateHandler.postDelayed(perfStatsUpdater!!, 1000)
+
+                    if (BooleanSetting.SHOW_FRAMETIME.getBoolean(NativeConfig.isPerGameConfigLoaded())) {
+                        if (sb.isNotEmpty()) sb.append(" | ")
+                        sb.append(
+                            String.format(
+                                "FT: %.1fms",
+                                (perfStats[FRAMETIME] * 1000.0f).toFloat()
+                            )
+                        )
+                    }
+
+                    if (BooleanSetting.SHOW_APP_RAM_USAGE.getBoolean(NativeConfig.isPerGameConfigLoaded())) {
+                        if (sb.isNotEmpty()) sb.append(" | ")
+                        val appRamUsage = File("/proc/self/statm").readLines()[0].split(' ')[1].toLong() * 4096 / 1000000
+                        sb.append("Process RAM: $appRamUsage MB")
+                    }
+
+                    if (BooleanSetting.SHOW_SYSTEM_RAM_USAGE.getBoolean(NativeConfig.isPerGameConfigLoaded())) {
+                        if (sb.isNotEmpty()) sb.append(" | ")
+                        context?.let { ctx ->
+                            val activityManager = ctx.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+                            val memInfo = ActivityManager.MemoryInfo()
+                            activityManager.getMemoryInfo(memInfo)
+                            val usedRamMB = (memInfo.totalMem - memInfo.availMem) / 1048576L
+                            sb.append("RAM: $usedRamMB MB")
+                        }
+                    }
+
+                    if (BooleanSetting.SHOW_BAT_TEMPERATURE.getBoolean(NativeConfig.isPerGameConfigLoaded())) {
+                        if (sb.isNotEmpty()) sb.append(" | ")
+                        val batteryTemp = getBatteryTemperature()
+                        val tempF = celsiusToFahrenheit(batteryTemp)
+                        sb.append(String.format("%.1f°C/%.1f°F", batteryTemp, tempF))
+                    }
+
+                    val shadersBuilding = NativeLibrary.getShadersBuilding()
+
+                    if (BooleanSetting.SHOW_SHADERS_BUILDING.getBoolean(NativeConfig.isPerGameConfigLoaded()) && shadersBuilding != 0) {
+                        if (sb.isNotEmpty()) sb.append(" | ")
+
+                        val prefix = getString(R.string.shaders_prefix)
+                        val suffix = getString(R.string.shaders_suffix)
+                        sb.append(String.format("$prefix %d $suffix", shadersBuilding))
+                    }
+
+                    if (BooleanSetting.OVERLAY_BACKGROUND.getBoolean(NativeConfig.isPerGameConfigLoaded())) {
+                        binding.showStatsOverlayText.setBackgroundResource(R.color.yuzu_transparent_black)
+                    } else {
+                        binding.showStatsOverlayText.setBackgroundResource(0)
+                    }
+
+                    binding.showStatsOverlayText.text = sb.toString()
                 }
+                perfStatsUpdateHandler.postDelayed(perfStatsUpdater!!, 800)
             }
             perfStatsUpdateHandler.post(perfStatsUpdater!!)
         } else {
@@ -549,25 +637,52 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
         }
     }
 
-    private fun updateThermalOverlay() {
-        val showOverlay = BooleanSetting.SHOW_THERMAL_OVERLAY.getBoolean()
-        binding.showThermalsText.setVisible(showOverlay)
-        if (showOverlay) {
-            thermalStatsUpdater = {
-                if (emulationViewModel.emulationStarted.value &&
-                    !emulationViewModel.isEmulationStopping.value
-                ) {
-                    val temperature = getBatteryTemperature(requireContext())
-                    updateThermalOverlay(temperature)
-                    thermalStatsUpdateHandler.postDelayed(thermalStatsUpdater!!, 1000)
-                }
+    private fun updateStatsPosition(position: Int) {
+        val params = binding.showStatsOverlayText.layoutParams as FrameLayout.LayoutParams
+        when (position) {
+            0 -> {
+                params.gravity = (Gravity.TOP or Gravity.START)
+                params.setMargins(resources.getDimensionPixelSize(R.dimen.spacing_large), 0, 0, 0)
             }
-            thermalStatsUpdateHandler.post(thermalStatsUpdater!!)
-        } else {
-            if (thermalStatsUpdater != null) {
-                thermalStatsUpdateHandler.removeCallbacks(thermalStatsUpdater!!)
+
+            1 -> {
+                params.gravity = (Gravity.TOP or Gravity.CENTER_HORIZONTAL)
+            }
+
+            2 -> {
+                params.gravity = (Gravity.TOP or Gravity.END)
+                params.setMargins(0, 0, resources.getDimensionPixelSize(R.dimen.spacing_large), 0)
+            }
+
+            3 -> {
+                params.gravity = (Gravity.BOTTOM or Gravity.START)
+                params.setMargins(resources.getDimensionPixelSize(R.dimen.spacing_large), 0, 0, 0)
+            }
+
+            4 -> {
+                params.gravity = (Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL)
+            }
+
+            5 -> {
+                params.gravity = (Gravity.BOTTOM or Gravity.END)
+                params.setMargins(0, 0, resources.getDimensionPixelSize(R.dimen.spacing_large), 0)
             }
         }
+    }
+
+    private fun getBatteryTemperature(): Float {
+        try {
+            val batteryIntent = requireContext().registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+            // Temperature in tenths of a degree Celsius
+            val temperature = batteryIntent?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) ?: 0
+            // Convert to degrees Celsius
+            return temperature / 10.0f
+        } catch (e: Exception) {
+            return 0.0f
+        }
+    }
+    private fun celsiusToFahrenheit(celsius: Float): Float {
+        return (celsius * 9 / 5) + 32
     }
 
     private fun updateThermalOverlay(temperature: Float) {
@@ -575,71 +690,22 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
             emulationViewModel.emulationStarted.value &&
             !emulationViewModel.isEmulationStopping.value
         ) {
-            // Get thermal status for color
-            val thermalStatus = when (powerManager.currentThermalStatus) {
-                PowerManager.THERMAL_STATUS_NONE -> 0f
-                PowerManager.THERMAL_STATUS_LIGHT -> 0.25f
-                PowerManager.THERMAL_STATUS_MODERATE -> 0.5f
-                PowerManager.THERMAL_STATUS_SEVERE -> 0.75f
-                PowerManager.THERMAL_STATUS_CRITICAL,
-                PowerManager.THERMAL_STATUS_EMERGENCY,
-                PowerManager.THERMAL_STATUS_SHUTDOWN -> 1.0f
-                else -> 0f
-            }
-
             // Convert to Fahrenheit
             val fahrenheit = (temperature * 9f / 5f) + 32f
 
-            // Color based on thermal status (green to red)
-            val red = (thermalStatus * 255).toInt()
-            val green = ((1f - thermalStatus) * 255).toInt()
-            val color = android.graphics.Color.rgb(red, green, 0)
+            // Determine color based on temperature ranges
+            val color = when {
+                temperature < 35  -> Color.parseColor("#00C8FF")
+                temperature < 40  -> Color.parseColor("#A146FF")
+                temperature < 45  -> Color.parseColor("#FFA500")
+                else              -> Color.RED
+            }
 
             binding.showThermalsText.setTextColor(color)
-            binding.showThermalsText.text = String.format("%.1f°C\n%.1f°F", temperature, fahrenheit)
+            binding.showThermalsText.text = String.format("%.1f°C • %.1f°F", temperature, fahrenheit)
         }
     }
 
-    private fun updateRamOverlay() {
-        val showOverlay = BooleanSetting.SHOW_RAM_OVERLAY.getBoolean()
-        binding.showRamText.setVisible(showOverlay)
-        if (showOverlay) {
-            ramStatsUpdater = {
-                if (emulationViewModel.emulationStarted.value &&
-                    !emulationViewModel.isEmulationStopping.value
-                ) {
-                    val runtime = Runtime.getRuntime()
-                    val nativeHeapSize = Debug.getNativeHeapSize()
-                    val nativeHeapFreeSize = Debug.getNativeHeapFreeSize()
-                    val nativeHeapUsed = nativeHeapSize - nativeHeapFreeSize
-
-                    val usedMemInMB = nativeHeapUsed / 1048576L
-                    val maxMemInMB = nativeHeapSize / 1048576L
-                    val percentUsed = (nativeHeapUsed.toFloat() / nativeHeapSize.toFloat() * 100f)
-
-                    // Color interpolation from green to red based on usage percentage
-                    val normalizedUsage = (percentUsed / 100f).coerceIn(0f, 1f)
-                    val red = (normalizedUsage * 255).toInt()
-                    val green = ((1f - normalizedUsage) * 255).toInt()
-                    val color = Color.rgb(red, green, 0)
-
-                    binding.showRamText.setTextColor(color)
-                    binding.showRamText.text = String.format(
-                        "\nRAM: %d/%d MB (%.1f%%)",
-                        usedMemInMB,
-                        maxMemInMB,
-                        percentUsed
-                    )
-                    ramStatsUpdateHandler.postDelayed(ramStatsUpdater!!, 1000)
-                }
-            }
-            ramStatsUpdateHandler.post(ramStatsUpdater!!)
-        } else {
-            if (ramStatsUpdater != null) {
-                ramStatsUpdateHandler.removeCallbacks(ramStatsUpdater!!)
-            }
-        }
-    }
 
     @SuppressLint("SourceLockedOrientationActivity")
     private fun updateOrientation() {
@@ -766,14 +832,8 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
         popup.menuInflater.inflate(R.menu.menu_overlay_options, popup.menu)
 
         popup.menu.apply {
-            findItem(R.id.menu_toggle_fps).isChecked =
+            findItem(R.id.menu_show_stats_overlay).isChecked =
                 BooleanSetting.SHOW_PERFORMANCE_OVERLAY.getBoolean()
-            findItem(R.id.thermal_indicator).isChecked =
-                BooleanSetting.SHOW_THERMAL_OVERLAY.getBoolean()
-            findItem(R.id.ram_meter).apply {
-                isChecked = BooleanSetting.SHOW_RAM_OVERLAY.getBoolean()
-                isEnabled = false  // This grays out the option
-            }
             findItem(R.id.menu_rel_stick_center).isChecked =
                 BooleanSetting.JOYSTICK_REL_CENTER.getBoolean()
             findItem(R.id.menu_dpad_slide).isChecked = BooleanSetting.DPAD_SLIDE.getBoolean()
@@ -786,25 +846,12 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
         popup.setOnDismissListener { NativeConfig.saveGlobalConfig() }
         popup.setOnMenuItemClickListener {
             when (it.itemId) {
-                R.id.menu_toggle_fps -> {
+                R.id.menu_show_stats_overlay -> {
                     it.isChecked = !it.isChecked
                     BooleanSetting.SHOW_PERFORMANCE_OVERLAY.setBoolean(it.isChecked)
-                    updateShowFpsOverlay()
+                    updateShowStatsOverlay()
                     true
                 }
-
-                R.id.thermal_indicator -> {
-                    it.isChecked = !it.isChecked
-                    BooleanSetting.SHOW_THERMAL_OVERLAY.setBoolean(it.isChecked)
-                    updateThermalOverlay()
-                    true
-                }
-
-                R.id.ram_meter -> {
-                    // Do nothing since it's disabled
-                    true
-                }
-
                 R.id.menu_edit_overlay -> {
                     binding.drawerLayout.close()
                     binding.surfaceInputOverlay.requestFocus()
@@ -982,15 +1029,6 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
         binding.surfaceInputOverlay.refreshControls()
     }
 
-    // companion object {
-    //     @JvmStatic
-    //     public fun SetGpuSpeedLimit(value: Int) {
-    //         ShortSetting.RENDERER_SPEED_LIMIT.setShort(value.toShort())
-    //         BooleanSetting.RENDERER_USE_SPEED_LIMIT.setBoolean(value != 0)
-    //         // emulationState.updateSurface()
-    //     }
-    // }
-
     private fun setInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(
             binding.inGameMenu
@@ -1004,7 +1042,8 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
                 right = cutInsets.right
             }
 
-            v.updatePadding(left = left, top = cutInsets.top, right = right)
+            v.setPadding(left, cutInsets.top, right, 0)
+
             windowInsets
         }
     }
@@ -1158,18 +1197,5 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
     companion object {
         private val perfStatsUpdateHandler = Handler(Looper.myLooper()!!)
         private val thermalStatsUpdateHandler = Handler(Looper.myLooper()!!)
-    }
-
-    private fun getBatteryTemperature(context: Context): Float {
-        try {
-            val batteryIntent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-            // Temperature in tenths of a degree Celsius
-            val temperature = batteryIntent?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) ?: 0
-            // Convert to degrees Celsius
-            return temperature / 10.0f
-        } catch (e: Exception) {
-            Log.error("[EmulationFragment] Failed to get battery temperature: ${e.message}")
-            return 0.0f
-        }
     }
 }

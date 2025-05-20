@@ -1,32 +1,34 @@
-// SPDX-FileCopyrightText: 2023 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-FileCopyrightText: Copyright yuzu/Citra Emulator Project / Eden Emulator Project
+// SPDX-License-Identifier: GPL-3.0-or-later
 
-package org.sumi.sumi_emu.features.settings.ui
+package org.yuzu.yuzu_emu.features.settings.ui
 
 import android.annotation.SuppressLint
 import android.os.Build
 import android.widget.Toast
-import org.sumi.sumi_emu.NativeLibrary
-import org.sumi.sumi_emu.R
-import org.sumi.sumi_emu.SumiApplication
-import org.sumi.sumi_emu.features.input.NativeInput
-import org.sumi.sumi_emu.features.input.model.AnalogDirection
-import org.sumi.sumi_emu.features.input.model.NativeAnalog
-import org.sumi.sumi_emu.features.input.model.NativeButton
-import org.sumi.sumi_emu.features.input.model.NpadStyleIndex
-import org.sumi.sumi_emu.features.settings.model.AbstractBooleanSetting
-import org.sumi.sumi_emu.features.settings.model.AbstractIntSetting
-import org.sumi.sumi_emu.features.settings.model.BooleanSetting
-import org.sumi.sumi_emu.features.settings.model.ByteSetting
-import org.sumi.sumi_emu.features.settings.model.IntSetting
-import org.sumi.sumi_emu.features.settings.model.LongSetting
-import org.sumi.sumi_emu.features.settings.model.Settings
-import org.sumi.sumi_emu.features.settings.model.Settings.MenuTag
-import org.sumi.sumi_emu.features.settings.model.ShortSetting
-import org.sumi.sumi_emu.features.settings.model.StringSetting
-import org.sumi.sumi_emu.features.settings.model.view.*
-import org.sumi.sumi_emu.utils.InputHandler
-import org.sumi.sumi_emu.utils.NativeConfig
+import androidx.preference.PreferenceManager
+import org.yuzu.yuzu_emu.NativeLibrary
+import org.yuzu.yuzu_emu.R
+import org.yuzu.yuzu_emu.YuzuApplication
+import org.yuzu.yuzu_emu.features.input.NativeInput
+import org.yuzu.yuzu_emu.features.input.model.AnalogDirection
+import org.yuzu.yuzu_emu.features.input.model.NativeAnalog
+import org.yuzu.yuzu_emu.features.input.model.NativeButton
+import org.yuzu.yuzu_emu.features.input.model.NpadStyleIndex
+import org.yuzu.yuzu_emu.features.settings.model.AbstractBooleanSetting
+import org.yuzu.yuzu_emu.features.settings.model.AbstractIntSetting
+import org.yuzu.yuzu_emu.features.settings.model.BooleanSetting
+import org.yuzu.yuzu_emu.features.settings.model.ByteSetting
+import org.yuzu.yuzu_emu.features.settings.model.IntSetting
+import org.yuzu.yuzu_emu.features.settings.model.LongSetting
+import org.yuzu.yuzu_emu.features.settings.model.Settings
+import org.yuzu.yuzu_emu.features.settings.model.Settings.MenuTag
+import org.yuzu.yuzu_emu.features.settings.model.ShortSetting
+import org.yuzu.yuzu_emu.features.settings.model.StringSetting
+import org.yuzu.yuzu_emu.features.settings.model.view.*
+import org.yuzu.yuzu_emu.utils.InputHandler
+import org.yuzu.yuzu_emu.utils.NativeConfig
+import androidx.core.content.edit
 
 class SettingsFragmentPresenter(
     private val settingsViewModel: SettingsViewModel,
@@ -35,7 +37,7 @@ class SettingsFragmentPresenter(
 ) {
     private var settingsList = ArrayList<SettingsItem>()
 
-    private val context get() = SumiApplication.appContext
+    private val context get() = YuzuApplication.appContext
 
     // Extension for altering settings list based on each setting's properties
     fun ArrayList<SettingsItem>.add(key: String) {
@@ -86,8 +88,8 @@ class SettingsFragmentPresenter(
             MenuTag.SECTION_ROOT -> addConfigSettings(sl)
             MenuTag.SECTION_SYSTEM -> addSystemSettings(sl)
             MenuTag.SECTION_RENDERER -> addGraphicsSettings(sl)
+            MenuTag.SECTION_PERFORMANCE_STATS -> addPerfomanceOverlaySettings(sl)
             MenuTag.SECTION_AUDIO -> addAudioSettings(sl)
-            MenuTag.SECTION_EXPERIMENTAL -> addExperimentalSettings(sl)
             MenuTag.SECTION_INPUT -> addInputSettings(sl)
             MenuTag.SECTION_INPUT_PLAYER_ONE -> addInputPlayer(sl, 0)
             MenuTag.SECTION_INPUT_PLAYER_TWO -> addInputPlayer(sl, 1)
@@ -99,6 +101,7 @@ class SettingsFragmentPresenter(
             MenuTag.SECTION_INPUT_PLAYER_EIGHT -> addInputPlayer(sl, 7)
             MenuTag.SECTION_THEME -> addThemeSettings(sl)
             MenuTag.SECTION_DEBUG -> addDebugSettings(sl)
+            MenuTag.SECTION_EDEN_VEIL -> addEdenVeilSettings(sl)
         }
         settingsList = sl
         adapter.submitList(settingsList) {
@@ -114,7 +117,7 @@ class SettingsFragmentPresenter(
                 SubmenuSetting(
                     titleId = R.string.preferences_system,
                     descriptionId = R.string.preferences_system_description,
-                    iconId = R.drawable.ui_select_all,
+                    iconId = R.drawable.ic_system_settings,
                     menuKey = MenuTag.SECTION_SYSTEM
                 )
             )
@@ -126,22 +129,15 @@ class SettingsFragmentPresenter(
                     menuKey = MenuTag.SECTION_RENDERER
                 )
             )
-            add(
-                SubmenuSetting(
-                    titleId = R.string.experimental_settings,
-                    descriptionId = R.string.experimental_settings_description,
-                    iconId = R.drawable.ic_system_settings,
-                    menuKey = MenuTag.SECTION_EXPERIMENTAL
+            if (!NativeConfig.isPerGameConfigLoaded())
+                add(
+                    SubmenuSetting(
+                        titleId = R.string.stats_overlay_options,
+                        descriptionId = R.string.stats_overlay_options_description,
+                        iconId = R.drawable.ic_frames,
+                        menuKey = MenuTag.SECTION_PERFORMANCE_STATS
+                    )
                 )
-            )
-            // add(
-            //     SubmenuSetting(
-            //         titleId = R.string.preferences_graphics,
-            //         descriptionId = R.string.preferences_graphics_description,
-            //         iconId = R.drawable.ic_graphics,
-            //         menuKey = MenuTag.SECTION_RENDERER
-            //     )
-            // )
             add(
                 SubmenuSetting(
                     titleId = R.string.preferences_audio,
@@ -159,6 +155,14 @@ class SettingsFragmentPresenter(
                 )
             )
             add(
+                SubmenuSetting(
+                    titleId = R.string.eden_veil,
+                    descriptionId = R.string.eden_veil_description,
+                    iconId = R.drawable.ic_eden_veil,
+                    menuKey = MenuTag.SECTION_EDEN_VEIL
+                )
+            )
+            add(
                 RunnableSetting(
                     titleId = R.string.reset_to_default,
                     descriptionId = R.string.reset_to_default_description,
@@ -169,18 +173,98 @@ class SettingsFragmentPresenter(
         }
     }
 
+    private val InterpolationSetting = object : AbstractBooleanSetting {
+    override val key = BooleanSetting.FRAME_INTERPOLATION.key
+
+    override fun getBoolean(needsGlobal: Boolean): Boolean {
+        return BooleanSetting.FRAME_INTERPOLATION.getBoolean(needsGlobal)
+    }
+
+    override fun setBoolean(value: Boolean) {
+        BooleanSetting.FRAME_INTERPOLATION.setBoolean(value)
+    }
+
+    override val defaultValue = BooleanSetting.FRAME_INTERPOLATION.defaultValue
+
+    override fun getValueAsString(needsGlobal: Boolean): String =
+        BooleanSetting.FRAME_INTERPOLATION.getValueAsString(needsGlobal)
+
+    override fun reset() = BooleanSetting.FRAME_INTERPOLATION.reset()
+    }
+
+    private val syncCoreSpeedSetting = object : AbstractBooleanSetting {
+    override val key = BooleanSetting.CORE_SYNC_CORE_SPEED.key
+
+    override fun getBoolean(needsGlobal: Boolean): Boolean {
+        return BooleanSetting.CORE_SYNC_CORE_SPEED.getBoolean(needsGlobal)
+    }
+
+    override fun setBoolean(value: Boolean) {
+        BooleanSetting.CORE_SYNC_CORE_SPEED.setBoolean(value)
+    }
+
+    override val defaultValue = BooleanSetting.CORE_SYNC_CORE_SPEED.defaultValue
+
+    override fun getValueAsString(needsGlobal: Boolean): String =
+        BooleanSetting.CORE_SYNC_CORE_SPEED.getValueAsString(needsGlobal)
+
+    override fun reset() = BooleanSetting.CORE_SYNC_CORE_SPEED.reset()
+    }
+
+    private val frameSkippingSetting = object : AbstractBooleanSetting {
+        override val key = BooleanSetting.FRAME_SKIPPING.key
+
+        override fun getBoolean(needsGlobal: Boolean): Boolean {
+            return BooleanSetting.FRAME_SKIPPING.getBoolean(needsGlobal)
+    }
+
+        override fun setBoolean(value: Boolean) {
+            BooleanSetting.FRAME_SKIPPING.setBoolean(value)
+    }
+
+        override val defaultValue = BooleanSetting.FRAME_SKIPPING.defaultValue
+
+        override fun getValueAsString(needsGlobal: Boolean): String =
+            BooleanSetting.FRAME_SKIPPING.getValueAsString(needsGlobal)
+
+        override fun reset() = BooleanSetting.FRAME_SKIPPING.reset()
+    }
+
+    private fun addEdenVeilSubmenu(sl: ArrayList<SettingsItem>) {
+        sl.apply {
+            add(
+                SubmenuSetting(
+                    titleId = R.string.eden_veil,
+                    descriptionId = R.string.eden_veil_description,
+                    iconId = R.drawable.ic_code,
+                    menuKey = MenuTag.SECTION_EDEN_VEIL
+                )
+            )
+            addEdenVeilSettings(sl)
+
+            add(BooleanSetting.FRAME_INTERPOLATION.key)
+            add(BooleanSetting.FRAME_SKIPPING.key)
+            add(BooleanSetting.CORE_SYNC_CORE_SPEED.key)
+            add(IntSetting.RENDERER_SHADER_BACKEND.key)
+            add(IntSetting.RENDERER_OPTIMIZE_SPIRV_OUTPUT.key)
+            add(IntSetting.RENDERER_NVDEC_EMULATION.key)
+            add(IntSetting.RENDERER_ASTC_DECODE_METHOD.key)
+            add(IntSetting.RENDERER_ASTC_RECOMPRESSION.key)
+            add(IntSetting.RENDERER_VRAM_USAGE_MODE.key)
+            add(BooleanSetting.USE_LRU_CACHE.key)
+        }
+    }
+
     private fun addSystemSettings(sl: ArrayList<SettingsItem>) {
         sl.apply {
             add(StringSetting.DEVICE_NAME.key)
-            add(BooleanSetting.USE_DOCKED_MODE.key)
-            add(BooleanSetting.USE_AUTO_STUB.key)
-            add(BooleanSetting.USE_DEMO_SETTING.key)
-            add(LongSetting.CUSTOM_RTC.key)
             add(BooleanSetting.RENDERER_USE_SPEED_LIMIT.key)
             add(ShortSetting.RENDERER_SPEED_LIMIT.key)
+            add(BooleanSetting.USE_DOCKED_MODE.key)
             add(IntSetting.REGION_INDEX.key)
             add(IntSetting.LANGUAGE_INDEX.key)
             add(BooleanSetting.USE_CUSTOM_RTC.key)
+            add(LongSetting.CUSTOM_RTC.key)
         }
     }
 
@@ -188,27 +272,37 @@ class SettingsFragmentPresenter(
         sl.apply {
             add(IntSetting.RENDERER_ACCURACY.key)
             add(IntSetting.RENDERER_RESOLUTION.key)
+            add(IntSetting.RENDERER_VSYNC.key)
+            add(IntSetting.RENDERER_SCALING_FILTER.key)
+            add(IntSetting.FSR_SHARPENING_SLIDER.key)
+            add(IntSetting.RENDERER_ANTI_ALIASING.key)
             add(IntSetting.MAX_ANISOTROPY.key)
             add(IntSetting.RENDERER_SCREEN_LAYOUT.key)
             add(IntSetting.RENDERER_ASPECT_RATIO.key)
             add(IntSetting.VERTICAL_ALIGNMENT.key)
             add(BooleanSetting.PICTURE_IN_PICTURE.key)
+            add(BooleanSetting.RENDERER_USE_DISK_SHADER_CACHE.key)
+            add(BooleanSetting.RENDERER_FORCE_MAX_CLOCK.key)
+            add(BooleanSetting.RENDERER_ASYNCHRONOUS_SHADERS.key)
+            add(BooleanSetting.RENDERER_REACTIVE_FLUSHING.key)
         }
     }
 
-    // Better mapped settings - from actual to real emulation settings
-    private fun addExperimentalSettings(sl: ArrayList<SettingsItem>) {
+    private fun addPerfomanceOverlaySettings(sl: ArrayList<SettingsItem>) {
         sl.apply {
-            add(IntSetting.INTELLIGENT_PERFORMANCE.key)
-            add(IntSetting.RENDERER_VSYNC.key)
-            add(IntSetting.RENDERER_SCALING_FILTER.key)
-            add(IntSetting.FSR_SHARPENING_SLIDER.key)
-            add(IntSetting.RENDERER_ANTI_ALIASING.key)
-            add(BooleanSetting.RENDERER_ASYNCHRONOUS_SHADERS.key)
-            add(BooleanSetting.RENDERER_USE_DISK_SHADER_CACHE.key)
-            add(BooleanSetting.RENDERER_FORCE_MAX_CLOCK.key)
-            add(BooleanSetting.RENDERER_REACTIVE_FLUSHING.key)
+            add(HeaderSetting(R.string.stats_overlay_customization))
+            add(BooleanSetting.SHOW_PERFORMANCE_OVERLAY.key)
+            add(BooleanSetting.OVERLAY_BACKGROUND.key)
+            add(IntSetting.PERF_OVERLAY_POSITION.key)
+            add(HeaderSetting(R.string.stats_overlay_items))
+            add(BooleanSetting.SHOW_FPS.key)
+            add(BooleanSetting.SHOW_FRAMETIME.key)
+            add(BooleanSetting.SHOW_SPEED.key)
+            add(BooleanSetting.SHOW_APP_RAM_USAGE.key)
+            add(BooleanSetting.SHOW_SYSTEM_RAM_USAGE.key)
+            add(BooleanSetting.SHOW_BAT_TEMPERATURE.key)
         }
+
     }
 
     private fun addAudioSettings(sl: ArrayList<SettingsItem>) {
@@ -363,6 +457,30 @@ class SettingsFragmentPresenter(
         }
     }
 
+    private fun addEdenVeilSettings(sl: ArrayList<SettingsItem>) {
+        sl.apply {
+            add(BooleanSetting.FRAME_INTERPOLATION.key)
+            add(BooleanSetting.FRAME_SKIPPING.key)
+            add(BooleanSetting.USE_LRU_CACHE.key)
+            add(BooleanSetting.RENDERER_FAST_GPU.key)
+            add(BooleanSetting.FAST_CPU_TIME.key)
+
+            add(ByteSetting.RENDERER_DYNA_STATE.key)
+
+            add(BooleanSetting.RENDERER_DYNA_STATE3.key)
+            add(BooleanSetting.RENDERER_PROVOKING_VERTEX.key)
+            add(BooleanSetting.RENDERER_DESCRIPTOR_INDEXING.key)
+
+            add(BooleanSetting.CORE_SYNC_CORE_SPEED.key)
+
+            add(IntSetting.RENDERER_SHADER_BACKEND.key)
+            add(IntSetting.RENDERER_NVDEC_EMULATION.key)
+            add(IntSetting.RENDERER_ASTC_DECODE_METHOD.key)
+            add(IntSetting.RENDERER_ASTC_RECOMPRESSION.key)
+            add(IntSetting.RENDERER_VRAM_USAGE_MODE.key)
+            add(IntSetting.RENDERER_OPTIMIZE_SPIRV_OUTPUT.key)
+        }
+    }
     private fun addInputPlayer(sl: ArrayList<SettingsItem>, playerIndex: Int) {
         sl.apply {
             val connectedSetting = object : AbstractBooleanSetting {
@@ -942,12 +1060,41 @@ class SettingsFragmentPresenter(
                 }
             }
 
+            val staticThemeColor: AbstractIntSetting = object : AbstractIntSetting {
+                val preferences = PreferenceManager.getDefaultSharedPreferences(YuzuApplication.appContext)
+                override fun getInt(needsGlobal: Boolean): Int =
+                    preferences.getInt(Settings.PREF_STATIC_THEME_COLOR, 0)
+                override fun setInt(value: Int) {
+                    preferences.edit() { putInt(Settings.PREF_STATIC_THEME_COLOR, value) }
+                    settingsViewModel.setShouldRecreate(true)
+                }
+
+                override val key: String = Settings.PREF_STATIC_THEME_COLOR
+                override val isRuntimeModifiable: Boolean = true
+                override fun getValueAsString(needsGlobal: Boolean): String =
+                    preferences.getInt(Settings.PREF_STATIC_THEME_COLOR, 0).toString()
+                override val defaultValue: Any = 0
+                override fun reset() {
+                    preferences.edit() { putInt(Settings.PREF_STATIC_THEME_COLOR, 0) }
+                    settingsViewModel.setShouldRecreate(true)
+                }
+            }
+
             add(
                 SingleChoiceSetting(
                     themeMode,
                     titleId = R.string.change_theme_mode,
                     choicesId = R.array.themeModeEntries,
                     valuesId = R.array.themeModeValues
+                )
+            )
+
+            add(
+                SingleChoiceSetting(
+                    staticThemeColor,
+                    titleId = R.string.static_theme_color,
+                    choicesId = R.array.staticThemeNames,
+                    valuesId = R.array.staticThemeValues
                 )
             )
 
@@ -994,6 +1141,7 @@ class SettingsFragmentPresenter(
             add(HeaderSetting(R.string.cpu))
             add(IntSetting.CPU_BACKEND.key)
             add(IntSetting.CPU_ACCURACY.key)
+            add(BooleanSetting.USE_AUTO_STUB.key)
             add(BooleanSetting.CPU_DEBUG_MODE.key)
             add(SettingsItem.FASTMEM_COMBINED)
         }
