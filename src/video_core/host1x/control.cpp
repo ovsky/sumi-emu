@@ -27,6 +27,7 @@ void Control::ProcessMethod(Method method, u32 argument) {
 }
 
 void Control::Execute(u32 data) {
+    LOG_TRACE(Service_NVDRV, "Control wait syncpt {} value {}", data, syncpoint_value);
     host1x.GetSyncpointManager().WaitHost(data, syncpoint_value);
 }
 

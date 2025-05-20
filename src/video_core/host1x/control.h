@@ -6,9 +6,7 @@
 
 #include "common/common_types.h"
 
-namespace Tegra {
-
-namespace Host1x {
+namespace Tegra::Host1x {
 
 class Host1x;
 class Nvdec;
@@ -31,10 +29,8 @@ private:
     /// For Host1x, execute is waiting on a syncpoint previously written into the state
     void Execute(u32 data);
 
-    u32 syncpoint_value{};
     Host1x& host1x;
+    u32 syncpoint_value{};
 };
 
-} // namespace Host1x
-
-} // namespace Tegra
+} // namespace Tegra::Host1x
