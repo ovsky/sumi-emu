@@ -1,5 +1,4 @@
 # SPDX-FileCopyrightText: 2018 yuzu Emulator Project
-# SPDX-FileCopyrightText: 2025 Sumi Emulator Project
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 add_subdirectory(host_shaders)
@@ -61,8 +60,8 @@ add_library(video_core STATIC
     framebuffer_config.h
     fsr.cpp
     fsr.h
-    host1x/codecs/codec.cpp
-    host1x/codecs/codec.h
+    host1x/codecs/decoder.cpp
+    host1x/codecs/decoder.h
     host1x/codecs/h264.cpp
     host1x/codecs/h264.h
     host1x/codecs/vp8.cpp
@@ -81,8 +80,6 @@ add_library(video_core STATIC
     host1x/nvdec.cpp
     host1x/nvdec.h
     host1x/nvdec_common.h
-    host1x/sync_manager.cpp
-    host1x/sync_manager.h
     host1x/syncpoint_manager.cpp
     host1x/syncpoint_manager.h
     host1x/vic.cpp
@@ -248,8 +245,6 @@ add_library(video_core STATIC
     renderer_vulkan/vk_turbo_mode.h
     renderer_vulkan/vk_update_descriptor.cpp
     renderer_vulkan/vk_update_descriptor.h
-    renderer_vulkan/vk_texture_manager.cpp
-    renderer_vulkan/vk_texture_manager.h
     shader_cache.cpp
     shader_cache.h
     shader_environment.cpp
@@ -309,8 +304,6 @@ add_library(video_core STATIC
     vulkan_common/vulkan_library.h
     vulkan_common/vulkan_memory_allocator.cpp
     vulkan_common/vulkan_memory_allocator.h
-    vulkan_common/hybrid_memory.cpp
-    vulkan_common/hybrid_memory.h
     vulkan_common/vulkan_surface.cpp
     vulkan_common/vulkan_surface.h
     vulkan_common/vulkan_wrapper.cpp
@@ -371,6 +364,11 @@ else()
 
     # VMA
     set_source_files_properties(vulkan_common/vma.cpp PROPERTIES COMPILE_OPTIONS "-Wno-conversion;-Wno-unused-variable;-Wno-unused-parameter;-Wno-missing-field-initializers")
+
+    # Get around GCC failing with intrinsics in Debug
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_BUILD_TYPE MATCHES "Debug")
+        set_source_files_properties(host1x/vic.cpp PROPERTIES COMPILE_OPTIONS "-O2")
+    endif()
 endif()
 
 if (ARCHITECTURE_x86_64)
@@ -379,6 +377,10 @@ if (ARCHITECTURE_x86_64)
         macro/macro_jit_x64.h
     )
     target_link_libraries(video_core PUBLIC xbyak::xbyak)
+
+    if (NOT MSVC)
+        target_compile_options(video_core PRIVATE -msse4.1)
+    endif()
 endif()
 
 if (ARCHITECTURE_x86_64 OR ARCHITECTURE_arm64)
@@ -395,6 +397,10 @@ endif()
 
 if (ANDROID AND ARCHITECTURE_arm64)
     target_link_libraries(video_core PRIVATE adrenotools)
+endif()
+
+if (ARCHITECTURE_arm64)
+    target_link_libraries(video_core PRIVATE sse2neon)
 endif()
 
 create_target_directory_groups(video_core)
