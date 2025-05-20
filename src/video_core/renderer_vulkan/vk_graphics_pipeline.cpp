@@ -726,8 +726,7 @@ void GraphicsPipeline::MakePipeline(VkRenderPass render_pass) {
     if (device.IsExtConservativeRasterizationSupported()) {
         conservative_raster.pNext = std::exchange(rasterization_ci.pNext, &conservative_raster);
     }
-    //if (device.IsExtProvokingVertexSupported() {
-    if (true) {
+    if (device.IsExtProvokingVertexSupported() && Settings::values.provoking_vertex.GetValue()) {
         provoking_vertex.pNext = std::exchange(rasterization_ci.pNext, &provoking_vertex);
     }
 
