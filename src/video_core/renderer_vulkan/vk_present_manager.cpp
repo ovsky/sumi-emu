@@ -95,15 +95,31 @@ bool CanBlitToSwapchain(const vk::PhysicalDevice& physical_device, VkFormat form
 
 } // Anonymous namespace
 
-PresentManager::PresentManager(const vk::Instance& instance_, Core::Frontend::EmuWindow& render_window_,
-                               const Device& device_, MemoryAllocator& memory_allocator_, Scheduler& scheduler_,
-                               Swapchain& swapchain_, VkSurfaceKHR_T* surface_handle_)
-    : instance{instance_}, render_window{render_window_}, device{device_},
-      memory_allocator{memory_allocator_}, scheduler{scheduler_}, swapchain{swapchain_},
-      surface_handle{surface_handle_},
-      blit_supported{CanBlitToSwapchain(device.GetPhysical(),
-                                        swapchain.GetImageViewFormat())},
-      use_present_thread{Settings::values.async_presentation.GetValue()} {
+PresentManager::PresentManager(const vk::Instance& instance_,
+                               Core::Frontend::EmuWindow& render_window_,
+                               const Device& device_,
+                               MemoryAllocator& memory_allocator_,
+                               Scheduler& scheduler_,
+                               Swapchain& swapchain_,
+#ifdef ANDROID
+                               vk::SurfaceKHR& surface_)
+#else
+                               VkSurfaceKHR_T* surface_handle_)
+#endif
+    : instance{instance_}
+    , render_window{render_window_}
+    , device{device_}
+    , memory_allocator{memory_allocator_}
+    , scheduler{scheduler_}
+    , swapchain{swapchain_}
+#ifdef ANDROID
+    , surface{surface_}
+#else
+    , surface_handle{surface_handle_}
+#endif
+    , blit_supported{CanBlitToSwapchain(device.GetPhysical(), swapchain.GetImageViewFormat())}
+    , use_present_thread{Settings::values.async_presentation.GetValue()}
+{
     SetImageCount();
 
     auto& dld = device.GetLogical();
@@ -289,7 +305,11 @@ void PresentManager::PresentThread(std::stop_token token) {
 }
 
 void PresentManager::RecreateSwapchain(Frame* frame) {
+#ifndef ANDROID
     swapchain.Create(surface_handle, frame->width, frame->height); // Pass raw pointer
+#else
+    swapchain.Create(*surface, frame->width, frame->height); // Pass raw pointer
+#endif
     SetImageCount();
 }
 
@@ -307,6 +327,9 @@ void PresentManager::CopyToSwapchain(Frame* frame) {
         try {
             // Recreate surface and swapchain if needed.
             if (requires_recreation) {
+#ifdef ANDROID
+                surface = CreateSurface(instance, render_window.GetWindowInfo());
+#endif
                 RecreateSwapchain(frame);
             }
 
