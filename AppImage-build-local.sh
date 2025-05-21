@@ -1,22 +1,22 @@
 #!/bin/bash
 
-FILE=build/bin/yuzu
+FILE=build/bin/sumi
 if test -f "$FILE"; then
-    # remove any previously made AppImage in the base torzu git folder
-    rm ./torzu.AppImage
+    # remove any previously made AppImage in the base sumi git folder
+    rm ./sumi.AppImage
 
     # enter AppImage utility folder
     cd AppImageBuilder
 
     # run the build script to create the AppImage
-    # (usage) ./build.sh [source torzu build folder] [destination .AppImage file]
-    ./build.sh ../build ./torzu.AppImage
+    # (usage) ./build.sh [source sumi build folder] [destination .AppImage file]
+    ./build.sh ../build ./sumi.AppImage
 
-    FILE=./torzu.AppImage
+    FILE=./sumi.AppImage
     if test -f "$FILE"; then
-       # move the AppImage to the main torzu folder
-       mv torzu.AppImage ..
-       # return to main torzu folder
+       # move the AppImage to the main sumi folder
+       mv sumi.AppImage ..
+       # return to main sumi folder
        cd ..
        # show contents of current folder
        echo
@@ -25,7 +25,7 @@ if test -f "$FILE"; then
        echo
        ls *.AppImage
        echo
-       echo "'torzu.AppImage' is now located in the current folder."
+       echo "'sumi.AppImage' is now located in the current folder."
        echo
     else
        cd ..
@@ -35,8 +35,8 @@ else
     echo
     echo "$FILE does not exist."
     echo
-    echo "No yuzu executable found in the /torzu/build/bin folder!"
+    echo "No sumi executable found in the /sumi/build/bin folder!"
     echo
-    echo "You must first build a native linux version of torzu before running this script!"
+    echo "You must first build a native linux version of sumi before running this script!"
     echo
 fi
