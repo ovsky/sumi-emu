@@ -22,7 +22,7 @@ rm -rf boost_1_84_0
 cd /tmp
 mkdir torzu-build
 cd torzu-build
-cmake /tmp/torzu-src -GNinja -DCMAKE_BUILD_TYPE=Release -DYUZU_TESTS=OFF -DENABLE_QT_TRANSLATION=OFF -DSPIRV_WERROR=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_FIND_LIBRARY_SUFFIXES=".a;.so" -DSPIRV-Headers_SOURCE_DIR=/tmp/torzu-src/externals/SPIRV-Headers
+cmake /tmp/torzu-src -GNinja -DCMAKE_BUILD_TYPE=Release -DSUMI_TESTS=OFF -DENABLE_QT_TRANSLATION=OFF -DSPIRV_WERROR=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_FIND_LIBRARY_SUFFIXES=".a;.so" -DSPIRV-Headers_SOURCE_DIR=/tmp/torzu-src/externals/SPIRV-Headers
 ninja
 
 # Generate AppImage
