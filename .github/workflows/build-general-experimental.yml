@@ -1,0 +1,137 @@
+name: Build Sumi (Appimage) (Windows) (Linux) (Stable)
+concurrency:
+  group: build-stable-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  schedule:
+    - cron: "0 7 1/14 * *"
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    name: "${{ matrix.name }} (${{ matrix.arch }})"
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      matrix:
+        include:
+          - runs-on: ubuntu-latest
+            optimized: false
+            name: "Sumi build (Normal)"
+            arch: x86_64
+          - runs-on: ubuntu-latest
+            optimized: true
+            name: "Sumi Build (Optimized)"
+            arch: x86_64
+          - runs-on: ubuntu-24.04-arm
+            name: "Sumi build (Normal)"
+            optimized: false
+            arch: aarch64
+    container: ghcr.io/pkgforge-dev/archlinux:latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install dependencies
+        if: always()
+        run: chmod +x ./get-dependencies.sh && ./get-dependencies.sh
+
+      - name: Compile Sumi (Normal)
+        if: ${{ matrix.optimized == false }}
+        run: |
+          chmod +x ./sumi-appimage.sh && ./sumi-appimage.sh
+          mkdir -p dist
+          mv *.AppImage* dist/
+
+      - name: Compile Sumi (Optimized)
+        if: ${{ matrix.optimized == true }}
+        run: |
+          rm -rf ./AppDir || true
+          sudo pacman -R --noconfirm sumi || true
+          chmod +x ./sumi-appimage.sh && ./sumi-appimage.sh v3
+          mkdir -p dist
+          mv *.AppImage* dist/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: sumi-${{ matrix.optimized && 'optimized' || 'normal' }}-appimage-${{ matrix.arch }}
+          path: "dist"
+
+      - name: Check version file
+        if: ${{ matrix.optimized == false }}
+        run: |
+          cat ~/version
+          echo "APP_VERSION=$(cat ~/version)" >> "${GITHUB_ENV}"
+
+      - name: Upload version file
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: version
+          path: ~/version
+          overwrite: true
+
+  release:
+    name: "release"
+    needs: [build]
+    permissions:
+      actions: read
+      security-events: write
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4.3.0
+        with:
+          name: sumi-optimized-appimage-x86_64
+
+      - uses: actions/download-artifact@v4.3.0
+        with:
+          name: sumi-normal-appimage-x86_64
+
+      - uses: actions/download-artifact@v4.3.0
+        with:
+          name: sumi-normal-appimage-aarch64
+
+      - uses: actions/download-artifact@v4.3.0
+        with:
+          name: version
+
+      - name: Read version
+        run: |
+          export VERSION="$(cat version)"
+          export SNAPSHOT_TAG="$(date --utc +'%Y%m%d-%H%M%S')"
+          echo "APP_VERSION=${VERSION}" >> "${GITHUB_ENV}"
+          echo SNAPSHOT_TAG="${SNAPSHOT_TAG}" >> "${GITHUB_ENV}"
+
+      - name: Del Previous Release
+        run: |
+          gh release delete "${APP_VERSION}" --repo "${GITHUB_REPOSITORY}" --cleanup-tag  -y
+          sleep 5
+        env:
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        continue-on-error: true
+
+      - name: Continuous Releaser
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Sumi AppImage ${{ env.APP_VERSION }}"
+          tag_name: "${{ env.APP_VERSION }}"
+          prerelease: false
+          draft: false
+          generate_release_notes: false
+          make_latest: true
+          files: |
+            *.AppImage*
+
+      - name: Snapshot Releaser
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Snapshot ${{ env.APP_VERSION }}"
+          tag_name: "${{ env.SNAPSHOT_TAG }}"
+          prerelease: false
+          draft: false
+          generate_release_notes: false
+          make_latest: false
+          files: |
+            *.AppImage*
