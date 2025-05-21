@@ -1,6 +1,9 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+// SPDX-FileCopyrightText: Copyright 2025 eden Emulator Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #include <algorithm>
 #include <array>
 #include <cstring>
@@ -99,52 +102,91 @@ Device CreateDevice(const vk::Instance& instance, const vk::InstanceDispatch& dl
 }
 
 RendererVulkan::RendererVulkan(Core::Frontend::EmuWindow& emu_window,
-                               Tegra::MaxwellDeviceMemoryManager& device_memory_, Tegra::GPU& gpu_,
-                               std::unique_ptr<Core::Frontend::GraphicsContext> context_) try
-    : RendererBase(emu_window, std::move(context_)), device_memory(device_memory_), gpu(gpu_),
-      library(OpenLibrary(context.get())),
-      // Create raw Vulkan instance first
-      instance(CreateInstance(*library, dld, VK_API_VERSION_1_1, render_window.GetWindowInfo().type,
-                            Settings::values.renderer_debug.GetValue())),
-      // Now create RAII wrappers for the resources in the correct order
-      managed_instance(MakeManagedInstance(instance, dld)),
-      // Create debug messenger if debug is enabled
-      debug_messenger(Settings::values.renderer_debug ? CreateDebugUtilsCallback(instance)
-                                                    : vk::DebugUtilsMessenger{}),
-      managed_debug_messenger(Settings::values.renderer_debug
-                             ? MakeManagedDebugUtilsMessenger(debug_messenger, instance, dld)
-                             : ManagedDebugUtilsMessenger{}),
-      // Create surface
-      surface(CreateSurface(instance, render_window.GetWindowInfo())),
-      managed_surface(MakeManagedSurface(surface, instance, dld)),
-      device(CreateDevice(instance, dld, *surface)),
-      memory_allocator(device), state_tracker(),
-      scheduler(device, state_tracker),
-      swapchain(*surface, device, scheduler, render_window.GetFramebufferLayout().width,
-                render_window.GetFramebufferLayout().height),
-      present_manager(instance, render_window, device, memory_allocator, scheduler, swapchain,
-                      *surface),
-      blit_swapchain(device_memory, device, memory_allocator, present_manager, scheduler,
-                     PresentFiltersForDisplay),
-      blit_capture(device_memory, device, memory_allocator, present_manager, scheduler,
-                   PresentFiltersForDisplay),
-      blit_applet(device_memory, device, memory_allocator, present_manager, scheduler,
-                  PresentFiltersForAppletCapture),
-      rasterizer(render_window, gpu, device_memory, device, memory_allocator, state_tracker,
-                 scheduler),
-      applet_frame() {
+                               Tegra::MaxwellDeviceMemoryManager& device_memory_,
+                               Tegra::GPU& gpu_,
+                               std::unique_ptr<Core::Frontend::GraphicsContext> context_)
+try
+    : RendererBase(emu_window, std::move(context_))
+    , device_memory(device_memory_)
+    , gpu(gpu_)
+    , library(OpenLibrary(context.get()))
+    ,
+    // Create raw Vulkan instance first
+    instance(CreateInstance(*library,
+                            dld,
+                            VK_API_VERSION_1_1,
+                            render_window.GetWindowInfo().type,
+                            Settings::values.renderer_debug.GetValue()))
+    ,
+    // Now create RAII wrappers for the resources in the correct order
+    managed_instance(MakeManagedInstance(instance, dld))
+    ,
+    // Create debug messenger if debug is enabled
+    debug_messenger(Settings::values.renderer_debug ? CreateDebugUtilsCallback(instance)
+                                                    : vk::DebugUtilsMessenger{})
+    , managed_debug_messenger(Settings::values.renderer_debug
+                                  ? MakeManagedDebugUtilsMessenger(debug_messenger, instance, dld)
+                                  : ManagedDebugUtilsMessenger{})
+    ,
+    // Create surface
+    surface(CreateSurface(instance, render_window.GetWindowInfo()))
+    , managed_surface(MakeManagedSurface(surface, instance, dld))
+    , device(CreateDevice(instance, dld, *surface))
+    , memory_allocator(device)
+    , state_tracker()
+    , scheduler(device, state_tracker)
+    , swapchain(*surface,
+                device,
+                scheduler,
+                render_window.GetFramebufferLayout().width,
+                render_window.GetFramebufferLayout().height)
+    , present_manager(instance,
+                      render_window,
+                      device,
+                      memory_allocator,
+                      scheduler,
+                      swapchain,
+#ifdef ANDROID
+                      surface)
+    ,
+#else
+                      *surface)
+    ,
+#endif
+    blit_swapchain(device_memory,
+                   device,
+                   memory_allocator,
+                   present_manager,
+                   scheduler,
+                   PresentFiltersForDisplay)
+    , blit_capture(device_memory,
+                   device,
+                   memory_allocator,
+                   present_manager,
+                   scheduler,
+                   PresentFiltersForDisplay)
+    , blit_applet(device_memory,
+                  device,
+                  memory_allocator,
+                  present_manager,
+                  scheduler,
+                  PresentFiltersForAppletCapture)
+    , rasterizer(render_window, gpu, device_memory, device, memory_allocator, state_tracker, scheduler)
+    , applet_frame() {
 
-   if (Settings::values.renderer_force_max_clock.GetValue() && device.ShouldBoostClocks()) {
+    if (Settings::values.renderer_force_max_clock.GetValue() && device.ShouldBoostClocks()) {
         turbo_mode.emplace(instance, dld);
         scheduler.RegisterOnSubmit([this] { turbo_mode->QueueSubmitted(); });
     }
 
+#ifndef ANDROID
     // Release ownership from the old instance and surface
     instance.release();
     surface.release();
     if (Settings::values.renderer_debug) {
         debug_messenger.release();
     }
+#endif
 
     Report();
 } catch (const vk::Exception& exception) {
@@ -160,7 +202,7 @@ RendererVulkan::~RendererVulkan() {
 #ifdef __ANDROID__
 class BooleanSetting {
     public:
-        static BooleanSetting FRAME_SKIPPING;
+//        static BooleanSetting FRAME_SKIPPING;
         static BooleanSetting FRAME_INTERPOLATION;
         explicit BooleanSetting(bool initial_value = false) : value(initial_value) {}
 
@@ -177,13 +219,13 @@ class BooleanSetting {
     };
 
     // Initialize static members
-    BooleanSetting BooleanSetting::FRAME_SKIPPING(true);
+    //BooleanSetting BooleanSetting::FRAME_SKIPPING(true);
     BooleanSetting BooleanSetting::FRAME_INTERPOLATION(true);
 
-    extern "C" JNIEXPORT jboolean JNICALL
-    Java_org_uzuy_uzuy_1emu_features_settings_model_BooleanSetting_isFrameSkippingEnabled(JNIEnv* env, jobject /* this */) {
-        return static_cast<jboolean>(BooleanSetting::FRAME_SKIPPING.getBoolean());
-    }
+//    extern "C" JNIEXPORT jboolean JNICALL
+//    Java_org_uzuy_uzuy_1emu_features_settings_model_BooleanSetting_isFrameSkippingEnabled(JNIEnv* env, jobject /* this */) {
+//        return static_cast<jboolean>(BooleanSetting::FRAME_SKIPPING.getBoolean());
+//    }
 
     extern "C" JNIEXPORT jboolean JNICALL
     Java_org_uzuy_uzuy_1emu_features_settings_model_BooleanSetting_isFrameInterpolationEnabled(JNIEnv* env, jobject /* this */) {
@@ -264,14 +306,8 @@ class BooleanSetting {
 
 void RendererVulkan::Composite(std::span<const Tegra::FramebufferConfig> framebuffers) {
     #ifdef __ANDROID__
-    // Frame skipping and interpolation settings
-    // These settings are used to control the frame skipping and interpolation behavior
-    static int frame_counter = 0;
-    static int target_fps = 60; // Target FPS (30 or 60)
-    int frame_skip_threshold = 1;
 
-    bool frame_skipping = false;
-    bool frame_interpolation = true;
+    // bool frame_interpolation = true; // BooleanSetting::FRAME_INTERPOLATION.getBoolean();
 
     #endif
 
@@ -280,48 +316,20 @@ void RendererVulkan::Composite(std::span<const Tegra::FramebufferConfig> framebu
     }
 
     #ifdef __ANDROID__
-    // Check if frame skipping and interpolation are enabled
-    // These settings can be toggled from the applet
-    if (frame_skipping) {
-        // Frame skipping logic:
-        // Skip frames based on the target FPS and the current frame counter. Strictly speaking:
-        // - If target FPS is 30, skip every 2nd frame (1 frame displayed, 1 skipped)
-        // - If target FPS is 60, skip every frame (1 frame displayed, 0 skipped)
-        // This is a simple implementation and can be adjusted based on the actual requirements.
-        frame_skip_threshold = (target_fps == 30) ? 1 : 0;
-    }
 
-    // Frame interpolation logic:
-    // Interpolate frames if frame skipping is enabled and the previous frame is available
-    // This is a simple implementation and can be adjusted based on the actual requirements.
-    // The interpolation logic can be more complex, depending on the requirements.
-    // For now, we just check if the previous frame is available.
-    // If frame skipping is enabled, we will skip frames based on the target FPS
-    // and interpolate the skipped frames.
-    frame_counter++;
-    if (frame_counter % frame_skip_threshold != 0) {
-        if (frame_interpolation && previous_frame) { // Check if the previous frame is available
-            Frame* interpolated_frame = present_manager.GetRenderFrame(); // Get a new frame for interpolation
-            InterpolateFrames(previous_frame, interpolated_frame); // Interpolate the skipped frame
-            blit_swapchain.DrawToFrame(rasterizer, interpolated_frame, framebuffers, // Draw the interpolated frame
-                                       render_window.GetFramebufferLayout(), swapchain.GetImageCount(), // Get the image count, used for the swapchain
-                                       swapchain.GetImageViewFormat()); // Get the image view format and draw the frame
-            scheduler.Flush(*interpolated_frame->render_ready); // Flush the frame to ensure it's ready for presentation
-            present_manager.Present(interpolated_frame); // Present the interpolated frame
-            previous_frame = interpolated_frame; // Update the previous frame to the current one
-            // Set the current frame to the interpolated frame
-            // This is a simple implementation and can be adjusted based on the actual requirements.
-            // For now, we just set the current frame to the interpolated frame.
-        } else
-        {
-            return; // If frame skipping is enabled and interpolation is not needed, just skip the frame
+        // if (frame_interpolation && previous_frame) {
+        if (previous_frame) {
+            Frame* interpolated_frame = present_manager.GetRenderFrame();
+            InterpolateFrames(previous_frame, interpolated_frame);
+            blit_swapchain.DrawToFrame(rasterizer, interpolated_frame, framebuffers,
+                                       render_window.GetFramebufferLayout(), swapchain.GetImageCount(),
+                                       swapchain.GetImageViewFormat());
+            scheduler.Flush(*interpolated_frame->render_ready);
+            present_manager.Present(interpolated_frame);
+            previous_frame = interpolated_frame;
         }
-
-        return; // If frame skipping is not enabled, we will just display the current frame
-    }
+        return;
     #endif
-
-    // Create a new frame for rendering and presentation to the swapchain
 
     SCOPE_EXIT {
         render_window.OnFrameDisplayed();
