@@ -24,7 +24,7 @@
                             <property name="title">
                                 <string>sumi Web Service</string>
                             </property>
-                            <layout class="QVBoxLayout" name="verticalLayoutYuzuWebService">
+                            <layout class="QVBoxLayout" name="verticalLayoutSumiWebService">
                                 <item>
                                     <widget class="QLabel" name="web_credentials_disclaimer">
                                         <property name="text">
@@ -34,7 +34,7 @@
                                     </widget>
                                 </item>
                                 <item>
-                                    <layout class="QGridLayout" name="gridLayoutYuzuUsername">
+                                    <layout class="QGridLayout" name="gridLayoutSumiUsername">
                                         <item row="2" column="3">
                                             <widget class="QPushButton" name="button_reset_token">
                                                 <property name="sizePolicy">
