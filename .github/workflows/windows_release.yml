@@ -10,7 +10,7 @@ jobs:
       - name: Get Current Date
         id: current_date
         run: |
-          $CURRENT_DATE=& Get-Date -format yyyy.MM.dd
+          $CURRENT_DATE = Get-Date -format "yy.MM.dd" # Corrected PowerShell syntax
           echo "CURRENT_DATE=$CURRENT_DATE" >> $env:GITHUB_ENV
 
       - name: Checkout Project
@@ -19,10 +19,10 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Prepare Visual Studio
+      - name: Prepare Visual Studio # This step actually sets up .NET, VS is available on windows-latest
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.x
+          dotnet-version: 8.x # If needed for VS or other tools
 
       - name: Prepare Vulkan SDK
         uses: humbletim/setup-vulkan-sdk@v1.2.1
@@ -39,31 +39,34 @@ jobs:
       - name: Prepare CMake
         uses: lukka/get-cmake@latest
 
-      - name: Configure CMake Build Location
-        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release
+      # Consolidated and Updated CMake Configuration Step
+      - name: Configure CMake
+        run: cmake -S ${{github.workspace}} -B ${{github.workspace}}/build -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=1.0
 
       - name: Build Project
-        run: |
-          cmake -G "Visual Studio 17 2022" -A x64
-          cmake --build ${{github.workspace}}/build --config Release
+        run: cmake --build ${{github.workspace}}/build --config Release
 
       - name: Archive Release
         uses: thedoctor0/zip-release@0.7.5
         with:
           type: 'zip'
           filename: 'Sumi-x64.zip'
-          directory: '${{ github.workspace }}/build'
-          path: '${{ github.workspace }}/build/bin/Release'
-          exclusions: 'tests.exe'
+          directory: '${{ github.workspace }}/build/bin/Release' # Ensure this path is correct after build
+          # path: field is usually for specific files/folders within directory, if directory is already specific enough, path might be redundant or './'
+          # Check if you want to zip the contents of 'build/bin/Release' or the 'Release' folder itself.
+          # If you want contents of 'Release' directly in zip root:
+          # directory: ${{ github.workspace }}/build/bin/Release 
+          # path: . # zips everything in the directory
+          exclusions: '*.pdb tests.exe' # Added *.pdb as a common exclusion for release zips
           recursive_exclusions: tests.exe
 
       - name: Release
         uses: ncipollo/release-action@v1.14.0
         with:
           name: ${{ env.CURRENT_DATE }}.${{ github.run_number }}
-          artifacts: "${{ github.workspace }}/build/*.zip"
+          artifacts: "${{ github.workspace }}/build/Sumi-x64.zip" # Point to the generated zip file directly
           tag: ${{ env.CURRENT_DATE }}.${{ github.run_number }}
-          commit: master
+          commit: master # Or ${{ github.sha }} for the specific commit that triggered the workflow
           allowUpdates: true
-          replacesArtifacts: true
+          replacesArtifacts: true # Be cautious with this in case of reruns
           token: ${{ secrets.GITHUB_TOKEN }}
