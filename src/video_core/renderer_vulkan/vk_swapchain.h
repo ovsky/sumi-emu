@@ -21,12 +21,27 @@ class Scheduler;
 
 class Swapchain {
 public:
-    explicit Swapchain(VkSurfaceKHR_T* surface_handle, const Device& device, Scheduler& scheduler, u32 width,
-                       u32 height);
+    explicit Swapchain(
+#ifdef ANDROID
+        VkSurfaceKHR surface,
+#else
+        VkSurfaceKHR_T* surface_handle,
+#endif
+        const Device& device,
+        Scheduler& scheduler,
+        u32 width,
+        u32 height);
     ~Swapchain();
 
     /// Creates (or recreates) the swapchain with a given size.
-    void Create(VkSurfaceKHR_T* surface_handle, u32 width, u32 height);
+    void Create(
+#ifdef ANDROID
+        VkSurfaceKHR surface,
+#else
+        VkSurfaceKHR_T* surface_handle,
+#endif
+        u32 width,
+        u32 height);
 
     /// Acquires the next image in the swapchain, waits as needed.
     bool AcquireNextImage();
@@ -110,7 +125,12 @@ private:
 
     bool NeedsPresentModeUpdate() const;
 
+#ifdef ANDROID
+    VkSurfaceKHR surface;
+#else
     VkSurfaceKHR_T* surface_handle;
+#endif
+
     const Device& device;
     Scheduler& scheduler;
 
