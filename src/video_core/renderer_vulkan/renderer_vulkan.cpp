@@ -306,9 +306,12 @@ class BooleanSetting {
 
 void RendererVulkan::Composite(std::span<const Tegra::FramebufferConfig> framebuffers) {
     #ifdef __ANDROID__
+    static int frame_counter = 0;
+    static int target_fps = 60; // Target FPS (30 or 60)
+    int frame_skip_threshold = 1;
 
-    // bool frame_interpolation = true; // BooleanSetting::FRAME_INTERPOLATION.getBoolean();
-
+    bool frame_skipping = false; //BooleanSetting::FRAME_SKIPPING.getBoolean();
+    bool frame_interpolation = true; // BooleanSetting::FRAME_INTERPOLATION.getBoolean();
     #endif
 
     if (framebuffers.empty()) {
@@ -316,9 +319,13 @@ void RendererVulkan::Composite(std::span<const Tegra::FramebufferConfig> framebu
     }
 
     #ifdef __ANDROID__
+    if (frame_skipping) {
+        frame_skip_threshold = (target_fps == 30) ? 1 : 0;
+    }
 
-        // if (frame_interpolation && previous_frame) {
-        if (previous_frame) {
+    frame_counter++;
+    if (frame_counter % frame_skip_threshold != 0) {
+        if (frame_interpolation && previous_frame) {
             Frame* interpolated_frame = present_manager.GetRenderFrame();
             InterpolateFrames(previous_frame, interpolated_frame);
             blit_swapchain.DrawToFrame(rasterizer, interpolated_frame, framebuffers,
@@ -329,6 +336,7 @@ void RendererVulkan::Composite(std::span<const Tegra::FramebufferConfig> framebu
             previous_frame = interpolated_frame;
         }
         return;
+    }
     #endif
 
     SCOPE_EXIT {
