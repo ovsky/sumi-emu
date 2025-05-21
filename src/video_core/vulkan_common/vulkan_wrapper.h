@@ -430,6 +430,7 @@ public:
         return handle != nullptr;
     }
 
+#ifndef ANDROID
     /**
      * Releases ownership of the managed handle.
      * The caller is responsible for managing the lifetime of the returned handle.
@@ -438,6 +439,7 @@ public:
     Type release() noexcept {
         return std::exchange(handle, nullptr);
     }
+#endif
 
 protected:
     Type handle = nullptr;
@@ -510,6 +512,7 @@ public:
         return handle != nullptr;
     }
 
+#ifndef ANDROID
     /**
      * Releases ownership of the managed handle.
      * The caller is responsible for managing the lifetime of the returned handle.
@@ -518,6 +521,7 @@ public:
     Type release() noexcept {
         return std::exchange(handle, nullptr);
     }
+#endif
 
 protected:
     Type handle = nullptr;
