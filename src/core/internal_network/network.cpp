@@ -159,8 +159,8 @@ Errno TranslateNativeError(int e, CallType call_type = CallType::Other) {
         return Errno::INPROGRESS;
     case WSAENOTSOCK:
         return Errno::NOTSOCK;
-    case WSAEBUSY:
-        return Errno::BUSY;
+    //case WSAEBUSY:
+        //return Errno::BUSY;
     default:
         UNIMPLEMENTED_MSG("Unimplemented errno={}", e);
         return Errno::OTHER;
