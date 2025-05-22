@@ -1,0 +1,159 @@
+# .github/workflows/build-macos-sumi.yml
+name: Build Sumi Emulator for macOS
+
+on:
+  push:
+    branches:
+      - main # Or your primary development branch, e.g., dev
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  build-macos-apple-silicon:
+    name: Build Sumi (macOS Apple Silicon)
+    # Using macos-latest, which typically defaults to an ARM64 (Apple Silicon) runner.
+    # As of late 2023/early 2024, macos-14 is ARM64.
+    # You can specify macos-14 directly if preferred: runs-on: macos-14
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Sumi repository
+        uses: actions/checkout@v4
+        with:
+          # Clones submodules recursively, similar to --recursive
+          submodules: 'recursive'
+
+      - name: Setup Ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ runner.os }}-cmake-sumi-${{ github.ref }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-cmake-sumi-${{ github.ref }}
+            ${{ runner.os }}-cmake-sumi-
+          # This action installs ccache if not present and configures it.
+
+      - name: Install Homebrew Dependencies
+        run: |
+          echo "Updating Homebrew..."
+          brew update
+
+          echo "Installing dependencies..."
+          # ccache is handled by the ccache-action
+          brew install autoconf automake boost cmake dylibbundler ffmpeg fmt glslang hidapi libtool libusb llvm@17 lz4 ninja nlohmann-json openssl pkg-config qt@6 sdl2 speexdsp vulkan-loader zlib zstd
+          
+          echo "Verifying installations (optional)..."
+          brew list
+
+      - name: Set Build Environment Variables
+        run: |
+          echo "Setting environment variables for the build..."
+          # Ensure Homebrew's bin directory is in PATH (especially for Apple Silicon /opt/homebrew/bin)
+          # This is usually handled by the runner setup, but being explicit doesn't hurt.
+          echo "/opt/homebrew/bin" >> $GITHUB_PATH
+
+          # Set variables for CMake to find libraries
+          echo "LLVM_DIR=$(brew --prefix llvm@17)" >> $GITHUB_ENV
+          echo "FFMPEG_DIR=$(brew --prefix ffmpeg)" >> $GITHUB_ENV
+          
+          # Qt6_DIR is often needed for CMake to find Qt6 components correctly.
+          # The path typically looks like /opt/homebrew/opt/qt@6/lib/cmake/Qt6
+          QT6_PREFIX=$(brew --prefix qt@6)
+          echo "Qt6_DIR=${QT6_PREFIX}/lib/cmake/Qt6" >> $GITHUB_ENV
+          echo "Set Qt6_DIR to ${QT6_PREFIX}/lib/cmake/Qt6"
+
+          # Construct PKG_CONFIG_PATH for libraries that provide .pc files
+          # This helps pkg-config (used by CMake or build scripts) find necessary build flags.
+          PKG_PATHS=""
+          dependencies_for_pkg_config=(qt@6 sdl2 openssl@3 zstd lz4 speexdsp libusb hidapi fmt zlib vulkan-loader) # Use openssl@3 as openssl often refers to the system's older version
+          
+          for pkg in "${dependencies_for_pkg_config[@]}"; do
+            PKG_PREFIX=$(brew --prefix "$pkg" 2>/dev/null) # Get prefix, ignore errors if not found (though they should be installed)
+            if [ -n "$PKG_PREFIX" ] && [ -d "$PKG_PREFIX/lib/pkgconfig" ]; then
+              PKG_PATHS="$PKG_PATHS:$PKG_PREFIX/lib/pkgconfig"
+            elif [ -n "$PKG_PREFIX" ] && [ -d "$PKG_PREFIX/share/pkgconfig" ]; then # Some packages might use share/pkgconfig
+              PKG_PATHS="$PKG_PATHS:$PKG_PREFIX/share/pkgconfig"
+            fi
+          done
+          
+          # Remove leading colon if PKG_PATHS is not empty
+          PKG_PATHS="${PKG_PATHS#:}"
+          if [ -n "$PKG_PATHS" ]; then
+            echo "PKG_CONFIG_PATH=$PKG_PATHS" >> $GITHUB_ENV
+            echo "PKG_CONFIG_PATH set to: $PKG_PATHS"
+          else
+            echo "No custom PKG_CONFIG_PATH generated."
+          fi
+
+      - name: Create Build Directory
+        run: mkdir -p build # Create build directory at the root of the workspace
+
+      - name: Configure CMake
+        working-directory: ./build # Run cmake from the build directory
+        run: |
+          echo "Running CMake configuration..."
+          # CMake will use environment variables like LLVM_DIR, FFMPEG_DIR, Qt6_DIR, PKG_CONFIG_PATH
+          # Ccache should be automatically picked up if ccache-action configured it (e.g., via CMAKE_C_COMPILER_LAUNCHER)
+          cmake .. -GNinja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DSUMI_USE_BUNDLED_VCPKG=OFF \
+            -DSUMI_TESTS=OFF \
+            -DENABLE_WEB_SERVICE=OFF \
+            -DENABLE_LIBUSB=OFF \
+            -DSDL_ARMNEON=ON \
+            -DENABLE_QT6=ON \
+            -DENABLE_QT_TRANSLATION=ON \
+            -DSUMI_USE_EXTERNAL_VULKAN_HEADERS=OFF \
+            -DUSE_SYSTEM_MOLTENVK=OFF
+            # Add any other CMake flags specific to Sumi
+
+      - name: Build Sumi with Ninja
+        working-directory: ./build # Run ninja from the build directory
+        run: |
+          echo "Building Sumi using Ninja..."
+          ninja
+
+      - name: Bundle Dependencies with dylibbundler
+        # This step assumes sumi.app is created in 'build/bin/sumi.app' by the 'ninja' command.
+        # Adjust path if sumi.app is located elsewhere.
+        working-directory: ./build # dylibbundler is typically run from where the .app is relative to its arguments
+        run: |
+          echo "Bundling application dependencies..."
+          if [ -d "bin/sumi.app" ]; then
+            dylibbundler -of -cd -b -x bin/sumi.app/Contents/MacOS/sumi -d bin/sumi.app/Contents/libs/
+            echo "Dylib bundling complete."
+          else
+            echo "Error: bin/sumi.app not found in build directory. Skipping dylibbundler."
+            exit 1
+          fi
+
+      - name: Prepare Artifact for Upload
+        run: |
+          echo "Preparing Sumi.app for artifact upload..."
+          # Move the bundled app to the root of the workspace for easier artifact pathing
+          # This assumes sumi.app is in 'build/bin/sumi.app'
+          if [ -d "build/bin/sumi.app" ]; then
+            mv build/bin/sumi.app ./Sumi.app # Renaming to Sumi.app for clarity in artifacts
+            echo "Sumi.app moved to workspace root."
+            # Optional: Create a ZIP archive or DMG
+            # echo "Creating Sumi_macOS.zip..."
+            # zip -r Sumi_macOS.zip Sumi.app
+            # echo "Creating Sumi.dmg..."
+            # hdiutil create -fs HFS+ -srcfolder Sumi.app -volname "Sumi" Sumi.dmg
+          else
+            echo "Error: build/bin/sumi.app not found. Cannot prepare artifact."
+            exit 1
+          fi
+
+      - name: Upload Sumi.app Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sumi-macOS-AppleSilicon # Name of the artifact in GitHub
+          path: | # Path to the file(s) to upload. Can be a directory or specific files.
+            Sumi.app
+            # If you created a zip or dmg:
+            # Sumi_macOS.zip
+            # Sumi.dmg
+          retention-days: 7 # Optional: How long to keep the artifact
