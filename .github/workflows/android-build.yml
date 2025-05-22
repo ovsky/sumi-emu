@@ -1,67 +1,53 @@
-# .github/workflows/android-build.yml
-
-name: Build Android APK
+name: Build Android APK Test
 
 on:
-  # Triggers the workflow on push events but only for the main branch
   push:
     branches: [ main ]
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
   build:
     name: Build Release APK
-    # Use the latest Windows runner provided by GitHub Actions
     runs-on: windows-latest
 
     steps:
-      # 1. Checkout the repository code
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Needed for proper git history in versioning
 
-      # 2. Set up JDK (Required for Gradle)
-      #    Choose a Java version compatible with your project (e.g., 11, 17)
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'temurin' # Or 'zulu', 'adopt', etc.
+          distribution: 'temurin'
 
-      # 3. Cache Gradle dependencies and wrapper
-      #    This speeds up subsequent builds by reusing downloaded dependencies.
       - name: Cache Gradle packages
         uses: actions/cache@v4
         with:
-          # Cache directories relative to the repository root
           path: |
-            src/android/.gradle/caches
-            src/android/.gradle/wrapper/dists
-          # Create a unique key based on dependency files
-          # Adjust if your dependency lockfiles/declarations are different
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            src/android/.gradle
           key: ${{ runner.os }}-gradle-${{ hashFiles('src/android/**/gradle-wrapper.properties', 'src/android/**/*.gradle*', 'src/android/**/libs.versions.toml') }}
-          # Use a restore key for partial cache hits
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # 4. Build the APK using Gradle Wrapper
-      #    Executes the specific command provided by the user.
-      #    Assumes gradlew.bat is located inside the src/android directory.
-      - name: Build with Gradle
-        run: .\gradlew --no-daemon --stacktrace --build-cache --parallel --configure-on-demand assembleMainlineRelease
-        # Set the working directory to where the gradlew script is located
+      - name: Validate Gradle Wrapper
+        run: ./gradlew wrapper --validate-url --gradle-version 8.1.1
         working-directory: ./src/android
-        shell: cmd # Use cmd shell on Windows for gradlew.bat
+        shell: cmd
 
-      # 5. Upload the generated APK as a build artifact
-      #    This makes the APK available for download from the workflow run page.
+      - name: Build with Gradle
+        run: ./gradlew --no-daemon --stacktrace --warning-mode=all --scan assembleMainlineRelease
+        working-directory: ./src/android
+        shell: cmd
+        env:
+          GRADLE_OPTS: -Dorg.gradle.daemon=false
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-mainline-release-apk # Name of the artifact zip file
-          # Path to the generated APK file(s).
-          # IMPORTANT: Adjust this path if your module name is not 'app'
-          # or if your build type/flavor output directory is different.
-          # The '*' wildcard helps capture the APK even if the name includes version codes.
+          name: app-mainline-release-apk
           path: src/android/app/build/outputs/apk/mainline/release/*.apk
-          if-no-files-found: error # Optional: Fail the step if the APK is not found
+          if-no-files-found: error
