@@ -7,6 +7,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QList>
+#include <QPushButton>
 #include <QStandardItemModel>
 #include <QString>
 #include <QTreeView>
@@ -172,6 +173,10 @@ private:
     QFileSystemWatcher* watcher = nullptr;
     ControllerNavigation* controller_navigation = nullptr;
     CompatibilityList compatibility_list;
+
+    QHBoxLayout* warning_layout = nullptr;
+    QWidget* warning_widget = nullptr;
+    QPushButton* warning_dont_show_again = nullptr;
 
     friend class GameListSearchField;
 

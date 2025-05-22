@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
+// SPDX-FileCopyrightText: Copyright 2020 sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #pragma once
@@ -31,6 +31,7 @@ class ConfigureAudio;
 class ConfigureCpu;
 class ConfigureGraphics;
 class ConfigureGraphicsAdvanced;
+class ConfigureGraphicsExtensions;
 class ConfigureInputPerGame;
 class ConfigureLinuxTab;
 class ConfigureSystem;
@@ -84,6 +85,7 @@ private:
     std::unique_ptr<ConfigureAudio> audio_tab;
     std::unique_ptr<ConfigureCpu> cpu_tab;
     std::unique_ptr<ConfigureGraphicsAdvanced> graphics_advanced_tab;
+    std::unique_ptr<ConfigureGraphicsExtensions> graphics_extensions_tab;
     std::unique_ptr<ConfigureGraphics> graphics_tab;
     std::unique_ptr<ConfigureInputPerGame> input_tab;
     std::unique_ptr<ConfigureLinuxTab> linux_tab;

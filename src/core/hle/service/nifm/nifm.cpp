@@ -398,11 +398,11 @@ void IGeneralService::GetCurrentNetworkProfile(HLERequestContext& ctx) {
                 .mtu{1500},
             },
             .uuid{0xdeadbeef, 0xdeadbeef},
-            .network_name{"sumi Network"},
+            .network_name{"Sumi Network"},
             .wireless_setting_data{
                 .ssid_length{12},
-                .ssid{"sumi Network"},
-                .passphrase{"citronpassword"},
+                .ssid{"Sumi Network"},
+                .passphrase{"sumipassword"},
             },
         };
     }();

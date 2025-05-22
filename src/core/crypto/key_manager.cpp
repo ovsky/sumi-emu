@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
+// SPDX-FileCopyrightText: Copyright 2018 sumi Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <algorithm>
@@ -1374,33 +1374,6 @@ bool KeyManager::AddTicket(const Ticket& ticket) {
         return false;
     }
     SetKey(S128KeyType::Titlekey, key.value(), rights_id[1], rights_id[0]);
-    return true;
-}
-
-bool KeyManager::IsFirmwareAvailable() const {
-    // Check for essential keys that would only be present with firmware
-    if (!HasKey(S128KeyType::Master, 0)) {
-        return false;
-    }
-
-    // Check for at least one titlekek
-    bool has_titlekek = false;
-    for (size_t i = 0; i < CURRENT_CRYPTO_REVISION; ++i) {
-        if (HasKey(S128KeyType::Titlekek, i)) {
-            has_titlekek = true;
-            break;
-        }
-    }
-
-    if (!has_titlekek) {
-        return false;
-    }
-
-    // Check for header key
-    if (!HasKey(S256KeyType::Header)) {
-        return false;
-    }
-
     return true;
 }
 } // namespace Core::Crypto

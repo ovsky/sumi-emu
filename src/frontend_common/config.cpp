@@ -362,6 +362,7 @@ void Config::ReadRendererValues() {
 
     ReadCategory(Settings::Category::Renderer);
     ReadCategory(Settings::Category::RendererAdvanced);
+//    ReadCategory(Settings::Category::RendererExtensions);
     ReadCategory(Settings::Category::RendererDebug);
 
     EndGroup();
@@ -670,6 +671,7 @@ void Config::SaveRendererValues() {
 
     WriteCategory(Settings::Category::Renderer);
     WriteCategory(Settings::Category::RendererAdvanced);
+//    WriteCategory(Settings::Category::RendererExtensions);
     WriteCategory(Settings::Category::RendererDebug);
 
     EndGroup();

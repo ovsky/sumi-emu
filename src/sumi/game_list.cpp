@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2014 Citra Emulator Project
+// SPDX-FileCopyrightText: 2014 Sumi / Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <regex>
@@ -335,6 +335,7 @@ GameList::GameList(FileSys::VirtualFilesystem vfs_, FileSys::ManualContentProvid
     tree_view->setSortingEnabled(true);
     tree_view->setEditTriggers(QHeaderView::NoEditTriggers);
     tree_view->setContextMenuPolicy(Qt::CustomContextMenu);
+    tree_view->setAttribute(Qt::WA_AcceptTouchEvents, true);
     tree_view->setStyleSheet(QStringLiteral("QTreeView{ border: none; }"));
 
     item_model->insertColumns(0, COLUMN_COUNT);
@@ -364,11 +365,12 @@ GameList::GameList(FileSys::VirtualFilesystem vfs_, FileSys::ManualContentProvid
             });
 
     // We must register all custom types with the Qt Automoc system so that we are able to use
-    // it with signals/slots. In this case, QList falls under the umbrells of custom types.
+    // it with signals/slots. In this case, QList falls under the umbrella of custom types.
     qRegisterMetaType<QList<QStandardItem*>>("QList<QStandardItem*>");
 
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
+
     layout->addWidget(tree_view);
     layout->addWidget(search_field);
     setLayout(layout);
@@ -575,7 +577,7 @@ void GameList::AddGamePopup(QMenu& context_menu, u64 program_id, const std::stri
         shortcut_menu->addAction(tr("Add to Applications Menu"));
 #endif
     context_menu.addSeparator();
-    QAction* properties = context_menu.addAction(tr("Properties"));
+    QAction* properties = context_menu.addAction(tr("Configure Game"));
 
     favorite->setVisible(program_id != 0);
     favorite->setCheckable(true);
