@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:title="CPU/GPU Core Management"
+        app:iconSpaceReserved="false">
+
+        <ListPreference
+            android:key="cpu_core_mode"
+            android:title="CPU Core Mode"
+            android:summary="Select CPU core usage mode"
+            android:entries="@array/cpu_core_mode_entries"
+            android:entryValues="@array/cpu_core_mode_values"
+            app:iconSpaceReserved="false" />
+
+        <SeekBarPreference
+            android:key="max_cpu_cores"
+            android:title="Maximum CPU Cores"
+            android:summary="Limit the number of CPU cores used"
+            android:max="8"
+            android:defaultValue="8"
+            app:iconSpaceReserved="false" />
+
+        <ListPreference
+            android:key="gpu_core_mode"
+            android:title="GPU Core Mode"
+            android:summary="Select GPU core usage mode"
+            android:entries="@array/gpu_core_mode_entries"
+            android:entryValues="@array/gpu_core_mode_values"
+            app:iconSpaceReserved="false" />
+
+        <SeekBarPreference
+            android:key="max_gpu_cores"
+            android:title="Maximum GPU Cores"
+            android:summary="Limit the number of GPU cores used"
+            android:max="4"
+            android:defaultValue="4"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

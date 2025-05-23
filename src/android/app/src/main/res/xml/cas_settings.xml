@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:title="AMD CAS Settings"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreference
+            android:key="enable_amd_cas"
+            android:title="Enable AMD CAS"
+            android:summary="Enable Contrast Adaptive Sharpening"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false" />
+
+        <SeekBarPreference
+            android:key="cas_sharpness"
+            android:title="Sharpness"
+            android:summary="Adjust CAS sharpness level"
+            android:max="100"
+            android:defaultValue="50"
+            android:dependency="enable_amd_cas"
+            app:iconSpaceReserved="false" />
+
+        <ListPreference
+            android:key="cas_quality"
+            android:title="Quality Mode"
+            android:summary="Select CAS quality mode"
+            android:entries="@array/cas_quality_entries"
+            android:entryValues="@array/cas_quality_values"
+            android:dependency="enable_amd_cas"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

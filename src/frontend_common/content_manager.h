@@ -25,6 +25,12 @@ enum class InstallResult {
     Overwrite,
     Failure,
     BaseInstallAttempted,
+    ErrorMetaFailed,
+    ErrorAlreadyExists,
+    ErrorCopyFailed,
+    ErrorInsufficientSpace,
+    ErrorInvalidNCA,
+    ErrorVerificationFailed
 };
 
 enum class GameVerificationResult {
@@ -201,47 +207,109 @@ inline InstallResult InstallNCA(FileSys::VfsFilesystem& vfs, const std::string& 
                                 FileSys::RegisteredCache& registered_cache,
                                 const FileSys::TitleType title_type,
                                 const std::function<bool(size_t, size_t)>& callback) {
-    const auto copy = [callback](const FileSys::VirtualFile& src, const FileSys::VirtualFile& dest,
-                                 std::size_t block_size) {
-        if (src == nullptr || dest == nullptr) {
-            return false;
-        }
-        if (!dest->Resize(src->GetSize())) {
-            return false;
+    try {
+        // Verify file exists and is accessible
+        if (!vfs.IsFile(filename)) {
+            LOG_ERROR(Loader, "File does not exist or is not accessible: {}", filename);
+            return InstallResult::ErrorInvalidNCA;
         }
 
-        using namespace Common::Literals;
-        std::vector<u8> buffer(1_MiB);
+        // Check available space before installation
+        const auto file_size = vfs.GetFileSize(filename);
+        if (!CheckStorageSpace(registered_cache.GetBasePath(), file_size)) {
+            LOG_ERROR(Loader, "Insufficient storage space for installation");
+            return InstallResult::ErrorInsufficientSpace;
+        }
 
-        for (std::size_t i = 0; i < src->GetSize(); i += buffer.size()) {
-            if (callback(src->GetSize(), i)) {
-                dest->Resize(0);
+        const auto copy = [callback](const FileSys::VirtualFile& src, const FileSys::VirtualFile& dest,
+                                   std::size_t block_size) {
+            if (src == nullptr || dest == nullptr) {
+                LOG_ERROR(Loader, "Invalid source or destination file");
                 return false;
             }
-            const auto read = src->Read(buffer.data(), buffer.size(), i);
-            dest->Write(buffer.data(), read, i);
+
+            try {
+                if (!dest->Resize(src->GetSize())) {
+                    LOG_ERROR(Loader, "Failed to resize destination file");
+                    return false;
+                }
+
+                using namespace Common::Literals;
+                std::vector<u8> buffer(1_MiB);
+
+                for (std::size_t i = 0; i < src->GetSize(); i += buffer.size()) {
+                    if (callback(src->GetSize(), i)) {
+                        LOG_WARNING(Loader, "Installation cancelled by user");
+                        dest->Resize(0);
+                        return false;
+                    }
+
+                    const auto read = src->Read(buffer.data(), buffer.size(), i);
+                    if (read == 0) {
+                        LOG_ERROR(Loader, "Failed to read source file at offset {}", i);
+                        return false;
+                    }
+
+                    if (!dest->Write(buffer.data(), read, i)) {
+                        LOG_ERROR(Loader, "Failed to write to destination file at offset {}", i);
+                        return false;
+                    }
+                }
+                return true;
+            } catch (const std::exception& e) {
+                LOG_ERROR(Loader, "Exception during file copy: {}", e.what());
+                return false;
+            }
+        };
+
+        // Open and verify NCA
+        const auto nca = std::make_shared<FileSys::NCA>(vfs.OpenFile(filename, FileSys::OpenMode::Read));
+        if (nca == nullptr) {
+            LOG_ERROR(Loader, "Failed to open NCA file: {}", filename);
+            return InstallResult::ErrorInvalidNCA;
         }
-        return true;
-    };
 
-    const auto nca =
-        std::make_shared<FileSys::NCA>(vfs.OpenFile(filename, FileSys::OpenMode::Read));
-    const auto id = nca->GetStatus();
+        const auto id = nca->GetStatus();
+        if (id != Loader::ResultStatus::Success &&
+            id != Loader::ResultStatus::ErrorMissingBKTRBaseRomFS) {
+            LOG_ERROR(Loader, "Invalid NCA status: {}", static_cast<int>(id));
+            return InstallResult::ErrorInvalidNCA;
+        }
 
-    // Game updates necessary are missing base RomFS
-    if (id != Loader::ResultStatus::Success &&
-        id != Loader::ResultStatus::ErrorMissingBKTRBaseRomFS) {
+        // Verify NCA integrity before installation
+        if (!nca->VerifyIntegrity()) {
+            LOG_ERROR(Loader, "NCA integrity verification failed");
+            return InstallResult::ErrorVerificationFailed;
+        }
+
+        // Install the NCA
+        const auto res = registered_cache.InstallEntry(*nca, title_type, true, copy);
+        if (res == FileSys::InstallResult::Success) {
+            return InstallResult::Success;
+        } else if (res == FileSys::InstallResult::OverwriteExisting) {
+            return InstallResult::Overwrite;
+        } else {
+            LOG_ERROR(Loader, "Installation failed with result: {}", static_cast<int>(res));
+            return InstallResult::Failure;
+        }
+    } catch (const std::exception& e) {
+        LOG_ERROR(Loader, "Exception during NCA installation: {}", e.what());
         return InstallResult::Failure;
     }
+}
 
-    const auto res = registered_cache.InstallEntry(*nca, title_type, true, copy);
-    if (res == FileSys::InstallResult::Success) {
-        return InstallResult::Success;
-    } else if (res == FileSys::InstallResult::OverwriteExisting) {
-        return InstallResult::Overwrite;
-    } else {
-        return InstallResult::Failure;
+// Helper function to check available storage space
+inline bool CheckStorageSpace(const std::string& path, size_t required_size) {
+    try {
+        struct statvfs stat;
+        if (statvfs(path.c_str(), &stat) == 0) {
+            const size_t available = stat.f_bsize * stat.f_bavail;
+            return available >= required_size;
+        }
+    } catch (const std::exception& e) {
+        LOG_ERROR(Loader, "Failed to check storage space: {}", e.what());
     }
+    return false;
 }
 
 /**
@@ -257,82 +325,92 @@ inline InstallResult InstallNCA(FileSys::VfsFilesystem& vfs, const std::string& 
 inline std::vector<std::string> VerifyInstalledContents(
     Core::System& system, FileSys::ManualContentProvider& provider,
     const std::function<bool(size_t, size_t)>& callback, bool firmware_only = false) {
-    // Get content registries.
-    auto bis_contents = system.GetFileSystemController().GetSystemNANDContents();
-    auto user_contents = system.GetFileSystemController().GetUserNANDContents();
+    try {
+        // Get content registries
+        auto bis_contents = system.GetFileSystemController().GetSystemNANDContents();
+        auto user_contents = system.GetFileSystemController().GetUserNANDContents();
 
-    std::vector<FileSys::RegisteredCache*> content_providers;
-    if (bis_contents) {
-        content_providers.push_back(bis_contents);
-    }
-    if (user_contents && !firmware_only) {
-        content_providers.push_back(user_contents);
-    }
+        if (!bis_contents && !user_contents) {
+            LOG_ERROR(Loader, "No content registries available");
+            return {"No content registries available"};
+        }
 
-    // Get associated NCA files.
-    std::vector<FileSys::VirtualFile> nca_files;
+        std::vector<FileSys::RegisteredCache*> content_providers;
+        if (bis_contents) {
+            content_providers.push_back(bis_contents);
+        }
+        if (user_contents && !firmware_only) {
+            content_providers.push_back(user_contents);
+        }
 
-    // Get all installed IDs.
-    size_t total_size = 0;
-    for (auto nca_provider : content_providers) {
-        const auto entries = nca_provider->ListEntriesFilter();
+        // Get all installed IDs
+        std::vector<FileSys::VirtualFile> nca_files;
+        size_t total_size = 0;
 
-        for (const auto& entry : entries) {
-            auto nca_file = nca_provider->GetEntryRaw(entry.title_id, entry.type);
-            if (!nca_file) {
+        for (const auto& provider : content_providers) {
+            if (!provider) continue;
+
+            const auto entries = provider->ListEntries();
+            for (const auto& entry : entries) {
+                const auto file = provider->GetEntry(entry);
+                if (file != nullptr) {
+                    nca_files.push_back(file);
+                    total_size += file->GetSize();
+                }
+            }
+        }
+
+        std::vector<std::string> failed;
+        size_t processed_size = 0;
+
+        for (const auto& nca_file : nca_files) {
+            if (nca_file == nullptr) {
+                failed.push_back("Invalid NCA file");
                 continue;
             }
 
-            total_size += nca_file->GetSize();
-            nca_files.push_back(std::move(nca_file));
-        }
-    }
-
-    // Declare a list of file names which failed to verify.
-    std::vector<std::string> failed;
-
-    size_t processed_size = 0;
-    bool cancelled = false;
-    auto nca_callback = [&](size_t nca_processed, size_t nca_total) {
-        cancelled = callback(total_size, processed_size + nca_processed);
-        return !cancelled;
-    };
-
-    // Using the NCA loader, determine if all NCAs are valid.
-    for (auto& nca_file : nca_files) {
-        Loader::AppLoader_NCA nca_loader(nca_file);
-
-        auto status = nca_loader.VerifyIntegrity(nca_callback);
-        if (cancelled) {
-            break;
-        }
-        if (status != Loader::ResultStatus::Success) {
-            FileSys::NCA nca(nca_file);
-            const auto title_id = nca.GetTitleId();
-            std::string title_name = "unknown";
-
-            const auto control = provider.GetEntry(FileSys::GetBaseTitleID(title_id),
-                                                   FileSys::ContentRecordType::Control);
-            if (control && control->GetStatus() == Loader::ResultStatus::Success) {
-                const FileSys::PatchManager pm{title_id, system.GetFileSystemController(),
-                                               provider};
-                const auto [nacp, logo] = pm.ParseControlNCA(*control);
-                if (nacp) {
-                    title_name = nacp->GetApplicationName();
+            try {
+                const auto nca = std::make_shared<FileSys::NCA>(nca_file);
+                if (nca == nullptr) {
+                    failed.push_back(fmt::format("{} (Failed to load NCA)", nca_file->GetName()));
+                    continue;
                 }
-            }
 
-            if (title_id > 0) {
-                failed.push_back(
-                    fmt::format("{} ({:016X}) ({})", nca_file->GetName(), title_id, title_name));
-            } else {
-                failed.push_back(fmt::format("{} (unknown)", nca_file->GetName()));
+                // Verify NCA integrity
+                if (!nca->VerifyIntegrity()) {
+                    const auto title_id = nca->GetTitleId();
+                    const auto title_name = provider.GetEntryName(title_id);
+
+                    if (title_id > 0) {
+                        failed.push_back(
+                            fmt::format("{} ({:016X}) ({}) - Integrity check failed",
+                                      nca_file->GetName(), title_id, title_name));
+                    } else {
+                        failed.push_back(fmt::format("{} (unknown) - Integrity check failed",
+                                                   nca_file->GetName()));
+                    }
+                    continue;
+                }
+
+                // Update progress
+                processed_size += nca_file->GetSize();
+                if (callback(total_size, processed_size)) {
+                    LOG_WARNING(Loader, "Content verification cancelled by user");
+                    failed.push_back("Verification cancelled by user");
+                    break;
+                }
+            } catch (const std::exception& e) {
+                LOG_ERROR(Loader, "Exception during NCA verification: {}", e.what());
+                failed.push_back(fmt::format("{} (Verification error: {})",
+                                           nca_file->GetName(), e.what()));
             }
         }
 
-        processed_size += nca_file->GetSize();
+        return failed;
+    } catch (const std::exception& e) {
+        LOG_ERROR(Loader, "Exception during content verification: {}", e.what());
+        return {fmt::format("Verification failed: {}", e.what())};
     }
-    return failed;
 }
 
 /**

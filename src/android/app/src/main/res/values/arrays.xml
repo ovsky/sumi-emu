@@ -317,4 +317,46 @@
         <item>2</item>
     </integer-array>
 
+    <string-array name="cpu_core_mode_entries">
+        <item>All Cores (Default)</item>
+        <item>BIG Cores Only</item>
+        <item>LITTLE Cores Only</item>
+        <item>Custom</item>
+    </string-array>
+
+    <string-array name="cpu_core_mode_values">
+        <item>all</item>
+        <item>big</item>
+        <item>little</item>
+        <item>custom</item>
+    </string-array>
+
+    <string-array name="gpu_core_mode_entries">
+        <item>All Cores (Default)</item>
+        <item>High Performance</item>
+        <item>Power Saving</item>
+        <item>Custom</item>
+    </string-array>
+
+    <string-array name="gpu_core_mode_values">
+        <item>all</item>
+        <item>performance</item>
+        <item>powersave</item>
+        <item>custom</item>
+    </string-array>
+
+    <string-array name="cas_quality_entries">
+        <item>Ultra Quality</item>
+        <item>Quality</item>
+        <item>Balanced</item>
+        <item>Performance</item>
+    </string-array>
+
+    <string-array name="cas_quality_values">
+        <item>ultra</item>
+        <item>quality</item>
+        <item>balanced</item>
+        <item>performance</item>
+    </string-array>
+
 </resources>

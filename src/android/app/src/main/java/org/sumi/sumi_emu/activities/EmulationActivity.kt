@@ -56,11 +56,15 @@ import org.sumi.sumi_emu.utils.NfcReader
 import org.sumi.sumi_emu.utils.ParamPackage
 import org.sumi.sumi_emu.utils.ThemeHelper
 import org.sumi.sumi_emu.utils.LicenseVerifier
+import org.sumi.sumi_emu.utils.CoreManager
+import org.sumi.sumi_emu.utils.CASManager
 import java.text.NumberFormat
 import kotlin.math.roundToInt
 
 class EmulationActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var binding: ActivityEmulationBinding
+    private lateinit var coreManager: CoreManager
+    private lateinit var casManager: CASManager
 
     var isActivityRecreated = false
     private lateinit var nfcReader: NfcReader
@@ -164,6 +168,12 @@ class EmulationActivity : AppCompatActivity(), SensorEventListener {
                     .apply()
             }
         }
+
+        coreManager = CoreManager.getInstance(this)
+        coreManager.applyCoreSettings()
+
+        casManager = CASManager.getInstance(this)
+        casManager.initialize()
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
