@@ -19,10 +19,6 @@
 #include "core/loader/nso.h"
 #include "core/loader/nsp.h"
 #include "core/loader/xci.h"
-#include "core/hle/service/am/am.h"
-#include "core/hle/service/filesystem/filesystem.h"
-#include "core/file_sys/registered_cache.h"
-#include "core/file_sys/content_archive.h"
 
 namespace Loader {
 
@@ -40,22 +36,23 @@ std::optional<FileType> IdentifyFileLoader(FileSys::VirtualFile file) {
 } // namespace
 
 FileType IdentifyFile(FileSys::VirtualFile file) {
-    if (const auto romdir_type = IdentifyFileLoader<AppLoader_DeconstructedRomDirectory>(file)) {
-        return *romdir_type;
-    } else if (const auto nso_type = IdentifyFileLoader<AppLoader_NSO>(file)) {
-        return *nso_type;
+    if (const auto nsp_type = IdentifyFileLoader<AppLoader_NSP>(file)) {
+        return *nsp_type;
+    } else if (const auto xci_type = IdentifyFileLoader<AppLoader_XCI>(file)) {
+        return *xci_type;
     } else if (const auto nro_type = IdentifyFileLoader<AppLoader_NRO>(file)) {
         return *nro_type;
     } else if (const auto nca_type = IdentifyFileLoader<AppLoader_NCA>(file)) {
         return *nca_type;
-    } else if (const auto xci_type = IdentifyFileLoader<AppLoader_XCI>(file)) {
-        return *xci_type;
     } else if (const auto nax_type = IdentifyFileLoader<AppLoader_NAX>(file)) {
         return *nax_type;
-    } else if (const auto nsp_type = IdentifyFileLoader<AppLoader_NSP>(file)) {
-        return *nsp_type;
     } else if (const auto kip_type = IdentifyFileLoader<AppLoader_KIP>(file)) {
         return *kip_type;
+    } else if (const auto nso_type = IdentifyFileLoader<AppLoader_NSO>(file)) {
+        return *nso_type;
+    } else if (const auto romdir_type =
+                   IdentifyFileLoader<AppLoader_DeconstructedRomDirectory>(file)) {
+        return *romdir_type;
     } else {
         return FileType::Unknown;
     }
@@ -251,20 +248,6 @@ static std::unique_ptr<AppLoader> GetFileLoader(Core::System& system, FileSys::V
 std::unique_ptr<AppLoader> GetLoader(Core::System& system, FileSys::VirtualFile file,
                                      u64 program_id, std::size_t program_index) {
     if (!file) {
-        return nullptr;
-    }
-
-    // Check if firmware is available
-    constexpr u64 MiiEditId = 0x0100000000001009; // Mii Edit applet ID
-    auto bis_system = system.GetFileSystemController().GetSystemNANDContents();
-    if (bis_system) {
-        auto mii_applet_nca = bis_system->GetEntry(MiiEditId, FileSys::ContentRecordType::Program);
-        if (!mii_applet_nca) {
-            LOG_ERROR(Loader, "Firmware is required to launch games but is not available");
-            return nullptr;
-        }
-    } else {
-        LOG_ERROR(Loader, "System NAND contents not available");
         return nullptr;
     }
 

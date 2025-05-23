@@ -190,11 +190,8 @@ Result IAddOnContentManager::NotifyUnmountAddOnContent() {
     R_SUCCEED();
 }
 
-Result IAddOnContentManager::CheckAddOnContentMountStatus(Out<bool> out_mounted) {
-    LOG_DEBUG(Service_AOC, "called");
-
-    // Return whether add-on content is currently mounted
-    *out_mounted = false;
+Result IAddOnContentManager::CheckAddOnContentMountStatus() {
+    LOG_WARNING(Service_AOC, "(STUBBED) called");
 
     R_SUCCEED();
 }
