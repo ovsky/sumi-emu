@@ -37,9 +37,6 @@ jobs:
         uses: amyu/setup-android@v4
         with:
           cache-disabled: true
-          # default: `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-v4`
-          # Custom key for cache. It is invalid when `cache-disabled: true`
-          # cache-key: 'custom-cache-key'
           sdk-version: 34
           build-tools-version: 33.0.1
           cmake-version: 3.22.1
@@ -55,6 +52,7 @@ jobs:
       - name: Release
         uses: ncipollo/release-action@v1.14.0
         with:
+          token: ${{ secrets.WORKFLOW_TOKEN }}  # <-- Using WORKFLOW_TOKEN instead
           name: ${{ env.CURRENT_DATE }}.${{ github.run_number }}
           artifacts: ./src/android/app/build/outputs/apk/mainline/release/app-mainline-release.apk
           tag: ${{ env.CURRENT_DATE }}.${{ github.run_number }}

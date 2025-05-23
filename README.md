@@ -64,6 +64,16 @@ To achieve best performance, download the best driver for your device and apply 
 
 ---
 
+## DLC Installation Alternative 💾
+
+We found that DLC installing of DLCs stopped in many titles. So, we have suggestion. You can install our last version on which all DLCs works properly, install every DLC you want and then reinstalling the latest version. I know, it's not a perfect solution, but we are consistently working on bringing back DLC support.
+
+If you want to test it:
+https://github.com/ovsky/sumi-emu/releases/tag/v0.3.0
+
+
+---
+
 ## Getting Started 💡
 
 1. **Download and Install**: Head over to the [downloads page](https://git.sumi-emu.org/Sumi/Sumi/releases) to grab the latest release.
