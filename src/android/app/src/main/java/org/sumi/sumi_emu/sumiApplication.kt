@@ -44,9 +44,10 @@ class SumiApplication : Application() {
         NativeInput.reloadInputDevices()
         NativeLibrary.logDeviceInfo()
         Log.logDeviceInfo()
-        ThreadManager.setLowestPriority()
 
-        // Initialize thermal monitoring
+        // Initialize managers
+        threadManager = ThreadManager.getInstance()
+        threadManager.setLowestPriority()
         thermalMonitor = ThermalMonitor(this)
         thermalMonitor.StartThermalMonitor()
         thermalManager = ThermalManager.getInstance(this)
@@ -59,6 +60,7 @@ class SumiApplication : Application() {
         lateinit var application: SumiApplication
         lateinit var thermalManager: ThermalManager
         lateinit var thermalMonitor: ThermalMonitor
+        lateinit var threadManager: ThreadManager
 
         val appContext: Context
             get() = application.applicationContext

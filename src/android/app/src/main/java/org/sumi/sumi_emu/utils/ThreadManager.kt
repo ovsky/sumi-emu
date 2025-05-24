@@ -3,8 +3,13 @@ package org.sumi.sumi_emu.utils
 import android.os.Process
 import android.util.Log
 
-object ThreadManager {
-    private const val TAG = "ThreadManager"
+class ThreadManager private constructor() {
+    private val TAG = "ThreadManager"
+
+    init {
+        Log.d(TAG, "Initializing ThreadManager")
+        setLowestPriority()
+    }
 
     fun setLowestPriority() {
         try {
@@ -49,5 +54,16 @@ object ThreadManager {
         var groupThreads = arrayOfNulls<Thread>(group.activeCount() * 2)
         val count = group.enumerate(groupThreads, true)
         return groupThreads.filterNotNull().take(count)
+    }
+
+    companion object {
+        @Volatile
+        private var instance: ThreadManager? = null
+
+        fun getInstance(): ThreadManager {
+            return instance ?: synchronized(this) {
+                instance ?: ThreadManager().also { instance = it }
+            }
+        }
     }
 }
