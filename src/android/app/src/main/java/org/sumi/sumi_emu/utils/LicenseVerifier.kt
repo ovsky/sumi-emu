@@ -42,9 +42,10 @@ object LicenseVerifier {
                 activity.packageManager.getPackageInfo(currentPackage, PackageManager.GET_SIGNATURES)
             }
 
-            if (!verifySignature(packageInfo.signatures)) {
-                showViolationDialog(activity)
-            }
+            // Skip verifying signatures due to potential issues with Android 11+ and signature verification
+            // if (!verifySignature(packageInfo.signatures)) {
+            //     showViolationDialog(activity)
+            // }
 
         } catch (e: Exception) {
             showViolationDialog(activity)

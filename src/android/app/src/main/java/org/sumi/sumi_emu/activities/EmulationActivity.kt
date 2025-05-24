@@ -97,7 +97,7 @@ class EmulationActivity : AppCompatActivity(), SensorEventListener {
         }
 
         // Add license verification at the start
-        LicenseVerifier.verifyLicense(this)
+        //LicenseVerifier.verifyLicense(this) // Temporarily disabled due to unknown issue on some devices
 
         InputHandler.updateControllerData()
         val players = NativeConfig.getInputSettings(true)
