@@ -60,23 +60,17 @@ public class ThermalMonitor(private val context: Context) : AppCompatActivity() 
     // Constructor
     public fun StartThermalMonitor()
     {
-        return; // Temporarily disabled
-
         val thermalMonitor = ThermalMonitor(context)
 
         thermalMonitor.setInitialProcessorState()
         thermalMonitor.startThermalMonitoring()
-        setAllThreadsPriority(Process.THREAD_PRIORITY_FOREGROUND)
+        setAllThreadsPriority(Process.THREAD_PRIORITY_BACKGROUND)
     }
 
     // Start the thermal monitoring loop process
     private fun startThermalMonitoring() {
-
-        return; // Temporarily disabled
-
         Handler(Looper.getMainLooper()).postDelayed(object : Runnable {
             override fun run() {
-
                 val temperature = getBatteryTemperature(context)
                 val fahrenheit = (temperature * 9f / 5f) + 32f
 
@@ -124,7 +118,8 @@ public class ThermalMonitor(private val context: Context) : AppCompatActivity() 
 
     // Set initial processor state
     public fun setInitialProcessorState() {
-        AndroidLog.d("ThermalMonitor", "Setting initial processor state to foreground")
+        AndroidLog.d("ThermalMonitor", "Setting initial processor state to lowest priority")
+        setAllThreadsPriority(Process.THREAD_PRIORITY_BACKGROUND)
     }
 
     // Start the frame limiter process
@@ -181,13 +176,14 @@ public class ThermalMonitor(private val context: Context) : AppCompatActivity() 
         for (t in threads) {
             try {
                 if (t != null && t.isAlive) {
+                    // Set all threads to lowest priority except system threads
                     if (!t.name.startsWith("Finalizer") && !t.name.startsWith("GC")) {
-                        AndroidLog.d("ThermalMonitor", "Setting thread ${t.name} to background priority")
+                        AndroidLog.d("ThermalMonitor", "Setting thread ${t.name} to lowest priority")
                         android.os.Process.setThreadPriority(t.id.toInt(), Process.THREAD_PRIORITY_BACKGROUND)
                     }
                 }
             } catch (e: Exception) {
-                AndroidLog.d("Cooler", "Failed to adjust thread '${t.name}': ${e.message}")
+                AndroidLog.d("ThermalMonitor", "Failed to adjust thread '${t.name}': ${e.message}")
             }
         }
     }

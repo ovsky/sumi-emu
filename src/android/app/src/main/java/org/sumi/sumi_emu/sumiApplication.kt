@@ -13,6 +13,9 @@ import org.sumi.sumi_emu.utils.DirectoryInitialization
 import org.sumi.sumi_emu.utils.DocumentsTree
 import org.sumi.sumi_emu.utils.GpuDriverHelper
 import org.sumi.sumi_emu.utils.Log
+import org.sumi.sumi_emu.utils.ThreadManager
+import org.sumi.sumi_emu.thermal.ThermalMonitor
+import org.sumi.sumi_emu.utils.ThermalManager
 
 fun Context.getPublicFilesDir(): File = getExternalFilesDir(null) ?: filesDir
 
@@ -41,6 +44,12 @@ class SumiApplication : Application() {
         NativeInput.reloadInputDevices()
         NativeLibrary.logDeviceInfo()
         Log.logDeviceInfo()
+        ThreadManager.setLowestPriority()
+
+        // Initialize thermal monitoring
+        thermalMonitor = ThermalMonitor(this)
+        thermalMonitor.StartThermalMonitor()
+        thermalManager = ThermalManager.getInstance(this)
 
         createNotificationChannels()
     }
@@ -48,6 +57,8 @@ class SumiApplication : Application() {
     companion object {
         var documentsTree: DocumentsTree? = null
         lateinit var application: SumiApplication
+        lateinit var thermalManager: ThermalManager
+        lateinit var thermalMonitor: ThermalMonitor
 
         val appContext: Context
             get() = application.applicationContext
