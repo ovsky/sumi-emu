@@ -28,12 +28,23 @@ void GlobalSchedulerContext::RemoveThread(KThread* thread) {
 }
 
 void GlobalSchedulerContext::PreemptThreads() {
+
     // The priority levels at which the global scheduler preempts threads every 10 ms. They are
-    // ordered from Core 0 to Core 3.
+    // ordered from Core 0 to Core 1.
+
+    // 59 - highest priority
+    // 63 - lowest priority
+    // static constexpr std::array<u32, Core::Hardware::NUM_CPU_CORES> preemption_priorities{
+    //     59,
+    //     59,
+    //     59,
+    //     63,
+    // };
+
     static constexpr std::array<u32, Core::Hardware::NUM_CPU_CORES> preemption_priorities{
-        59,
-        59,
-        59,
+        63,
+        63,
+        63,
         63,
     };
 
