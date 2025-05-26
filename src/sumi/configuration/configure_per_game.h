@@ -13,10 +13,10 @@
 #include "configuration/shared_widget.h"
 #include "core/file_sys/vfs/vfs_types.h"
 #include "frontend_common/config.h"
-#include "vk_device_info.h"
 #include "sumi/configuration/configuration_shared.h"
 #include "sumi/configuration/qt_config.h"
 #include "sumi/configuration/shared_translation.h"
+#include "vk_device_info.h"
 
 namespace Core {
 class System;
@@ -31,7 +31,6 @@ class ConfigureAudio;
 class ConfigureCpu;
 class ConfigureGraphics;
 class ConfigureGraphicsAdvanced;
-class ConfigureGraphicsExtensions;
 class ConfigureInputPerGame;
 class ConfigureLinuxTab;
 class ConfigureSystem;
@@ -85,7 +84,6 @@ private:
     std::unique_ptr<ConfigureAudio> audio_tab;
     std::unique_ptr<ConfigureCpu> cpu_tab;
     std::unique_ptr<ConfigureGraphicsAdvanced> graphics_advanced_tab;
-    std::unique_ptr<ConfigureGraphicsExtensions> graphics_extensions_tab;
     std::unique_ptr<ConfigureGraphics> graphics_tab;
     std::unique_ptr<ConfigureInputPerGame> input_tab;
     std::unique_ptr<ConfigureLinuxTab> linux_tab;

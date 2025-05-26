@@ -1,9 +1,6 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-// SPDX-FileCopyrightText: Copyright 2025 sumi Emulator Project
-// SPDX-License-Identifier: GPL-3.0-or-later
-
 #pragma once
 
 #include <filesystem>
@@ -32,22 +29,25 @@ enum class SumiPath {
     IconsDir,       // Where Icons for Windows shortcuts are stored.
 };
 
-enum LegacyPath {
-    CitronDir, // Citron Directories for migration
-    CitronConfigDir,
-    CitronCacheDir,
-
-    SudachiDir, // Sudachi Directories for migration
+enum class LegacyPath {
+    SumiDir,
+    SumiConfigDir,
+    SumiCacheDir,
+    SudachiDir,
     SudachiConfigDir,
     SudachiCacheDir,
-
-    YuzuDir, // Yuzu Directories for migration
+    YuzuDir,
     YuzuConfigDir,
     YuzuCacheDir,
-
-    SuyuDir, // Suyu Directories for migration
+    SuyuDir,
     SuyuConfigDir,
     SuyuCacheDir,
+    CitronDir,
+    CitronConfigDir,
+    CitronCacheDir,
+    EdenDir,
+    EdenConfigDir,
+    EdenCacheDir,
 };
 
 /**
@@ -223,15 +223,6 @@ void SetAppDirectory(const std::string& app_directory);
 [[nodiscard]] const std::filesystem::path& GetSumiPath(SumiPath sumi_path);
 
 /**
- * Gets the filesystem path associated with the LegacyPath enum.
- *
- * @param legacy_path LegacyPath enum
- *
- * @returns The filesystem path associated with the LegacyPath enum.
- */
-[[nodiscard]] const std::filesystem::path& GetLegacyPath(LegacyPath legacy_path);
-
-/**
  * Gets the filesystem path associated with the SumiPath enum as a UTF-8 encoded std::string.
  *
  * @param sumi_path SumiPath enum
@@ -241,15 +232,6 @@ void SetAppDirectory(const std::string& app_directory);
 [[nodiscard]] std::string GetSumiPathString(SumiPath sumi_path);
 
 /**
- * Gets the filesystem path associated with the LegacyPath enum as a UTF-8 encoded std::string.
- *
- * @param legacy_path LegacyPath enum
- *
- * @returns The filesystem path associated with the LegacyPath enum as a UTF-8 encoded std::string.
- */
-[[nodiscard]] std::string GetLegacyPathString(LegacyPath legacy_path);
-
-/**
  * Sets a new filesystem path associated with the SumiPath enum.
  * If the filesystem object at new_path is not a directory, this function will not do anything.
  *
@@ -257,11 +239,6 @@ void SetAppDirectory(const std::string& app_directory);
  * @param new_path New filesystem path
  */
 void SetSumiPath(SumiPath sumi_path, const std::filesystem::path& new_path);
-
-/**
- * Creates all necessary Sumi paths in the filesystem.
- */
-void CreateSumiPaths();
 
 #ifdef _WIN32
 template <typename Path>
@@ -332,11 +309,11 @@ enum class DirectorySeparator {
 };
 
 // Splits the path on '/' or '\' and put the components into a vector
-// i.e. "C:\Users\Yuzu\Documents\save.bin" becomes {"C:", "Users", "Yuzu", "Documents", "save.bin" }
+// i.e. "C:\Users\Sumi\Documents\save.bin" becomes {"C:", "Users", "Sumi", "Documents", "save.bin" }
 [[nodiscard]] std::vector<std::string_view> SplitPathComponents(std::string_view filename);
 
 // Splits the path on '/' or '\' and put the components into a vector
-// i.e. "C:\Users\Yuzu\Documents\save.bin" becomes {"C:", "Users", "Yuzu", "Documents", "save.bin" }
+// i.e. "C:\Users\Sumi\Documents\save.bin" becomes {"C:", "Users", "Sumi", "Documents", "save.bin" }
 [[nodiscard]] std::vector<std::string> SplitPathComponentsCopy(std::string_view filename);
 
 // Removes trailing slash, makes all '\\' into '/', and removes duplicate '/'. Makes '/' into '\\'

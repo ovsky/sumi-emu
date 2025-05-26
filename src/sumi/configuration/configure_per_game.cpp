@@ -26,13 +26,11 @@
 #include "core/file_sys/xts_archive.h"
 #include "core/loader/loader.h"
 #include "frontend_common/config.h"
-#include "ui_configure_per_game.h"
 #include "sumi/configuration/configuration_shared.h"
 #include "sumi/configuration/configure_audio.h"
 #include "sumi/configuration/configure_cpu.h"
 #include "sumi/configuration/configure_graphics.h"
 #include "sumi/configuration/configure_graphics_advanced.h"
-#include "sumi/configuration/configure_graphics_extensions.h"
 #include "sumi/configuration/configure_input_per_game.h"
 #include "sumi/configuration/configure_linux_tab.h"
 #include "sumi/configuration/configure_per_game.h"
@@ -41,12 +39,13 @@
 #include "sumi/uisettings.h"
 #include "sumi/util/util.h"
 #include "sumi/vk_device_info.h"
+#include "ui_configure_per_game.h"
 
 ConfigurePerGame::ConfigurePerGame(QWidget* parent, u64 title_id_, const std::string& file_name,
                                    std::vector<VkDeviceInfo::Record>& vk_device_records,
                                    Core::System& system_)
-    : QDialog(parent),
-      ui(std::make_unique<Ui::ConfigurePerGame>()), title_id{title_id_}, system{system_},
+    : QDialog(parent), ui(std::make_unique<Ui::ConfigurePerGame>()), title_id{title_id_},
+      system{system_},
       builder{std::make_unique<ConfigurationShared::Builder>(this, !system_.IsPoweredOn())},
       tab_group{std::make_shared<std::vector<ConfigurationShared::Tab*>>()} {
     const auto file_path = std::filesystem::path(Common::FS::ToU8String(file_name));
@@ -58,8 +57,6 @@ ConfigurePerGame::ConfigurePerGame(QWidget* parent, u64 title_id_, const std::st
     cpu_tab = std::make_unique<ConfigureCpu>(system_, tab_group, *builder, this);
     graphics_advanced_tab =
         std::make_unique<ConfigureGraphicsAdvanced>(system_, tab_group, *builder, this);
-    graphics_extensions_tab =
-        std::make_unique<ConfigureGraphicsExtensions>(system_, tab_group, *builder, this);
     graphics_tab = std::make_unique<ConfigureGraphics>(
         system_, vk_device_records, [&]() { graphics_advanced_tab->ExposeComputeOption(); },
         [](Settings::AspectRatio, Settings::ResolutionSetup) {}, tab_group, *builder, this);
@@ -74,7 +71,6 @@ ConfigurePerGame::ConfigurePerGame(QWidget* parent, u64 title_id_, const std::st
     ui->tabWidget->addTab(cpu_tab.get(), tr("CPU"));
     ui->tabWidget->addTab(graphics_tab.get(), tr("Graphics"));
     ui->tabWidget->addTab(graphics_advanced_tab.get(), tr("Adv. Graphics"));
-    ui->tabWidget->addTab(graphics_extensions_tab.get(), tr("GPU Extensions"));
     ui->tabWidget->addTab(audio_tab.get(), tr("Audio"));
     ui->tabWidget->addTab(input_tab.get(), tr("Input Profiles"));
 

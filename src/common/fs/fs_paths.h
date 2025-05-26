@@ -1,4 +1,32 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
+#pragma once
+
+// Add these definitions if not already present
+
+// Directory name constants
+#define SUDACHI_DIR "sudachi"
+
+// Enum for LegacyPath
+enum class LegacyPath {
+    SumiDir,
+    SumiConfigDir,
+    SumiCacheDir,
+    SudachiDir,
+    SudachiConfigDir,
+    SudachiCacheDir,
+    YuzuDir,
+    YuzuConfigDir,
+    YuzuCacheDir,
+    SuyuDir,
+    SuyuConfigDir,
+    SuyuCacheDir,
+    CitronDir,
+    CitronConfigDir,
+    CitronCacheDir,
+    EdenDir,
+    EdenConfigDir,
+    EdenCacheDir,
+};
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #pragma once

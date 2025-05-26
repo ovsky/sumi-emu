@@ -18,7 +18,6 @@
 #include "configuration/qt_config.h"
 #include "frontend_common/content_manager.h"
 #include "input_common/drivers/tas_input.h"
-#include "user_data_migration.h"
 #include "sumi/compatibility_list.h"
 #include "sumi/hotkeys.h"
 #include "sumi/util/controller_navigation.h"
@@ -168,7 +167,7 @@ class GMainWindow : public QMainWindow {
 public:
     void filterBarSetChecked(bool state);
     void UpdateUITheme();
-    explicit GMainWindow(bool has_broken_vulkan);
+    explicit GMainWindow(std::unique_ptr<QtConfig> config_, bool has_broken_vulkan);
     ~GMainWindow() override;
 
     bool DropAction(QDropEvent* event);
@@ -275,6 +274,7 @@ private:
     void BootGameFromList(const QString& filename, StartGameType with_config);
     void ShutdownGame();
 
+    void ShowTelemetryCallout();
     void SetDiscordEnabled(bool state);
     void LoadAmiibo(const QString& filename);
 
@@ -336,9 +336,7 @@ private slots:
     void OnPrepareForSleep(bool prepare_sleep);
     void OnMenuReportCompatibility();
     void OnOpenModsPage();
-    void OnOpenQuickstartGuide();
     void OnOpenFAQ();
-    void OnOpenDiscord();
     /// Called whenever a user selects a game in the game list widget.
     void OnGameListLoadFile(QString game_path, u64 program_id);
     void OnGameListOpenFolder(u64 program_id, GameListOpenTarget target,
@@ -400,11 +398,6 @@ private slots:
     void OnCabinet(Service::NFP::CabinetMode mode);
     void OnMiiEdit();
     void OnOpenControllerMenu();
-    void OnHomeMenu();
-    void OnInitialSetup();
-    void OnCreateHomeMenuDesktopShortcut();
-    void OnCreateHomeMenuApplicationMenuShortcut();
-    void OnCreateHomeMenuShortcut(GameListShortcutTarget target);
     void OnCaptureScreenshot();
     void OnCheckFirmwareDecryption();
     void OnLanguageChanged(const QString& locale);
@@ -413,6 +406,7 @@ private slots:
     void OnShutdownBeginDialog();
     void OnEmulationStopped();
     void OnEmulationStopTimeExpired();
+    void OnHomeMenu();
 
 private:
     QString GetGameListErrorRemoving(InstalledEntryType type) const;
@@ -514,7 +508,6 @@ private:
     QSlider* volume_slider = nullptr;
     QTimer status_bar_update_timer;
 
-    UserDataMigrator user_data_migrator;
     std::unique_ptr<QtConfig> config;
 
     // Whether emulation is currently running in sumi.

@@ -1,11 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-// SPDX-FileCopyrightText: Copyright 2025 sumi Emulator Project
-// SPDX-License-Identifier: GPL-3.0-or-later
-
 #include <algorithm>
-#include <iostream>
 #include <sstream>
 #include <unordered_map>
 
@@ -83,22 +79,8 @@ public:
         return sumi_paths.at(sumi_path);
     }
 
-    [[nodiscard]] const fs::path& GetLegacyPathImpl(LegacyPath legacy_path) {
-        return legacy_paths.at(legacy_path);
-    }
-
-    void CreateSumiPaths() {
-        std::for_each(sumi_paths.begin(), sumi_paths.end(), [](auto &path) {
-            void(FS::CreateDir(path.second));
-        });
-    }
-
     void SetSumiPathImpl(SumiPath sumi_path, const fs::path& new_path) {
         sumi_paths.insert_or_assign(sumi_path, new_path);
-    }
-
-    void SetLegacyPathImpl(LegacyPath legacy_path, const fs::path& new_path) {
-        legacy_paths.insert_or_assign(legacy_path, new_path);
     }
 
     void Reinitialize(fs::path sumi_path = {}) {
@@ -106,7 +88,7 @@ public:
         fs::path sumi_path_config;
 
 #ifdef _WIN32
-#ifdef YUZU_ENABLE_PORTABLE
+#ifdef SUMI_ENABLE_PORTABLE
         sumi_path = GetExeDirectory() / PORTABLE_DIR;
 #endif
         if (!IsDir(sumi_path)) {
@@ -115,23 +97,12 @@ public:
 
         sumi_path_cache = sumi_path / CACHE_DIR;
         sumi_path_config = sumi_path / CONFIG_DIR;
-
-#define LEGACY_PATH(titleName, upperName) GenerateLegacyPath(LegacyPath::titleName##Dir, GetAppDataRoamingDirectory() / upperName##_DIR); \
-        GenerateLegacyPath(LegacyPath::titleName##ConfigDir, GetAppDataRoamingDirectory() / upperName##_DIR / CONFIG_DIR); \
-        GenerateLegacyPath(LegacyPath::titleName##CacheDir, GetAppDataRoamingDirectory() / upperName##_DIR / CACHE_DIR);
-
-        LEGACY_PATH(Citron, CITRON)
-        LEGACY_PATH(Sudachi, SUDACHI)
-        LEGACY_PATH(Yuzu, YUZU)
-        LEGACY_PATH(Suyu, SUYU)
-#undef LEGACY_PATH
-
 #elif ANDROID
         ASSERT(!sumi_path.empty());
         sumi_path_cache = sumi_path / CACHE_DIR;
         sumi_path_config = sumi_path / CONFIG_DIR;
 #else
-#ifdef YUZU_ENABLE_PORTABLE
+#ifdef SUMI_ENABLE_PORTABLE
         sumi_path = GetCurrentDir() / PORTABLE_DIR;
 #endif
         if (Exists(sumi_path) && IsDir(sumi_path)) {
@@ -142,18 +113,6 @@ public:
             sumi_path_cache = GetDataDirectory("XDG_CACHE_HOME") / SUMI_DIR;
             sumi_path_config = GetDataDirectory("XDG_CONFIG_HOME") / SUMI_DIR;
         }
-
-#define LEGACY_PATH(titleName, upperName) GenerateLegacyPath(LegacyPath::titleName##Dir, GetDataDirectory("XDG_DATA_HOME") / upperName##_DIR); \
-        GenerateLegacyPath(LegacyPath::titleName##ConfigDir, GetDataDirectory("XDG_CONFIG_HOME") / upperName##_DIR); \
-        GenerateLegacyPath(LegacyPath::titleName##CacheDir, GetDataDirectory("XDG_CACHE_HOME") / upperName##_DIR);
-
-        LEGACY_PATH(Citron, CITRON)
-        LEGACY_PATH(Sudachi, SUDACHI)
-        LEGACY_PATH(Yuzu, YUZU)
-        LEGACY_PATH(Suyu, SUYU)
-
-#undef LEGACY_PATH
-
 #endif
 
         GenerateSumiPath(SumiPath::SumiDir, sumi_path);
@@ -182,16 +141,12 @@ private:
     ~PathManagerImpl() = default;
 
     void GenerateSumiPath(SumiPath sumi_path, const fs::path& new_path) {
-        // Defer path creation
+        void(FS::CreateDir(new_path));
+
         SetSumiPathImpl(sumi_path, new_path);
     }
 
-    void GenerateLegacyPath(LegacyPath legacy_path, const fs::path& new_path) {
-        SetLegacyPathImpl(legacy_path, new_path);
-    }
-
     std::unordered_map<SumiPath, fs::path> sumi_paths;
-    std::unordered_map<LegacyPath, fs::path> legacy_paths;
 };
 
 bool ValidatePath(const fs::path& path) {
@@ -279,16 +234,8 @@ const fs::path& GetSumiPath(SumiPath sumi_path) {
     return PathManagerImpl::GetInstance().GetSumiPathImpl(sumi_path);
 }
 
-const std::filesystem::path& GetLegacyPath(LegacyPath legacy_path) {
-    return PathManagerImpl::GetInstance().GetLegacyPathImpl(legacy_path);
-}
-
 std::string GetSumiPathString(SumiPath sumi_path) {
     return PathToUTF8String(GetSumiPath(sumi_path));
-}
-
-std::string GetLegacyPathString(LegacyPath legacy_path) {
-    return PathToUTF8String(GetLegacyPath(legacy_path));
 }
 
 void SetSumiPath(SumiPath sumi_path, const fs::path& new_path) {
@@ -299,11 +246,6 @@ void SetSumiPath(SumiPath sumi_path, const fs::path& new_path) {
     }
 
     PathManagerImpl::GetInstance().SetSumiPathImpl(sumi_path, new_path);
-}
-
-void CreateSumiPaths()
-{
-    PathManagerImpl::GetInstance().CreateSumiPaths();
 }
 
 #ifdef _WIN32

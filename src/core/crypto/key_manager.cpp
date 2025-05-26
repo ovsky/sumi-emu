@@ -1376,4 +1376,11 @@ bool KeyManager::AddTicket(const Ticket& ticket) {
     SetKey(S128KeyType::Titlekey, key.value(), rights_id[1], rights_id[0]);
     return true;
 }
+
+bool KeyManager::IsFirmwareAvailable() const {
+    // Example check: verify if a key required for firmware is present.
+    // Adjust the key type and fields as needed for your project.
+    return HasKey(S128KeyType::Package2, 0, 0) && HasKey(S256KeyType::Header, 0, 0);
+}
+
 } // namespace Core::Crypto
