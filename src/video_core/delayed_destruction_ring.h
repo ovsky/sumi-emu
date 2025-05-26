@@ -18,8 +18,7 @@ namespace VideoCommon {
 template <typename T, size_t TICKS_TO_DESTROY>
 class DelayedDestructionRing {
 public:
-    DelayedDestructionRing() = default;
-    ~DelayXedDestructionRing() {
+    DelayedDestructionRing() {
         // Ensure all resources are properly released when ring is destroyed
         for (auto& element_list : elements) {
             element_list.clear();
