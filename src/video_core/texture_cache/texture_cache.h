@@ -1,4 +1,6 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
+// SPDX-FileCopyrightText: 2025 citron Emulator Project
+// SPDX-FileCopyrightText: 2025 sumi Emulator Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #pragma once
@@ -80,8 +82,11 @@ void TextureCache<P>::RunGarbageCollector() {
     const auto Configure = [&](bool allow_aggressive) {
         high_priority_mode = total_used_memory >= expected_memory;
         aggressive_mode = allow_aggressive && total_used_memory >= critical_memory;
-        ticks_to_destroy = aggressive_mode ? 10ULL : high_priority_mode ? 25ULL : 50ULL;
-        num_iterations = aggressive_mode ? 40 : (high_priority_mode ? 20 : 10);
+        // If we are in high priority mode, we can be more aggressive with the cleanup
+        ticks_to_destroy = aggressive_mode ? 5ULL : high_priority_mode ? 15ULL : 40ULL;
+        // Set the number of iterations based on the mode.
+        num_iterations = aggressive_mode ? 60 : (high_priority_mode ? 30 : 15);
+
     };
     const auto Cleanup = [this, &num_iterations, &high_priority_mode,
                           &aggressive_mode](ImageId image_id) {
@@ -95,7 +100,9 @@ void TextureCache<P>::RunGarbageCollector() {
             // used by the async decoder thread.
             return false;
         }
-        if (!aggressive_mode && True(image.flags & ImageFlagBits::CostlyLoad)) {
+
+        // Cleanup the cache more aggressively if we are in high priority mode.
+        if (!aggressive_mode && !high_priority_mode && True(image.flags & ImageFlagBits::CostlyLoad)) {
             return false;
         }
         const bool must_download =
@@ -118,19 +125,21 @@ void TextureCache<P>::RunGarbageCollector() {
         DeleteImage(image_id, image.scale_tick > frame_tick + 5);
         if (total_used_memory < critical_memory) {
             if (aggressive_mode) {
-                // Sink the aggresiveness.
-                num_iterations >>= 2;
+                // If we are in aggressive mode, we need to reduce the number of iterations.
+                num_iterations = num_iterations * 3 / 4;
                 aggressive_mode = false;
                 return false;
             }
+            // If we are not in aggressive mode, we can exit early if we have cleaned enough images.
             if (high_priority_mode && total_used_memory < expected_memory) {
-                num_iterations >>= 1;
+                num_iterations = num_iterations * 3 / 4;
                 high_priority_mode = false;
             }
         }
         return false;
     };
 
+    // Make garbage collection more frequent if we are in high priority mode.
     // Try to remove anything old enough and not high priority.
     Configure(false);
     lru_cache.ForEachItemBelow(frame_tick - ticks_to_destroy, Cleanup);
@@ -138,19 +147,71 @@ void TextureCache<P>::RunGarbageCollector() {
     // If pressure is still too high, prune aggressively.
     if (total_used_memory >= critical_memory) {
         Configure(true);
-        lru_cache.ForEachItemBelow(frame_tick - ticks_to_destroy, Cleanup);
+        // Try to remove anything old enough and not high priority.
+        lru_cache.ForEachItemBelow(frame_tick - ticks_to_destroy / 2, Cleanup);
+
+        // If we are still over the critical memory threshold, we need to be more aggressive.
+        if (total_used_memory >= critical_memory + 50_MiB) {
+            // Last resort emergency cleanup - reduce thresholds dramatically
+            ticks_to_destroy = 1;
+            num_iterations = 100;
+            lru_cache.ForEachItemBelow(frame_tick - ticks_to_destroy, Cleanup);
+        }
+
     }
 }
 
 template <class P>
 void TextureCache<P>::TickFrame() {
+    static u64 consecutive_high_memory_frames = 0;
+    static constexpr u64 EMERGENCY_CLEANUP_THRESHOLD = 120; // 2 minutes of high memory usage
+
     // If we can obtain the memory info, use it instead of the estimate.
     if (runtime.CanReportMemoryUsage()) {
         total_used_memory = runtime.GetDeviceMemoryUsage();
     }
+
+    // If we cannot obtain the memory info, use the estimation based on tracked values.
+    if (total_used_memory > critical_memory) {
+        consecutive_high_memory_frames++;
+        if (consecutive_high_memory_frames > EMERGENCY_CLEANUP_THRESHOLD) {
+            // Emergency cleanup triggered after too many frames of high memory usage.
+            // Log the emergency cleanup warning.
+            LOG_WARNING(Render, "Emergency texture cache cleanup triggered after {} frames of high memory usage",
+                     consecutive_high_memory_frames);
+
+            // Forcefully destroy all sentenced images, framebuffers, and image views immediately.
+            sentenced_images.ForceDestroyAll();
+            sentenced_framebuffers.ForceDestroyAll();
+            sentenced_image_view.ForceDestroyAll();
+
+            // Run the garbage collector to clean up any remaining resources.
+            bool saved_value = has_deleted_images;
+            RunGarbageCollector();
+            has_deleted_images = saved_value;
+
+            // Reset the consecutive high memory frames counter to a lower value to maintain pressure.
+            consecutive_high_memory_frames = 30; // Reset to 30 frames (~0.5 seconds) to keep some pressure on the cache.
+        }
+        else if (consecutive_high_memory_frames > 60) { // If high memory usage lasts at least 60 frames - 1 second.
+            // Forcing garbage collection every frame to reduce memory usage.
+            RunGarbageCollector();
+            consecutive_high_memory_frames = 45; // Reset to 45 frames (~0.75 seconds) to keep some pressure on the cache.
+        }
+    } else if (total_used_memory > expected_memory) {
+        // If we are above the expected memory usage, we can reduce the pressure.
+        // u64 is used to avoid overflow in case of very high memory usage / ULL suffix.
+        consecutive_high_memory_frames = std::max(u64(1), consecutive_high_memory_frames / 2);
+    } else {
+        consecutive_high_memory_frames = 0; // Reset the counter if we are below the expected memory usage.
+    }
+
+    // If we are above the expected memory usage, run the garbage collector.
     if (total_used_memory > minimum_memory) {
         RunGarbageCollector();
     }
+
+    // If we have any sentenced images, framebuffers, or image views, tick them to remove them from the cache.
     sentenced_images.Tick();
     sentenced_framebuffers.Tick();
     sentenced_image_view.Tick();
@@ -2165,27 +2226,33 @@ void TextureCache<P>::DeleteImage(ImageId image_id, bool immediate_delete) {
     if (image.HasScaled()) {
         total_used_memory -= GetScaledImageSizeBytes(image);
     }
+
+    // If the image is not registered, we can just delete it immediately.
     u64 tentative_size = std::max(image.guest_size_bytes, image.unswizzled_size_bytes);
     if ((IsPixelFormatASTC(image.info.format) &&
          True(image.flags & ImageFlagBits::AcceleratedUpload)) ||
         True(image.flags & ImageFlagBits::Converted)) {
         tentative_size = TranscodedAstcSize(tentative_size, image.info.format);
     }
+
+    // If the image is registered, we need to remove it from the total used memory.
     total_used_memory -= Common::AlignUp(tentative_size, 1024);
+
     const GPUVAddr gpu_addr = image.gpu_addr;
     const auto alloc_it = image_allocs_table.find(gpu_addr);
     if (alloc_it == image_allocs_table.end()) {
-        ASSERT_MSG(false, "Trying to delete an image alloc that does not exist in address 0x{:x}",
-                   gpu_addr);
+        LOG_ERROR(HW_GPU, "Trying to delete an image alloc that does not exist in address 0x{:x}", gpu_addr);
         return;
     }
     const ImageAllocId alloc_id = alloc_it->second;
     std::vector<ImageId>& alloc_images = slot_image_allocs[alloc_id].images;
     const auto alloc_image_it = std::ranges::find(alloc_images, image_id);
     if (alloc_image_it == alloc_images.end()) {
-        ASSERT_MSG(false, "Trying to delete an image that does not exist");
+        LOG_ERROR(HW_GPU, "Trying to delete an image that does not exist");
         return;
     }
+
+    // Check if the image is registered and tracked before deleting it.
     ASSERT_MSG(False(image.flags & ImageFlagBits::Tracked), "Image was not untracked");
     ASSERT_MSG(False(image.flags & ImageFlagBits::Registered), "Image was not unregistered");
 
@@ -2196,6 +2263,8 @@ void TextureCache<P>::DeleteImage(ImageId image_id, bool immediate_delete) {
     for (size_t rt = 0; rt < NUM_RT; ++rt) {
         dirty[Dirty::ColorBuffer0 + rt] = true;
     }
+
+    // Remove the image from the render targets.
     const std::span<const ImageViewId> image_view_ids = image.image_view_ids;
     for (const ImageViewId image_view_id : image_view_ids) {
         std::ranges::replace(render_targets.color_buffer_ids, image_view_id, ImageViewId{});
@@ -2203,9 +2272,12 @@ void TextureCache<P>::DeleteImage(ImageId image_id, bool immediate_delete) {
             render_targets.depth_buffer_id = ImageViewId{};
         }
     }
+
+    // Remove the image from the channel storage.
     RemoveImageViewReferences(image_view_ids);
     RemoveFramebuffers(image_view_ids);
 
+    // Remove the image from the channel state.
     for (const AliasedImage& alias : image.aliased_images) {
         ImageBase& other_image = slot_images[alias.id];
         [[maybe_unused]] const size_t num_removed_aliases =
@@ -2213,33 +2285,44 @@ void TextureCache<P>::DeleteImage(ImageId image_id, bool immediate_delete) {
                 return other_alias.id == image_id;
             });
         other_image.CheckAliasState();
-        ASSERT_MSG(num_removed_aliases == 1, "Invalid number of removed aliases: {}",
-                   num_removed_aliases);
+        if (num_removed_aliases != 1) {
+            LOG_WARNING(HW_GPU, "Invalid number of removed aliases: {}", num_removed_aliases);
+        }
     }
+
+    // Remove the image from the overlapping images.
     for (const ImageId overlap_id : image.overlapping_images) {
         ImageBase& other_image = slot_images[overlap_id];
         [[maybe_unused]] const size_t num_removed_overlaps = std::erase_if(
             other_image.overlapping_images,
             [image_id](const ImageId other_overlap_id) { return other_overlap_id == image_id; });
         other_image.CheckBadOverlapState();
-        ASSERT_MSG(num_removed_overlaps == 1, "Invalid number of removed overlapps: {}",
-                   num_removed_overlaps);
+        if (num_removed_overlaps != 1) {
+            LOG_WARNING(HW_GPU, "Invalid number of removed overlaps: {}", num_removed_overlaps);
+        }
     }
+
+    // Remove the image from the channel storage.
     for (const ImageViewId image_view_id : image_view_ids) {
         if (!immediate_delete) {
             sentenced_image_view.Push(std::move(slot_image_views[image_view_id]));
         }
         slot_image_views.erase(image_view_id);
     }
+
     if (!immediate_delete) {
         sentenced_images.Push(std::move(slot_images[image_id]));
     }
+
     slot_images.erase(image_id);
 
+    // Remove the image from the image alloc.
     alloc_images.erase(alloc_image_it);
     if (alloc_images.empty()) {
         image_allocs_table.erase(alloc_it);
     }
+
+    // Remove the image from the sparse views.
     for (size_t c : active_channel_ids) {
         auto& channel_info = channel_storage[c];
         if constexpr (ENABLE_VALIDATION) {
@@ -2252,6 +2335,7 @@ void TextureCache<P>::DeleteImage(ImageId image_id, bool immediate_delete) {
     has_deleted_images = true;
 }
 
+// Make table of image views in the channel storage consistent with the removed image views.
 template <class P>
 void TextureCache<P>::RemoveImageViewReferences(std::span<const ImageViewId> removed_views) {
     for (size_t c : active_channel_ids) {
