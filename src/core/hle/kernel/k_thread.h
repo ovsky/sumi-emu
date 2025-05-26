@@ -130,9 +130,9 @@ private:
     friend class KProcess;
 
 public:
-    static constexpr s32 DefaultThreadPriority = 44;
-    static constexpr s32 IdleThreadPriority = Svc::LowestThreadPriority + 1;
-    static constexpr s32 DummyThreadPriority = Svc::LowestThreadPriority + 2;
+    static constexpr s32 DefaultThreadPriority = Svc::HighestThreadPriority;
+    static constexpr s32 IdleThreadPriority = Svc::HighestThreadPriority;
+    static constexpr s32 DummyThreadPriority = Svc::HighestThreadPriority;
 
     explicit KThread(KernelCore& kernel);
     ~KThread() override;

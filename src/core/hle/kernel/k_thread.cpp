@@ -144,6 +144,8 @@ Result KThread::Initialize(KThreadFunction func, uintptr_t arg, KProcessAddress 
     // Set the ideal core ID and affinity mask.
     m_virtual_ideal_core_id = virt_core;
     m_physical_ideal_core_id = phys_core;
+//    m_virtual_affinity_mask.SetAll();
+//    m_physical_affinity_mask.SetAll();
     m_virtual_affinity_mask = 1ULL << virt_core;
     m_physical_affinity_mask.SetAffinity(phys_core, true);
 
@@ -169,9 +171,9 @@ Result KThread::Initialize(KThreadFunction func, uintptr_t arg, KProcessAddress 
     m_core_id = phys_core;
     m_wait_result = ResultNoSynchronizationObject;
 
-    // Set priorities.
-    m_priority = prio;
-    m_base_priority = prio;
+    // Set priorities to highest
+    m_priority = Svc::HighestThreadPriority;
+    m_base_priority = Svc::HighestThreadPriority;
 
     // Initialize sleeping queue.
     m_wait_queue = nullptr;

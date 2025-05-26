@@ -38,9 +38,8 @@ Result CreateThread(Core::System& system, Handle* out_handle, u64 entry_point, u
     R_UNLESS(IsValidVirtualCoreId(core_id), ResultInvalidCoreId);
     R_UNLESS(((1ull << core_id) & process.GetCoreMask()) != 0, ResultInvalidCoreId);
 
-    R_UNLESS(HighestThreadPriority <= priority && priority <= LowestThreadPriority,
-             ResultInvalidPriority);
-    R_UNLESS(process.CheckThreadPriority(priority), ResultInvalidPriority);
+    // Always use highest priority
+    priority = HighestThreadPriority;
 
     // Reserve a new thread from the process resource limit (waiting up to 100ms).
     KScopedResourceReservation thread_reservation(std::addressof(process),
@@ -72,7 +71,9 @@ Result CreateThread(Core::System& system, Handle* out_handle, u64 entry_point, u
     KThread::Register(kernel, thread);
 
     // Add the thread to the handle table.
-    R_RETURN(process.GetHandleTable().Add(out_handle, thread));
+    R_TRY(process.GetHandleTable().Add(out_handle, thread));
+
+    R_SUCCEED();
 }
 
 /// Starts the thread for the provided handle
@@ -181,10 +182,8 @@ Result SetThreadPriority(Core::System& system, Handle thread_handle, s32 priorit
     // Get the current process.
     KProcess& process = GetCurrentProcess(system.Kernel());
 
-    // Validate the priority.
-    R_UNLESS(HighestThreadPriority <= priority && priority <= LowestThreadPriority,
-             ResultInvalidPriority);
-    R_UNLESS(process.CheckThreadPriority(priority), ResultInvalidPriority);
+    // Always use highest priority
+    priority = HighestThreadPriority;
 
     // Get the thread from its handle.
     KScopedAutoObject thread = process.GetHandleTable().GetObject<KThread>(thread_handle);
