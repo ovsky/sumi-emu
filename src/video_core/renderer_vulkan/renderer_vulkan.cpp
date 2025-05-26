@@ -114,6 +114,7 @@ try
     // Create raw Vulkan instance first
     instance(CreateInstance(*library,
                             dld,
+                            // VK_API_VERSION_1_4,
                             VK_API_VERSION_1_3,
                             render_window.GetWindowInfo().type,
                             Settings::values.renderer_debug.GetValue()))
