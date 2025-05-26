@@ -51,10 +51,11 @@ CoreTiming::~CoreTiming() {
 }
 
 void CoreTiming::ThreadEntry(CoreTiming& instance) {
-    static constexpr char name[] = "HostTiming";
+    static constexpr char name[] = "HostTiming_LITTLE";
     MicroProfileOnThreadCreate(name);
     Common::SetCurrentThreadName(name);
     Common::SetCurrentThreadPriority(Common::ThreadPriority::Low);
+
     instance.on_thread_init();
     instance.ThreadLoop();
     MicroProfileOnThreadExit();
@@ -270,7 +271,9 @@ void CoreTiming::ThreadLoop() {
                     while (!paused && !event.IsSet() && wait_time > 0) {
                         wait_time = *next_time - GetGlobalTimeNs().count();
                         if (wait_time >= timer_resolution_ns) {
+                            // Use longer sleep intervals to reduce CPU usage
                             Common::Windows::SleepForOneTick();
+                            std::this_thread::sleep_for(std::chrono::milliseconds(1));
                         } else {
 #ifdef ARCHITECTURE_x86_64
                             Common::X64::MicroSleep();
@@ -284,12 +287,16 @@ void CoreTiming::ThreadLoop() {
                         event.Reset();
                     }
 #else
-                    event.WaitFor(std::chrono::nanoseconds(wait_time));
+                    // Use longer sleep intervals on non-Windows platforms too
+                    if (wait_time > 1000000) { // If wait time > 1ms
+                        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                    } else {
+                        event.WaitFor(std::chrono::nanoseconds(wait_time));
+                    }
 #endif
                 }
             } else {
-                // Queue is empty, wait until another event is scheduled and signals us to
-                // continue.
+                // Queue is empty, wait until another event is scheduled
                 wait_set = true;
                 event.Wait();
             }

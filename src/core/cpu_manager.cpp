@@ -121,6 +121,9 @@ void CpuManager::SingleCoreRunGuestThread() {
             physical_core = &kernel.CurrentPhysicalCore();
         }
 
+        // Add small sleep to reduce CPU usage and thermal throttling
+        std::this_thread::sleep_for(std::chrono::microseconds(100));
+
         kernel.SetIsPhantomModeForSingleCore(true);
         system.CoreTiming().Advance();
         kernel.SetIsPhantomModeForSingleCore(false);
@@ -138,6 +141,10 @@ void CpuManager::SingleCoreRunIdleThread() {
         PreemptSingleCore(false);
         system.CoreTiming().AddTicks(1000U);
         idle_count++;
+
+        // Add longer sleep during idle to reduce thermal throttling
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
         HandleInterrupt();
     }
 }
@@ -188,13 +195,14 @@ void CpuManager::RunThread(std::stop_token token, std::size_t core) {
     system.RegisterCoreThread(core);
     std::string name;
     if (is_multicore) {
-        name = "CPUCore_" + std::to_string(core);
+        name = "CPUCore_" + std::to_string(core) + "LITTLE";
     } else {
-        name = "CPUThread";
+        name = "CPUThread_LITTLE";
     }
     MicroProfileOnThreadCreate(name.c_str());
     Common::SetCurrentThreadName(name.c_str());
     Common::SetCurrentThreadPriority(Common::ThreadPriority::Low);
+
     auto& data = core_data[core];
     data.host_context = Common::Fiber::ThreadToFiber();
 
