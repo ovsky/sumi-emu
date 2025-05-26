@@ -194,7 +194,7 @@ void CpuManager::RunThread(std::stop_token token, std::size_t core) {
     }
     MicroProfileOnThreadCreate(name.c_str());
     Common::SetCurrentThreadName(name.c_str());
-    Common::SetCurrentThreadPriority(Common::ThreadPriority::Critical);
+    Common::SetCurrentThreadPriority(Common::ThreadPriority::Low);
     auto& data = core_data[core];
     data.host_context = Common::Fiber::ThreadToFiber();
 
