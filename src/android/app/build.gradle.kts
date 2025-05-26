@@ -41,7 +41,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = "21"
+        jvmTarget = "23"
     }
 
     packaging {
@@ -55,7 +55,7 @@ android {
 
     defaultConfig {
         // TODO If this is ever modified, change application_id in strings.xml
-        applicationId = "com.antutu.ABenchMark"
+        applicationId = "org.sumi.sumi_emu"
         minSdk = 30
         //noinspection EditedTargetSdkVersion
         targetSdk = 35
@@ -150,6 +150,7 @@ android {
             isDefault = true
             dimension = "version"
             buildConfigField("Boolean", "PREMIUM", "true")
+            applicationIdSuffix = ".release"
         }
 
         create("ea") {
