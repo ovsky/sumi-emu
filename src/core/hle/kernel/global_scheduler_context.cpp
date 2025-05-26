@@ -33,6 +33,8 @@ void GlobalSchedulerContext::PreemptThreads() {
     static constexpr std::array<u32, Core::Hardware::NUM_CPU_CORES> preemption_priorities{
         63,  // Core 0 - Lowest possible priority
         63,  // Core 1 - Lowest possible priority
+        63,  // Core 2 - Lowest possible priority
+        63,  // Core 3 - Lowest possible priority
     };
 
     ASSERT(KScheduler::IsSchedulerLockedByCurrentThread(m_kernel));
