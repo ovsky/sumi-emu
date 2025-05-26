@@ -101,6 +101,16 @@ Result ILibraryAppletAccessor::PushInData(SharedPointer<IStorage> storage) {
 
 Result ILibraryAppletAccessor::PopOutData(Out<SharedPointer<IStorage>> out_storage) {
     LOG_DEBUG(Service_AM, "called");
+    if (auto caller = m_applet->caller_applet.lock(); caller != nullptr) {
+        caller->SetInteractibleLocked(true);
+        caller->lifecycle_manager.SetFocusState(FocusState::InFocus);
+        caller->lifecycle_manager.UpdateRequestedFocusState();
+        caller->lifecycle_manager.SetResumeNotificationEnabled(true);
+        caller->lifecycle_manager.RequestResumeNotification();
+        caller->UpdateSuspensionStateLocked(true);
+    } else {
+        LOG_CRITICAL(Service_AM, "Caller applet pointer is invalid.");
+    }
     R_RETURN(m_broker->GetOutData().Pop(out_storage.Get()));
 }
 
