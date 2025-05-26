@@ -31,9 +31,9 @@ void GlobalSchedulerContext::PreemptThreads() {
     // The priority levels at which the global scheduler preempts threads every 10 ms. They are
     // ordered from Core 0 to Core 3.
     static constexpr std::array<u32, Core::Hardware::NUM_CPU_CORES> preemption_priorities{
-        59,
-        59,
-        59,
+        63, // Change the Core priority from 59 to 63 - the lowest priority - to make the emulation less thermal demanding
+        63,
+        63,
         63,
     };
 
