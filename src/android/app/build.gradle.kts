@@ -41,7 +41,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = "23"
+        jvmTarget = "21"
     }
 
     packaging {
@@ -55,7 +55,7 @@ android {
 
     defaultConfig {
         // TODO If this is ever modified, change application_id in strings.xml
-        applicationId = "org.sumi.sumi_emu"
+        applicationId = "com.sumi.SumiEmulator"
         minSdk = 30
         //noinspection EditedTargetSdkVersion
         targetSdk = 35
@@ -150,7 +150,6 @@ android {
             isDefault = true
             dimension = "version"
             buildConfigField("Boolean", "PREMIUM", "true")
-            applicationIdSuffix = ".release"
         }
 
         create("ea") {
