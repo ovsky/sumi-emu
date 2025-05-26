@@ -1141,6 +1141,10 @@ void MicroProfileShutdown()
     MicroProfileWebServerStop();
     MicroProfileStopContextSwitchTrace();
     MicroProfileGpuShutdown();
+    // Clear the microprofile thread log pool to avoid memory leaks.
+    for (uint32_t i = 0; i < S.nNumLogs; ++i) {
+        delete S.Pool[i];
+    }
 }
 
 #ifdef MICROPROFILE_IOS
