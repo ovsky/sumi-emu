@@ -31,10 +31,10 @@ void GlobalSchedulerContext::PreemptThreads() {
     // The priority levels at which the global scheduler preempts threads every 10 ms. They are
     // ordered from Core 0 to Core 1.
     static constexpr std::array<u32, Core::Hardware::NUM_CPU_CORES> preemption_priorities{
-        63,  // Core 0 - Lowest possible priority
-        63,  // Core 1 - Lowest possible priority
-        63,  // Core 2 - Lowest possible priority
-        63,  // Core 3 - Lowest possible priority
+        59,  // Core 0 - Highest possible priority
+        59,  // Core 1 - Highest possible priority
+        59,  // Core 2 - Highest possible priority
+        59,  // Core 3 - Highest possible priority
     };
 
     ASSERT(KScheduler::IsSchedulerLockedByCurrentThread(m_kernel));
