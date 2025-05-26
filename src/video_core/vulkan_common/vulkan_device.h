@@ -77,7 +77,7 @@ VK_DEFINE_HANDLE(VmaAllocator)
     EXTENSION(KHR, PUSH_DESCRIPTOR, push_descriptor)                                               \
     EXTENSION(KHR, SAMPLER_MIRROR_CLAMP_TO_EDGE, sampler_mirror_clamp_to_edge)                     \
     EXTENSION(KHR, SHADER_FLOAT_CONTROLS, shader_float_controls)                                   \
-    EXTENSION(KHR, SPIRV_1_4, spirv_1_4)                                                           \
+    EXTENSION(KHR, SPIRV_1_6, spirv_1_6)                                                           \
     EXTENSION(KHR, SWAPCHAIN, swapchain)                                                           \
     EXTENSION(KHR, SWAPCHAIN_MUTABLE_FORMAT, swapchain_mutable_format)                             \
     EXTENSION(KHR, IMAGE_FORMAT_LIST, image_format_list)                                           \
@@ -447,7 +447,7 @@ public:
 
     /// Returns true if the device supports VK_KHR_image_format_list.
     bool IsKhrImageFormatListSupported() const {
-        return extensions.image_format_list || instance_version >= VK_API_VERSION_1_2;
+        return extensions.image_format_list || instance_version >= VK_API_VERSION_1_4;
     }
 
     /// Returns true if the device supports VK_EXT_primitive_topology_list_restart.
@@ -587,11 +587,14 @@ public:
 
     /// Returns the minimum supported version of SPIR-V.
     u32 SupportedSpirvVersion() const {
+        if (instance_version >= VK_API_VERSION_1_4) {
+            return 0x00010400U;
+        }
         if (instance_version >= VK_API_VERSION_1_3) {
             return 0x00010600U;
         }
-        if (extensions.spirv_1_4) {
-            return 0x00010400U;
+        if (extensions.spirv_1_6) {
+            return 0x00010600U;
         }
         return 0x00010300U;
     }
