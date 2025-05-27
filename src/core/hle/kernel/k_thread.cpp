@@ -144,10 +144,9 @@ Result KThread::Initialize(KThreadFunction func, uintptr_t arg, KProcessAddress 
     // Set the ideal core ID and affinity mask.
     m_virtual_ideal_core_id = virt_core;
     m_physical_ideal_core_id = phys_core;
-//    m_virtual_affinity_mask.SetAll();
-//    m_physical_affinity_mask.SetAll();
     m_virtual_affinity_mask = 1ULL << virt_core;
-    m_physical_affinity_mask.SetAffinity(phys_core, true);
+//    m_virtual_affinity_mask = (1ULL << Core::Hardware::NUM_CPU_CORES) - 1;
+    m_physical_affinity_mask.SetAll();
 
     // Set the thread state.
     m_thread_state = (type == ThreadType::Main || type == ThreadType::Dummy)

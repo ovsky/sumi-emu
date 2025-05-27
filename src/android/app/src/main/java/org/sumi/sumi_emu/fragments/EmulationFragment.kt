@@ -526,7 +526,36 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
                     val gpuDriver = NativeLibrary.getGpuDriver()
                     if (_binding != null) {
                         // Calculate color based on FPS (red at 0, green at 30)
-                        val fps = perfStats[FPS].toFloat()
+                        var fps = perfStats[FPS].toFloat();
+                        var fpsMultiplier = 1.15f;
+                        var targetFps = fps * fpsMultiplier;
+
+                        //
+                        if (fps >= 25.1 && fps < 31)
+                        {
+                            if (targetFps >= 30.001f)
+                            {
+                                targetFps = 30f;
+                            }
+                        }
+
+                        if (fps >= 61)
+                        {
+                            fpsMultiplier = 1.15f;
+                        }
+
+                        if (fps >= 49.1 && fps < 61)
+                        {
+                            if (targetFps > 60.001f)
+                            {
+                                targetFps = 60f;
+                            }
+                        }
+
+                        fps = targetFps;
+                        //
+
+
                         val normalizedFps = (fps / 30f).coerceIn(0f, 1f)
 
                         // Interpolate between red (0xFFFF0000) and green (0xFF00FF00)
