@@ -62,6 +62,17 @@ To achieve best performance, download the best driver for your device and apply 
  
 [GitHub Releases - K11MCH1/AdrenoToolsDrivers](https://github.com/K11MCH1/AdrenoToolsDrivers/releases)
 
+#### **Snapdragon 8 Elite / Adreno 830:** 
+Unfortunately, Mesa do not provide support for 8 Dlite, and fo not have defindd plans about supporting it:
+https://gitlab.freedesktop.org/mesa/mesa/-/issues/12066.
+
+Due to this, it is well known and do not suggested to use this SoC for emulation process. 
+K11MCH1's Mesa sources and fixed are closed, so it is not easy in any way.
+
+Good information is that we are trying out best to support every user snd every device - so, we have started our internal process for porting drivers for 8 Elite. The development process of drivers for new SoC is really demanding and long. We hope, that we or anyone else will be able to provide the best Switch emulation drivers for 8 Elite users.
+
+~ Suni Team :)
+
 ---
 
 ## DLC Installation Alternative 💾
