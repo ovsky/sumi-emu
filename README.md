@@ -11,7 +11,7 @@
 
 <h4 align="center">
     Join newly created Sumi Community on Discord!<br><br>
-    <a href="https://discord.gg/work-in-progress" target="_blank">
+    <a href="https://discord.gg/eZ7wC7Kr" target="_blank">
         <img  " src="https://img.shields.io/discord/1379376999617007776.svg?label=Sumi%20Community%20-%20Discord&logo=discord&logoColor=ffffff&color=rgba(40%2C%200%2C%20190%2C%200.8)&labelColor=404EED">
     </a>
     <!-- <a href="https://github.com/ovsky/sumi-emu/actions/workflows/ci.yml" target="_blank">
