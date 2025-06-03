@@ -1,16 +1,28 @@
-# 🙂 Sumi - Efficient Nintendo Switch  Emulator
-
 <h1 align="center">
+🎲 Sumi – Efficient Nintendo Switch  Emulator
+</h1>
+
+<p align="center">
     <a href="https://github.com/ovsky/sumi-emu" target="_blank">
-        <img height="40%" width="40%" src="https://github.com/ovsky/sumi-emu/blob/experimental/src/android/app/src/main/res/drawable-xhdpi/tv_banner.png"><br>
+        <img height="40%" width="20%" src="https://raw.githubusercontent.com/ovsky/sumi-emu/refs/heads/experimental/src/android/app/src/main/res/drawable/ic_sumi_full.png"><br>
     </a>
+</p>
+
+
+<h4 align="center">
+    Join newly created Sumi Community on Discord!<br><br>
     <a href="https://discord.gg/work-in-progress" target="_blank">
-        <img src="https://img.shields.io/discord/1104386300750082081.svg?label=&logo=discord&logoColor=ffffff&color=5865F2&labelColor=404EED">
+        <img  " src="https://img.shields.io/discord/1379376999617007776.svg?label=Sumi%20Community%20-%20Discord&logo=discord&logoColor=ffffff&color=rgba(40%2C%200%2C%20190%2C%200.8)&labelColor=404EED">
     </a>
     <!-- <a href="https://github.com/ovsky/sumi-emu/actions/workflows/ci.yml" target="_blank">
         <img src="https://github.com/ovsky/sumi-emu/actions/workflows/ci.yml/badge.svg"><br>
     </a> -->
+</h4>
+<h1 align="center">
 </h1>
+
+
+
 
 <p align="center">
     <b><a href="CONTRIBUTING.md">Contributing Guide</a> • <a href="BUILDING.md">Building Guide</a></b>
