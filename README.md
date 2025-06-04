@@ -65,17 +65,34 @@ https://github.com/ovsky/sumi-emu/releases
 
 To achieve best performance, download the best driver for your device and apply it in Sumi
 
- **Mesa / Adreno - Sources:**
- 
-[GitHub Releases - XForYouX/Turnip](https://github.com/XForYouX/Turnip_Driver/releases)
-
-
- **Mesa / Adreno / Mediatek - Sources**
+ **Mesa / Adreno - Sources**<br>
+[The most universal drivers]
  
 [GitHub Releases - K11MCH1/AdrenoToolsDrivers](https://github.com/K11MCH1/AdrenoToolsDrivers/releases)
 
-#### **Snapdragon 8 Elite / Adreno 830:** 
-Unfortunately, Mesa do not provide support for 8 Dlite, and fo not have defindd plans about supporting it:
+ **Mesa / Adreno - Sources:**<br>
+[Especially for old Android Devices]
+
+[GitHub Releases - XForYouX/Turnip](https://github.com/XForYouX/Turnip_Driver/releases)
+
+**Mesa / Adreno - Sources:**<br>
+[These drivers are better performing on some devices]
+
+[GitHub Releases - Tiago/Turnip](https://github.com/tiagosouzacandido/AdrenoToolsTurnipDrivers/releases)
+
+***Anbernic / Retroid / AYN (Snapdragon Versions):**<br>
+[The probably best drivers for Anbernic, especially for Snapdragon 865 handhelds]
+
+[GitHub Sources - MrPurple/Freedreno](https://github.com/MrPurple666/freedreno-CI/releases)
+
+**Mali GPU:**<br>
+[Mali GPUs unfortunately have poor driver support.
+So, we have prepared our own, Sumi's universal one, for Mali and 8 Elite. If you can, please try to find better one for your device!]
+
+[GitHub Sources - Sumi/Sumi Universal Driver W1](https://github.com/user-attachments/files/20505703/Sumi.8.Elite.Driver.Experimental.W1.zip)
+
+**Snapdragon 8 Elite / Adreno 830:**<br>
+Unfortunately, Mesa do not provide support for 8 Elite, and to not have defined plans about supporting it:
 https://gitlab.freedesktop.org/mesa/mesa/-/issues/12066.
 
 Due to this, it is well known and do not suggested to use this SoC for emulation process. 
