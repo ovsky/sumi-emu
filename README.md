@@ -116,7 +116,7 @@ https://github.com/ovsky/sumi-emu/releases/tag/v0.3.0
 
 ## Getting Started 💡
 
-1. **Download and Install**: Head over to the [downloads page](https://git.sumi-emu.org/Sumi/Sumi/releases) to grab the latest release.
+1. **Download and Install**: Head over to the [downloads page](https://github.com/ovsky/sumi-emu/releases) to grab the latest release.
 2. **Add Homebrew Games**: Sumi is built to play homebrew games. Add them to your game directory and enjoy!
 3. **Configure Your Settings**: Customize your emulator settings to suit your performance needs.
 
@@ -124,7 +124,7 @@ https://github.com/ovsky/sumi-emu/releases/tag/v0.3.0
 
 Sumi is an open-source project. You can find the source code on our official Git repository:
 
-- [Sumi Source Code](https://git.sumi-emu.org/)
+- [Sumi Source Code](https://github.com/ovsky/sumi-emu/)
 
 We welcome contributions! Check out the repository and feel free to submit issues or pull requests to help improve Sumi.
 
